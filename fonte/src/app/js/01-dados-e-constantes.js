@@ -83,7 +83,7 @@ function roles(w){
   add(w.leitura.pub,'leitura.pub','Leitura da Bíblia (4 min)'+(w.leitura.tema?' · '+w.leitura.tema:w.leituraSemanal?' · '+w.leituraSemanal:''));
   w.ministerio.forEach((p,i)=>{const n=4+i;if(isPres(p))return;
     add(p.pub,'ministerio.'+i+'.pub','Faça Seu Melhor no Ministério, parte '+n+': '+(p.tema||'')+' ('+(p.min||'?')+' min)'+(p.ajudante&&!isDiscurso(p)?'\n   Ajudante: '+pn(p.ajudante):''));
-    if(!isDiscurso(p))add(p.ajudante,'ministerio.'+i+'.ajudante','Ajudante na parte '+n+': '+(p.tema||'')+' ('+(p.min||'?')+' min)'+(p.pub?'\n   Estudante: '+pn(p.pub):''));});
+    if(!isDiscurso(p))add(p.ajudante,'ministerio.'+i+'.ajudante','Ajudante na parte '+n+': '+(p.tema||'')+' ('+(p.min||'?')+' min)'+(p.pub?'\n   Estudante Responsável: '+pn(p.pub):''));});
   w.vida.forEach((p,i)=>add(p.pub,'vida.'+i+'.pub','Nossa Vida Cristã: “'+(p.tema||'')+'” ('+(p.min||'?')+' min)'));
   if(tp!=='visita'){add(w.estudo.dirigente,'estudo.dirigente','Dirigente do Estudo Bíblico de Congregação (30 min)');
   add(w.estudo.leitor,'estudo.leitor','Leitor do Estudo Bíblico de Congregação');}

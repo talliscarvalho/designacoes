@@ -35,7 +35,7 @@
   const CFG=window.DESIGNAR_CONFIG||{};
   const FIREBASE_CONFIG=CFG.firebase;
   const OWNER=String(CFG.dono||'').trim().toLowerCase();
-  const APP="Designar", VERSAO="2026.11.06-1617", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
+  const APP="Designar", VERSAO="2026.11.06-1630", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
   const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,whatsapp:CFG.whatsapp||'',pub:{}};
   const t=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let resolveReady,rejectReady;const readyP=new Promise((r,j)=>{resolveReady=r;rejectReady=j});
@@ -1041,7 +1041,7 @@ function roles(w){
   add(w.leitura.pub,'leitura.pub','Leitura da Bíblia (4 min)'+(w.leitura.tema?' · '+w.leitura.tema:w.leituraSemanal?' · '+w.leituraSemanal:''));
   w.ministerio.forEach((p,i)=>{const n=4+i;if(isPres(p))return;
     add(p.pub,'ministerio.'+i+'.pub','Faça Seu Melhor no Ministério, parte '+n+': '+(p.tema||'')+' ('+(p.min||'?')+' min)'+(p.ajudante&&!isDiscurso(p)?'\n   Ajudante: '+pn(p.ajudante):''));
-    if(!isDiscurso(p))add(p.ajudante,'ministerio.'+i+'.ajudante','Ajudante na parte '+n+': '+(p.tema||'')+' ('+(p.min||'?')+' min)'+(p.pub?'\n   Estudante: '+pn(p.pub):''));});
+    if(!isDiscurso(p))add(p.ajudante,'ministerio.'+i+'.ajudante','Ajudante na parte '+n+': '+(p.tema||'')+' ('+(p.min||'?')+' min)'+(p.pub?'\n   Estudante Responsável: '+pn(p.pub):''));});
   w.vida.forEach((p,i)=>add(p.pub,'vida.'+i+'.pub','Nossa Vida Cristã: “'+(p.tema||'')+'” ('+(p.min||'?')+' min)'));
   if(tp!=='visita'){add(w.estudo.dirigente,'estudo.dirigente','Dirigente do Estudo Bíblico de Congregação (30 min)');
   add(w.estudo.leitor,'estudo.leitor','Leitor do Estudo Bíblico de Congregação');}
