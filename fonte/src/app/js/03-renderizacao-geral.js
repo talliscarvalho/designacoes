@@ -35,8 +35,8 @@ const NAVI={cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
   gente:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.8-3 3-4.5 5.5-4.5s4.7 1.5 5.5 4.5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.6c2 .2 3.6 1.5 4.3 4"/></svg>',
   print:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg>',
   mais:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"/></svg>'};
-const AREAS=[{k:'reunioes',l:'Reuniões',i:'cal',t:[['semanas','Meio de semana'],['fimdesemana','Fim de semana']]},
-  {k:'limpeza',l:'Limpeza',i:'casa',t:[['limpeza','Limpeza e itens'],['av','A/V e Indicadores']]},
+const AREAS=[{k:'reunioes',l:'Reuniões',i:'cal',t:[['semanas','Meio de semana'],['fimdesemana','Fim de semana'],['av','A/V e Indicadores']]},
+  {k:'limpeza',l:'Limpeza',i:'casa',t:[['limpeza','Limpeza e itens']]},
   {k:'pregacao',l:'Pregação',i:'pin',t:[['campo','Saídas de campo']]},
   {k:'publicadores',l:'Publicadores',i:'gente',t:[['publicadores','Publicadores'],['confirmacoes','Confirmações'],['equilibrio','Equilíbrio'],['pubimport','Importar e exportar']]},
   {k:'imprimir',l:'Imprimir',i:'print',t:[['imprimir','Imprimir / PDF']]},
@@ -46,7 +46,9 @@ function drawNav(){const AR=navAreas();const cur=AR.find(a=>a.t.some(x=>x[0]===u
   const href=a=>'#'+(ui.areaLast[a.k]||a.t[0][0]);
   $('#areas').innerHTML=AR.map(a=>`<a href="${href(a)}" aria-current="${a===cur?'page':'false'}">${a.l}</a>`).join('');
   $('#bnav').innerHTML=AR.map(a=>`<a href="${href(a)}" aria-current="${a===cur?'page':'false'}">${NAVI[a.i]}${a.l}</a>`).join('');
-  $('#subtabs').innerHTML=cur.t.length>1?cur.t.map(([k,l])=>`<a href="#${k}" aria-current="${k===ui.tab?'page':'false'}">${l}</a>`).join(''):''}
+  const st=$('#subtabs');st.classList.toggle('muitas',cur.t.length>3);poeHTML(st,cur.t.length>1?cur.t.map(([k,l])=>`<a href="#${k}" aria-current="${k===ui.tab?'page':'false'}">${l}</a>`).join(''):'');
+  /* no celular a faixa pode rolar para o lado: mantém a aba atual à vista */
+  const at=st.querySelector('[aria-current="page"]');if(at&&st.scrollWidth>st.clientWidth){const l=at.offsetLeft-st.offsetLeft,r=l+at.offsetWidth;if(l<st.scrollLeft||r>st.scrollLeft+st.clientWidth)st.scrollLeft=l-16}}
 function route(){ui.delAsk=null;const h=location.hash.slice(1);ui.tab=['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio','confirmacoes'].includes(h)?h:'semanas';renderAll()}
 window.addEventListener('hashchange',route);
 

@@ -35,7 +35,7 @@
   const CFG=window.DESIGNAR_CONFIG||{};
   const FIREBASE_CONFIG=CFG.firebase;
   const OWNER=String(CFG.dono||'').trim().toLowerCase();
-  const APP="Designar", VERSAO="2026.11.06-1529", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
+  const APP="Designar", VERSAO="2026.11.06-1554", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
   const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,whatsapp:CFG.whatsapp||'',pub:{}};
   const t=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let resolveReady,rejectReady;const readyP=new Promise((r,j)=>{resolveReady=r;rejectReady=j});
@@ -395,8 +395,10 @@ nav.bnav:empty,nav.areas:empty{display:none!important}
   header.app .wrap.top{padding-block:12px 12px;gap:10px}
   .logo{--lh:30px}.brand{gap:10px}.brand h1{font-size:16px}
   nav.areas{display:none}
-  nav.subtabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:0;margin:-22px -16px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
-  nav.subtabs a{justify-content:center;padding:10px 4px 11px;border-bottom:3px solid transparent;font-size:14px;text-align:center}
+  nav.subtabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:0;margin:-22px -16px 16px;background:var(--surface);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  nav.subtabs::-webkit-scrollbar{display:none}
+  nav.subtabs.muitas{display:flex;flex-wrap:nowrap}nav.subtabs.muitas a{flex:1 0 auto;white-space:nowrap;padding:10px 14px 11px}
+  nav.subtabs a{justify-content:center;padding:10px 10px 11px;border-bottom:3px solid transparent;font-size:14px;text-align:center}
   nav.subtabs a[aria-current="page"]{border-color:var(--accent)}
   nav.subtabs a[aria-current="page"]::before{display:none}
   nav.bnav{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);padding:4px 4px calc(6px + env(safe-area-inset-bottom,0px))}
@@ -877,6 +879,38 @@ tr.agora .agoratag{display:block;margin:4px 0 0;width:max-content}
 .avcard.agora,.cweek.agora{box-shadow:0 0 0 2px var(--accent)}
 .wk.agora .agoratag{position:absolute;top:6px;right:8px;margin:0;font-size:10px}
 .wk.agora{position:relative}
+.agoratag,.avh .agoratag,.cwh .agoratag{color:#fff!important}
+:root[data-theme="dark"] .agoratag{color:var(--accent-fg)!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .agoratag{color:var(--accent-fg)!important}}
+/* escala de limpeza no celular: cada data vira um cartão (sem rolar para o lado) */
+@media (max-width:640px){
+  .tablewrap:has(> .ltab){overflow:visible}
+  .ltab thead{display:none}
+  .ltab,.ltab tbody{display:block;width:100%}
+  .ltab tr{display:grid;grid-template-columns:auto auto 1fr;column-gap:12px;row-gap:8px;padding:12px 10px;border-bottom:1px solid var(--line);align-items:baseline}
+  .ltab td{display:block;padding:0!important;border:0!important;background:transparent!important;min-width:0!important}
+  .ltab td:nth-child(1){font-weight:700}
+  .ltab td:nth-child(4),.ltab td:nth-child(5){grid-column:1/-1}
+  .ltab td[colspan]{grid-column:3/-1}
+  .ltab select{min-width:0;width:100%}.ltab .cbx{width:100%}
+  .ltab tr.agora{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+  .ltab tr.agora>td:first-child{box-shadow:none}
+  .ltab tr.agora .agoratag{display:inline-block;margin:0 0 0 6px}
+}
+@media (max-width:340px){.bnav a,.bnav button{font-size:10px}}
+/* equilíbrio no celular: cada pessoa vira um cartão com os números embaixo */
+@media (max-width:640px){
+  .tablewrap:has(> .eqtab){overflow:visible}
+  .eqtab thead{display:none}
+  .eqtab,.eqtab tbody{display:block;width:100%}
+  .eqtab tr{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;padding:10px 4px;border-bottom:1px solid var(--line)}
+  .eqtab td{display:block;padding:0!important;border:0!important}
+  .eqtab td:first-child{flex:1 1 55%;min-width:0}
+  .eqtab td:nth-child(2){flex:0 0 auto}
+  .eqtab td[data-l]{font-size:12.5px;color:var(--muted);text-align:left}
+  .eqtab td[data-l]::before{content:attr(data-l) " ";font-size:11.5px}
+  .eqtab td[colspan]{flex:1 1 100%}
+}
 
 </style>
 
@@ -1121,8 +1155,8 @@ const NAVI={cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
   gente:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.8-3 3-4.5 5.5-4.5s4.7 1.5 5.5 4.5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.6c2 .2 3.6 1.5 4.3 4"/></svg>',
   print:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg>',
   mais:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"/></svg>'};
-const AREAS=[{k:'reunioes',l:'Reuniões',i:'cal',t:[['semanas','Meio de semana'],['fimdesemana','Fim de semana']]},
-  {k:'limpeza',l:'Limpeza',i:'casa',t:[['limpeza','Limpeza e itens'],['av','A/V e Indicadores']]},
+const AREAS=[{k:'reunioes',l:'Reuniões',i:'cal',t:[['semanas','Meio de semana'],['fimdesemana','Fim de semana'],['av','A/V e Indicadores']]},
+  {k:'limpeza',l:'Limpeza',i:'casa',t:[['limpeza','Limpeza e itens']]},
   {k:'pregacao',l:'Pregação',i:'pin',t:[['campo','Saídas de campo']]},
   {k:'publicadores',l:'Publicadores',i:'gente',t:[['publicadores','Publicadores'],['confirmacoes','Confirmações'],['equilibrio','Equilíbrio'],['pubimport','Importar e exportar']]},
   {k:'imprimir',l:'Imprimir',i:'print',t:[['imprimir','Imprimir / PDF']]},
@@ -1132,7 +1166,9 @@ function drawNav(){const AR=navAreas();const cur=AR.find(a=>a.t.some(x=>x[0]===u
   const href=a=>'#'+(ui.areaLast[a.k]||a.t[0][0]);
   $('#areas').innerHTML=AR.map(a=>`<a href="${href(a)}" aria-current="${a===cur?'page':'false'}">${a.l}</a>`).join('');
   $('#bnav').innerHTML=AR.map(a=>`<a href="${href(a)}" aria-current="${a===cur?'page':'false'}">${NAVI[a.i]}${a.l}</a>`).join('');
-  $('#subtabs').innerHTML=cur.t.length>1?cur.t.map(([k,l])=>`<a href="#${k}" aria-current="${k===ui.tab?'page':'false'}">${l}</a>`).join(''):''}
+  const st=$('#subtabs');st.classList.toggle('muitas',cur.t.length>3);poeHTML(st,cur.t.length>1?cur.t.map(([k,l])=>`<a href="#${k}" aria-current="${k===ui.tab?'page':'false'}">${l}</a>`).join(''):'');
+  /* no celular a faixa pode rolar para o lado: mantém a aba atual à vista */
+  const at=st.querySelector('[aria-current="page"]');if(at&&st.scrollWidth>st.clientWidth){const l=at.offsetLeft-st.offsetLeft,r=l+at.offsetWidth;if(l<st.scrollLeft||r>st.scrollLeft+st.clientWidth)st.scrollLeft=l-16}}
 function route(){ui.delAsk=null;const h=location.hash.slice(1);ui.tab=['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio','confirmacoes'].includes(h)?h:'semanas';renderAll()}
 window.addEventListener('hashchange',route);
 
@@ -2964,7 +3000,7 @@ function rEquilibrio(){const v=$('#v-equilibrio');const M=ui.eqMeses||3;const ho
       <div class="eqres">${nZ?`<span class="nao"><b>${nZ}</b> sem nenhuma parte</span>`:''}${nM?`<span class="mto"><b>${nM}</b> com o dobro da média ou mais</span>`:''}<span>Média: <b>${media.toFixed(1).replace('.',',')}</b> parte${media>0&&media<2?'':'s'} por pessoa</span><span class="muted">${br(de)} a ${br(ate)}</span></div>
     </div>
     <div class="panel tablewrap"><table class="pubs eqtab"><thead><tr><th>Nome</th><th>Partes</th><th class="eqnum">Meio</th><th class="eqnum">Fim de sem.</th><th class="eqnum">A/V</th><th class="eqnum">Campo</th><th>Última</th></tr></thead><tbody>
-      ${ids.map(id=>{const x=c[id]||{meio:0,fds:0,av:0,campo:0,total:0,ult:''};return`<tr class="${muito(id)?'mto':nada(id)?'nao':''}"><td><b>${esc(tc(pname(id)))}</b></td><td><span class="eqbar"><i style="width:${Math.round(100*val(id)/max)}%"></i></span><b>${val(id)}</b></td><td class="eqnum">${x.meio}</td><td class="eqnum">${x.fds}</td><td class="eqnum">${x.av}</td><td class="eqnum">${x.campo}</td><td>${x.ult?br(x.ult).slice(0,5):'<span class="muted">—</span>'}</td></tr>`}).join('')||'<tr><td colspan="7" class="muted">Ninguém neste filtro.</td></tr>'}
+      ${ids.map(id=>{const x=c[id]||{meio:0,fds:0,av:0,campo:0,total:0,ult:''};return`<tr class="${muito(id)?'mto':nada(id)?'nao':''}"><td><b>${esc(tc(pname(id)))}</b></td><td><span class="eqbar"><i style="width:${Math.round(100*val(id)/max)}%"></i></span><b>${val(id)}</b></td><td class="eqnum" data-l="Meio">${x.meio}</td><td class="eqnum" data-l="Fim de sem.">${x.fds}</td><td class="eqnum" data-l="A/V">${x.av}</td><td class="eqnum" data-l="Campo">${x.campo}</td><td data-l="Última">${x.ult?br(x.ult).slice(0,5):'<span class="muted">—</span>'}</td></tr>`}).join('')||'<tr><td colspan="7" class="muted">Ninguém neste filtro.</td></tr>'}
     </tbody></table></div></div>`}
 document.addEventListener('change',e=>{const t=e.target;if(t.id==='eqmes'){ui.eqMeses=+t.value;rEquilibrio()}if(t.id==='eqtipo'){ui.eqTipo=t.value;rEquilibrio()}if(t.id==='eqcat'){ui.eqCat=t.value;rEquilibrio()}if(t.id==='eqfut'){ui.eqFuturo=t.checked;rEquilibrio()}});
 
