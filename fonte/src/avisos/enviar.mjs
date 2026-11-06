@@ -8,7 +8,8 @@ import {readFileSync} from 'node:fs';
 
 const bruto=process.env.FIREBASE_SERVICE_ACCOUNT||'';
 if(!bruto.trim()){console.log('O segredo FIREBASE_SERVICE_ACCOUNT ainda não foi configurado no GitHub. Nada foi enviado.');process.exit(0)}
-const sa=JSON.parse(bruto);
+let sa=null;try{const i=bruto.indexOf('{'),f=bruto.lastIndexOf('}');sa=JSON.parse(bruto.slice(i,f+1))}catch(e){}
+if(!sa||sa.type!=='service_account'||!sa.private_key){console.log('O segredo FIREBASE_SERVICE_ACCOUNT não tem a chave certa. Ele deve conter o arquivo .json inteiro baixado em Firebase › Configurações do projeto › Contas de serviço › "Gerar nova chave privada" (começa com { "type": "service_account", ...), e não o trecho de código mostrado nessa página.');process.exit(1)}
 admin.initializeApp({credential:admin.credential.cert(sa)});
 const db=admin.firestore(),fcm=admin.messaging();
 const TESTE=process.env.TESTE==='true',FORCAR=process.env.FORCAR==='true';
