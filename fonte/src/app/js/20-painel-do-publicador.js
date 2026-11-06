@@ -83,5 +83,9 @@ function respResumo(col,id,rs){if(!window.FBX)return'';let ok=0;const nao=[];
 /* mantém a lista de nomes (sem telefones) que o painel dos publicadores usa */
 function syncNomes(){const F=window.FBX;if(!F||!['admin','editor'].includes(F.papel)||!loaded.p||nomesRemote===null)return;
   const map={};Object.entries(pubs).forEach(([id,p])=>{if(p&&p.nome)map[id]=tc(p.nome)});
-  if(JSON.stringify(map)===JSON.stringify(nomesRemote))return;clearTimeout(syncNomes.t);
-  syncNomes.t=setTimeout(()=>{nomesRemote=map;store.set('quadro','nomes',{nomes:map}).catch(()=>{nomesRemote=null})},1200)}
+  /* compara sem depender da ordem: o Firebase pode devolver os nomes em outra ordem, e isso não é mudança */
+  const can=o=>JSON.stringify(Object.keys(o||{}).sort().map(k=>[k,o[k]]));
+  if(can(map)===can(nomesRemote))return;clearTimeout(syncNomes.t);
+  /* trava de segurança: no máximo uma gravação a cada 30 s, mesmo que algo volte a parecer diferente */
+  const espera=Math.max(1200,(syncNomes.ultima||0)+30000-Date.now());
+  syncNomes.t=setTimeout(()=>{if(can(map)===can(nomesRemote))return;syncNomes.ultima=Date.now();nomesRemote=map;store.set('quadro','nomes',{nomes:map}).catch(()=>{nomesRemote=null})},espera)}
