@@ -92,7 +92,7 @@ function layoutPages(sel,sub,kind,stage){
     if(body.scrollHeight>body.clientHeight+1&&body.children.length>1){el.remove();newPage();body.appendChild(el)}});
 }
 document.addEventListener('change',e=>{if(e.target.classList&&e.target.classList.contains('pw')){const P=printState();e.target.checked?P.set.add(e.target.value):P.set.delete(e.target.value);rPrint()}});
-document.addEventListener('input',e=>{if(e.target.id==='psub'){ui.printSub=e.target.value;const P=printState();layoutPages(P.sel,ui.printSub||P.autoSub,P.kind)}});
+document.addEventListener('input',e=>{if(e.target.id==='psub'){ui.printSub=e.target.value;clearTimeout(ui.psubT);ui.psubT=setTimeout(()=>{if(ui.tab!=='imprimir')return;const P=printState();layoutPages(P.sel,ui.printSub||P.autoSub,P.kind)},200)}});
 let rzT;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(ui.tab==='imprimir')rPrint()},200)});
 
 async function saveFile(filename,blob){

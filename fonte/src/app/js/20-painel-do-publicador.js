@@ -9,17 +9,19 @@ let resp={};               // respostas (confirmações) por id do documento
 let nomesRemote=null;      // quadro/nomes como está no banco
 const respKey=(col,id,field,pid)=>[col,id,field,pid].join('~').replace(/\//g,'_');
 const horaDe=date=>parse(date).getDay()===+cfg.diaFds?(cfg.horaFds||''):(cfg.hora||'');
-function myItems(pid,from){const out=[];const add=o=>out.push(o);
-  sortedWeeks().forEach(w=>{const d=meetDate(w);if(d<from)return;roles(w).forEach(r=>{if(r.pub===pid)add({k:'meio',col:'semanas',id:w.data,field:r.field,date:d,hora:cfg.hora,titulo:'Reunião do meio de semana',txt:r.txt})})});
-  sortedFds().forEach(f=>{if(f.data<from)return;rolesFds(f).forEach(r=>{if(r.pub===pid)add({k:'fds',col:'fimdesemana',id:f.data,field:r.field,date:f.data,hora:cfg.horaFds||'',titulo:'Reunião do fim de semana',txt:r.txt})})});
-  Object.values(avd).forEach(d0=>{const d=avNorm(d0);if(!d.data||d.data<from)return;const A=(field,txt)=>add({k:'av',col:'av',id:d.data,field,date:d.data,hora:horaDe(d.data),titulo:'Áudio/vídeo e indicadores',txt});
-    if(d.av===pid)A('av','Áudio e vídeo');if(d.palco===pid)A('palco','Palco');d.mic.forEach((x,i)=>{if(x===pid)A('mic.'+i,'Microfone volante')});d.ind.forEach((x,i)=>{if(x===pid)A('ind.'+i,'Indicador')})});
+/* designações a partir de "from": de um publicador (so=id) ou de todos (so=null, usado na agenda dos avisos) — uma só passada pelos dados */
+function itensDe(from,so){const out=[];const add=(p,o)=>{if(p&&(so==null||p===so))out.push(Object.assign({pid:p},o))};
+  sortedWeeks().forEach(w=>{const d=meetDate(w);if(d<from)return;roles(w).forEach(r=>add(r.pub,{k:'meio',col:'semanas',id:w.data,field:r.field,date:d,hora:cfg.hora,titulo:'Reunião do meio de semana',txt:r.txt}))});
+  sortedFds().forEach(f=>{if(f.data<from)return;rolesFds(f).forEach(r=>add(r.pub,{k:'fds',col:'fimdesemana',id:f.data,field:r.field,date:f.data,hora:cfg.horaFds||'',titulo:'Reunião do fim de semana',txt:r.txt}))});
+  Object.values(avd).forEach(d0=>{const d=avNorm(d0);if(!d.data||d.data<from)return;const A=(p,field,txt)=>add(p,{k:'av',col:'av',id:d.data,field,date:d.data,hora:horaDe(d.data),titulo:'Áudio/vídeo e indicadores',txt});
+    A(d.av,'av','Áudio e vídeo');A(d.palco,'palco','Palco');d.mic.forEach((x,i)=>A(x,'mic.'+i,'Microfone volante'));d.ind.forEach((x,i)=>A(x,'ind.'+i,'Indicador'))});
   Object.entries(lmp).forEach(([id,s])=>{if(!s||!s.data||s.data<from||!s.grupo)return;const g=lgr[s.grupo];if(!g)return;
-    const dir=g.dirigente===pid;if(!dir&&!(g.membros||[]).some(m=>m.id===pid))return;
-    add({k:'limp',col:'limpeza',id,field:'grupo',date:s.data,hora:s.tipo==='reuniao'?'após a reunião':'',titulo:'Limpeza do Salão do Reino',txt:(s.tipo==='semanal'?'Limpeza semanal':'Limpeza após a reunião')+' · Grupo '+(g.letra||s.grupo)+(dir?' (você dirige o grupo)':'')})});
-  Object.values(cmp).forEach(c=>(c.saidas||[]).forEach(r=>{if(r.dir!==pid)return;const date=cDate(c.semana,r.dia);if(date<from)return;
-    add({k:'campo',col:'campo',id:c.semana,field:'saida.'+r.dia+'.'+String(r.hora||'').replace(':','h'),date,hora:r.hora,titulo:'Saída de campo',txt:'Dirigir: '+r.mod+(r.terr?' · '+r.terr:'')})}));
+    const quem=new Set([g.dirigente,...(g.membros||[]).map(m=>m.id)]);
+    quem.forEach(p=>{const dir=p===g.dirigente;add(p,{k:'limp',col:'limpeza',id,field:'grupo',date:s.data,hora:s.tipo==='reuniao'?'após a reunião':'',titulo:'Limpeza do Salão do Reino',txt:(s.tipo==='semanal'?'Limpeza semanal':'Limpeza após a reunião')+' · Grupo '+(g.letra||s.grupo)+(dir?' (você dirige o grupo)':'')})})});
+  Object.values(cmp).forEach(c=>(c.saidas||[]).forEach(r=>{const date=cDate(c.semana,r.dia);if(date<from)return;
+    add(r.dir,{k:'campo',col:'campo',id:c.semana,field:'saida.'+r.dia+'.'+String(r.hora||'').replace(':','h'),date,hora:r.hora,titulo:'Saída de campo',txt:'Dirigir: '+r.mod+(r.terr?' · '+r.terr:'')})}));
   return out.sort((a,b)=>(a.date+(a.hora||'')).localeCompare(b.date+(b.hora||'')))}
+function myItems(pid,from){return pid?itensDe(from,pid):[]}
 const KCOR={meio:'var(--tes)',fds:'var(--pub)',av:'var(--sent)',limp:'var(--min)',campo:'var(--accent)'};
 function icsFor(it){const p2=n=>String(n).padStart(2,'0');const d=it.date.replace(/-/g,'');const m=/^(\d{1,2}):(\d{2})$/.exec(it.hora||'');
   const st=m?d+'T'+p2(m[1])+m[2]+'00':null;let en=null;if(m){const t=new Date(parse(it.date));t.setHours(+m[1]+1,+m[2]);en=iso(t).replace(/-/g,'')+'T'+p2(t.getHours())+p2(t.getMinutes())+'00'}

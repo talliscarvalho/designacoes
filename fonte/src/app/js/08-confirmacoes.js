@@ -1,8 +1,7 @@
 /* ================= Confirmações: quem confirmou, quem não pode e quem ainda não respondeu ================= */
 function confItens(dias){const hoje=iso(new Date()),ate=shiftDays(hoje,dias);const out=[];
-  Object.keys(pubs).forEach(pid=>{if(!pubs[pid]||pubs[pid].ativo===false)return;
-    myItems(pid,hoje).forEach(it=>{if(it.date>ate)return;const r=resp[respKey(it.col,it.id,it.field,pid)];
-      const ac=acessoDe(pid);out.push(Object.assign({},it,{pid,st:r&&r.status==='ok'?'ok':r&&r.status==='nao'?'nao':ac==='sem'?'sem':'pend',ac,em:r&&r.em}))})});
+  itensDe(hoje,null).forEach(it=>{const pid=it.pid;if(it.date>ate||!pubs[pid]||pubs[pid].ativo===false)return;const r=resp[respKey(it.col,it.id,it.field,pid)];
+    const ac=acessoDe(pid);out.push(Object.assign({},it,{pid,st:r&&r.status==='ok'?'ok':r&&r.status==='nao'?'nao':ac==='sem'?'sem':'pend',ac,em:r&&r.em}))});
   return out.sort((a,b)=>(a.date+(a.hora||'')+a.titulo).localeCompare(b.date+(b.hora||'')+b.titulo)||pname(a.pid).localeCompare(pname(b.pid),'pt'))}
 const CF_TXT={ok:'Confirmou',nao:'Não pode',pend:'Sem resposta',sem:'Sem acesso ao painel'};
 function confLembrete(it){const p=pubs[it.pid]||{};const n=waNumber(p.tel);if(!n)return'';const d=parse(it.date);

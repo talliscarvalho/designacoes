@@ -45,9 +45,9 @@ function rAV(){
     return`<select class="avsel" data-id="${esc(s.id)}" data-f="${field}" data-i="${idx==null?'':idx}" aria-label="${field} ${br(s.data)}"><option value="">—</option>${ids.map(id=>`<option value="${id}" ${id===val?'selected':''}>${esc(tc(pname(id)))}${isElder(id)?' · ancião':''} · ${avSince(id,s.data)}</option>`).join('')}</select>`};
   const B=bros(),O=avOps();
   const cards=slots.map(s=>{const lab=`<div class="avh"><b>${br(s.data).slice(0,5)}</b><span>${cap(DIAS[parse(s.data).getDay()])} · ${s.kind==='meio'?'Meio de semana':'Fim de semana'}</span>${s.ev&&!s.sem?`<span class="evtag">${EVTAG[s.ev]}</span>`:''}</div>`;
-    if(s.sem)return`<div class="panel avcard">${lab}<p class="muted" style="margin:0">Sem reunião nesta semana (${esc(EVENTOS[s.ev])}).</p></div>`;
+    if(s.sem)return`<div class="panel avcard" data-dia="${s.data}">${lab}<p class="muted" style="margin:0">Sem reunião nesta semana (${esc(EVENTOS[s.ev])}).</p></div>`;
     const d=avNorm(avd[s.id]||avBlank(s.data));const w=avWarn(s,d);
-    return`<div class="panel avcard">${lab}
+    return`<div class="panel avcard" data-dia="${s.data}">${lab}
       <div class="avgrid"><label class="f">Áudio/Vídeo${sel(s,'av',null,d.av,O)}</label><label class="f">Palco${sel(s,'palco',null,d.palco,B)}</label>
       <label class="f">Microfone${sel(s,'mic',0,d.mic[0],B)}${sel(s,'mic',1,d.mic[1],B)}</label>
       <label class="f">Indicadores${sel(s,'ind',0,d.ind[0],B)}${sel(s,'ind',1,d.ind[1],B)}${sel(s,'ind',2,d.ind[2],B)}</label></div>
@@ -93,7 +93,7 @@ function avMsgs(ym){const by={};avSlots(ym).filter(s=>!s.sem).forEach(s=>{const 
     const add=(id,f)=>{if(id)(by[id]=by[id]||[]).push('• '+cap(DIAS[parse(s.data).getDay()])+', '+br(s.data).slice(0,5)+' — '+f)};
     add(d.av,'Áudio e vídeo');add(d.palco,'Palco');d.mic.forEach(m=>add(m,'Microfone'));d.ind.forEach(m=>add(m,'Indicador'))});
   return Object.entries(by).map(([pid,list])=>{const p=pubs[pid]||{nome:'(removido)'};
-    const msg=`Olá, ${tc(p.nome.split(' ')[0])}!\n\nSuas designações de apoio às reuniões em ${monthLabel(ym)}:\n\n${list.join('\n')}\n\nSe não puder em alguma data, avise com antecedência, por favor. Obrigado!\n${cfg.congregacao||''}`;
+    const msg=`Olá, ${tc(p.nome.split(' ')[0])}!\n\nSuas designações de apoio às reuniões em ${monthLabel(ym)}:\n\n${list.join('\n')}\n\nSe não puder em alguma data, avise com antecedência, por favor. Obrigado!`;
     return{pid,p,msg}}).sort((a,b)=>a.p.nome.localeCompare(b.p.nome,'pt'))}
 function rWaAV(seg){const ym=ui.waAV||(ui.waAV=iso(new Date()).slice(0,7));const ms=avMsgs(ym);const env=(cfg.avEnviados||{})[ym]||{};const sent=ms.filter(m=>env[m.pid]).length;
   $('#v-whatsapp').innerHTML=`<div class="wa-top">${seg}<label class="f">Mês<select id="wawav">${avMonths().map(m=>`<option value="${m}" ${m===ym?'selected':''}>${cap(monthLabel(m))}</option>`).join('')}</select></label>

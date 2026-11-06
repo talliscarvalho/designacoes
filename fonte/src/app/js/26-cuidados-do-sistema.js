@@ -77,6 +77,11 @@ async function diagnostico(){const out=[];const add=(ok,t,d)=>out.push({ok,t,d})
   try{await loadScript(XLSX_URL);add(!!window.XLSX,'Planilhas (Excel)','Leitor de planilhas funcionando.')}catch(e){add(false,'Planilhas (Excel)','O leitor de planilhas não carregou.')}
   const sw='serviceWorker' in navigator&&location.protocol==='https:';let swOk=false;if(sw){try{swOk=!!(await navigator.serviceWorker.getRegistration())}catch(e){}}
   add(swOk||!sw,'Aplicativo e uso sem internet',swOk?'Instalável e com cópia no aparelho.':sw?'Ainda não ativado neste aparelho. Recarregue a página uma vez.':'Disponível só no endereço https do site.');
+  /* avisos no celular */
+  if(typeof VAPID==='undefined'||!VAPID)add(false,'Avisos no celular','Desligados: falta a chave pública "Web Push" no config.js (Firebase › Configurações › Cloud Messaging).');
+  else{let n=null,ag=null;try{n=(await fdb().collection('avisos').get()).size}catch(e){}try{const d=await fdb().doc('quadro/agenda').get();ag=d.exists?Object.keys(d.data().itens||{}).length:0}catch(e){}
+    const st=avisoEstado();const aqui={ativo:'ativados neste aparelho',desligado:'ainda não ativados neste aparelho (menu da conta › Avisos no celular)',negado:'bloqueados pelo navegador neste aparelho',ios:'no iPhone, só com o aplicativo instalado',sem:'este navegador não recebe avisos'}[st];
+    add(n!==null&&ag>0,'Avisos no celular',`${n===null?'Não consegui contar os aparelhos':n+' aparelho'+(n===1?'':'s')+' com avisos ativados'} · agenda com ${ag||0} publicadores · ${aqui}. O envio é feito pelo GitHub (aba Actions › Avisos das designações), que precisa do segredo FIREBASE_SERVICE_ACCOUNT.`)}
   return out}
 function drawDiag(){const box=$('#diagBox');if(!box)return;const F=window.FBX;if(!F||F.papel!=='admin'||!F.ping){box.innerHTML='';return}
   const r=ui.diag;box.innerHTML=`<div class="accbox"><h3 style="margin:0 0 4px;font-size:16px">Conferir o site</h3><p class="hint" style="margin:0 0 10px">Use depois de cada publicação no GitHub: confere se todos os arquivos estão lá, se a versão é a mais nova e se banco, PDF e planilhas funcionam neste aparelho.</p>

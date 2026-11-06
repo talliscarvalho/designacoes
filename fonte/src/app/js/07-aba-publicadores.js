@@ -62,7 +62,8 @@ const PACTS={
 document.addEventListener('submit',e=>{if(e.target.id!=='pform')return;e.preventDefault();const d=readDraft();if(!d.nome){toast('Escreva o nome');return}
   const id=ui.pub||(d.nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)+'-'+Math.random().toString(36).slice(2,6));
   const was=!!ui.pub;pubs[id]=d;queueSave('publicadores',id,d);ui.pub=id;draft=null;rPubs();toast(was?'Alterações salvas':d.nome+' adicionado')});
-document.addEventListener('input',e=>{if(e.target.id==='pq'){ui.pubFilter=e.target.value;draft=readDraft();const p=e.target.selectionStart;rPubs();const el=$('#pq');el.focus();el.setSelectionRange(p,p)}});
+/* busca: espera a pessoa parar de digitar (fica leve em celulares simples) */
+document.addEventListener('input',e=>{if(e.target.id==='pq'){ui.pubFilter=e.target.value;clearTimeout(ui.pqT);ui.pqT=setTimeout(()=>{const el0=$('#pq');if(!el0)return;draft=readDraft();const p=el0.selectionStart;rPubs();const el=$('#pq');el.focus();el.setSelectionRange(p,p)},140)}});
 document.addEventListener('change',e=>{if(e.target.id==='pc'){ui.pubCat=e.target.value;draft=readDraft();rPubs()}});
 function fmtTel(t){const d=String(t).replace(/\D/g,'').replace(/^55(?=\d{10,11}$)/,'');if(d.length===11)return`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;if(d.length===10)return`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;return t}
 function waNumber(t){let d=String(t||'').replace(/\D/g,'').replace(/^0+/,'');if(!d)return'';if(d.length<=11)d='55'+d;return d}

@@ -35,7 +35,7 @@
   const CFG=window.DESIGNAR_CONFIG||{};
   const FIREBASE_CONFIG=CFG.firebase;
   const OWNER=String(CFG.dono||'').trim().toLowerCase();
-  const APP="Designar", VERSAO="2026.11.06-1335", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
+  const APP="Designar", VERSAO="2026.11.06-1500", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
   const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,whatsapp:CFG.whatsapp||'',pub:{}};
   const t=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let resolveReady,rejectReady;const readyP=new Promise((r,j)=>{resolveReady=r;rejectReady=j});
@@ -476,6 +476,7 @@ h2,h3{font-family:var(--f-cond);letter-spacing:0}
 .weeklist .empty{color:var(--muted);font-size:14px;padding:6px 4px 10px}
 @media (max-width:720px){
   .wklist{flex-direction:row;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  .wk.agora .agoratag{display:none}.wk.agora .cal{box-shadow:0 0 0 2px var(--accent)}
   .wk{flex:1 0 64px;flex-direction:column;justify-content:center;gap:4px;min-height:74px;padding:0;border:0;background:transparent!important;box-shadow:none!important}
   .wk .cal{width:100%;height:70px}
   .wk .wi{display:none}
@@ -509,6 +510,7 @@ h2,h3{font-family:var(--f-cond);letter-spacing:0}
 .row.r3{grid-template-columns:minmax(0,1.4fr) 70px minmax(0,2fr)}
 .row.r2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .row .fixed{padding:8px 0;font-weight:600}
+.row .fixed .ltema{display:block;font-weight:400;font-size:12px;opacity:.72;margin-top:2px}
 @media (max-width:620px){.row,.row.r3{grid-template-columns:minmax(0,1fr) 70px}.row>*:nth-child(n+3){grid-column:1/-1}}
 .hint{font-size:12.5px;color:var(--muted)}
 .warnline{font-size:13px;color:var(--warn);font-weight:600}
@@ -867,6 +869,15 @@ select[data-cbx]{display:none!important}
 .settings .full{grid-column:1/-1}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;z-index:50;max-width:calc(100% - 32px)}
 @media (prefers-reduced-motion:no-preference){.wk,.btn{transition:background .15s}}
+/* semana atual */
+.agoratag{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:999px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;letter-spacing:.02em;vertical-align:middle;white-space:nowrap}
+tr.agora>td{background:var(--accent-soft)}
+tr.agora>td:first-child{box-shadow:inset 3px 0 0 var(--accent);font-weight:700}
+tr.agora .agoratag{display:block;margin:4px 0 0;width:max-content}
+.avcard.agora,.cweek.agora{box-shadow:0 0 0 2px var(--accent)}
+.wk.agora .agoratag{position:absolute;top:6px;right:8px;margin:0;font-size:10px}
+.wk.agora{position:relative}
+
 </style>
 
 <div id="testbar" class="testbar" role="note" hidden></div>
@@ -920,7 +931,7 @@ const CANTICOS=["As qualidades de Jeová", "Teu nome é Jeová", "Jeová, minha 
 /* "83" vira "83 - “De casa em casa”"; texto já completo fica como está */
 const cant=v=>{v=String(v||'').trim();const m=/^(\d{1,3})\.?\s*$/.exec(v);return m&&CANTICOS[+m[1]-1]?m[1]+' - '+CANTICOS[+m[1]-1]:v};
 const MIN_TEMAS=['Iniciando conversas','Cultivando o interesse','Fazendo discípulos','Explicando suas crenças','Discurso','O que você diria?'];
-const DEF_MSG='Olá, {nome}!\n\nVocê tem designação na {reuniao} de {dia_semana}, {data}:\n\n{designacoes}\n\nSe não puder participar, avise com antecedência, por favor. Obrigado!\n{congregacao}';
+const DEF_MSG='Olá, {nome}!\n\nVocê tem designação na {reuniao} de {dia_semana}, {data}:\n\n{designacoes}\n\nSe não puder participar, avise com antecedência, por favor. Obrigado!';
 const DEF_CFG={congregacao:'Congregação',dia:4,hora:'19:30',papel:'A4',modelo:'cores',mensagem:DEF_MSG,intervaloMeses:2,diaFds:0,horaFds:'09:00',diaLimpeza:2};
 
 let pubs={}, weeks={}, fds={}, evs={}, lgr={}, lmp={}, stk={}, avd={}, cmp={}, cfg={...DEF_CFG};
@@ -951,11 +962,11 @@ function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeou
 function setStatus(t,cls){const s=$('#status');s.className='status '+(cls||'');$('#statusTxt').textContent=t}
 
 function newWeek(date){return{data:date,leituraSemanal:'',canticoInicial:'',oracaoInicial:'',presidente:'',
-  tesouros:{tema:'',pub:''},joias:{pub:''},leitura:{pub:''},
+  tesouros:{tema:'',pub:''},joias:{pub:''},leitura:{pub:'',tema:''},
   ministerio:[{tema:'Iniciando conversas',min:3,pub:'',ajudante:''},{tema:'Cultivando o interesse',min:4,pub:'',ajudante:''},{tema:'Discurso',min:5,pub:'',ajudante:''}],
   canticoMeio:'',vida:[{tema:'',min:15,pub:''}],estudo:{dirigente:'',leitor:''},canticoFinal:'',oracaoFinal:'',enviados:{}}}
 function norm(w){const b=newWeek(w.data);const o=Object.assign(b,w);
-  o.tesouros=Object.assign({tema:'',pub:''},w.tesouros);o.joias=Object.assign({pub:''},w.joias);o.leitura=Object.assign({pub:''},w.leitura);
+  o.tesouros=Object.assign({tema:'',pub:''},w.tesouros);o.joias=Object.assign({pub:''},w.joias);o.leitura=Object.assign({pub:'',tema:''},w.leitura);
   o.estudo=Object.assign({dirigente:'',leitor:''},w.estudo);o.ministerio=Array.isArray(w.ministerio)?w.ministerio:b.ministerio;o.vida=Array.isArray(w.vida)?w.vida:b.vida;o.enviados=w.enviados||{};return o}
 const TIPOS=[['demo','Demonstração'],['discurso','Discurso'],['consideracao','Consideração'],['presidente','Feita pelo presidente']];
 const partTipo=p=>p.tipo||(/o que voc[eê] diria/i.test(p.tema||'')?'consideracao':/discurso/i.test(p.tema||'')?'discurso':'demo');
@@ -987,7 +998,7 @@ function roles(w){
   add(w.oracaoInicial,'oracaoInicial','Oração inicial'+(w.canticoInicial?' (após o Cântico '+w.canticoInicial.split(' ')[0]+')':''));
   add(w.tesouros.pub,'tesouros.pub','Tesouros da Palavra de Deus: “'+(w.tesouros.tema||'discurso')+'” (10 min)');
   add(w.joias.pub,'joias.pub','Encontre Joias Espirituais (10 min)');
-  add(w.leitura.pub,'leitura.pub','Leitura da Bíblia (4 min)'+(w.leituraSemanal?' · '+w.leituraSemanal:''));
+  add(w.leitura.pub,'leitura.pub','Leitura da Bíblia (4 min)'+(w.leitura.tema?' · '+w.leitura.tema:w.leituraSemanal?' · '+w.leituraSemanal:''));
   w.ministerio.forEach((p,i)=>{const n=4+i;if(isPres(p))return;
     add(p.pub,'ministerio.'+i+'.pub','Faça Seu Melhor no Ministério, parte '+n+': '+(p.tema||'')+' ('+(p.min||'?')+' min)'+(p.ajudante&&!isDiscurso(p)?'\n   Ajudante: '+pn(p.ajudante):''));
     if(!isDiscurso(p))add(p.ajudante,'ministerio.'+i+'.ajudante','Ajudante na parte '+n+': '+(p.tema||'')+' ('+(p.min||'?')+' min)'+(p.pub?'\n   Estudante: '+pn(p.pub):''));});
@@ -1086,6 +1097,7 @@ function renderAll(fromData){
   ['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio','confirmacoes'].forEach(t=>$('#v-'+t).hidden=t!==ui.tab);
   const v=$('#v-'+ui.tab);
   lembreteS89();pedidoBox();instalarBox();avisoBox();
+  if(ui.abaAnterior!==ui.tab){ui.abaAnterior=ui.tab;ui.rolarSemana=true}
   if(fromData&&v.contains(document.activeElement)&&document.activeElement.matches('input,textarea,select'))return; // não atrapalha quem está digitando
   ({semanas:rSemanas,fimdesemana:rFds,limpeza:rLimpeza,av:rAV,campo:rCampo,publicadores:rPubs,imprimir:rPrint,whatsapp:rWa,ajustes:rAjustes,painel:rPainel,pubimport:rPubImport,equilibrio:rEquilibrio,confirmacoes:rConfirm})[ui.tab]();
 }
@@ -1127,11 +1139,26 @@ function sheetHead(date,hora){const d=parse(date);return`<div class="sheethead">
 function wkItem(act,id,date,n,t,sel){const tp=evTipo(id),off=SEM_REUNIAO(tp);const dt=parse(date);
   const title=off?EVENTOS[tp]:tp==='visita'?'Visita do superintendente':n>=t?'Semana completa':(t-n)+(t-n>1?' designações em aberto':' designação em aberto');
   const lab=cap(DIAS[dt.getDay()])+', '+dt.getDate()+' de '+MESES[dt.getMonth()]+': '+title;
-  return`<button class="wk${off?' ev':''}" data-a="${act}" data-id="${esc(id)}" aria-current="${sel}" aria-label="${esc(lab)}"><span class="cal" aria-hidden="true"><small>${DIAS[dt.getDay()].slice(0,3).toUpperCase()}</small><b>${pad(dt.getDate())}</b></span>
+  return`<button class="wk${off?' ev':''}" data-dia="${esc(date)}" data-a="${act}" data-id="${esc(id)}" aria-current="${sel}" aria-label="${esc(lab)}"><span class="cal" aria-hidden="true"><small>${DIAS[dt.getDay()].slice(0,3).toUpperCase()}</small><b>${pad(dt.getDate())}</b></span>
     <span class="wi" aria-hidden="true"><span class="wt">${esc(title)}</span>${off?'<span class="wev">Sem reunião nesta semana</span>':`<span class="wbar"><i><span style="width:${t?Math.round(100*Math.min(n,t)/t):0}%"></span></i>${n} de ${t}</span>`}</span></button>`}
 function sortedWeeks(){return Object.values(weeks).sort((a,b)=>a.data<b.data?-1:1)}
 function upcomingWeek(){const t=iso(new Date());const ws=sortedWeeks();return(ws.find(w=>w.data>=t)||ws[ws.length-1]||{}).data||null}
 
+
+/* semana atual: destaca as datas desta semana (segunda a domingo) e, ao abrir a aba, rola até ela */
+function semanaAtual(rolar){const v=$('#v-'+ui.tab);if(!v)return;const hoje=iso(new Date()),seg=weekMonday(hoje),dom=shiftDays(seg,6);
+  const els=[...v.querySelectorAll('[data-dia]')];let alvo=null;
+  els.forEach(el=>{const d=el.dataset.dia,a=el.dataset.ate||d;const agora=d<=dom&&a>=seg;el.classList.toggle('agora',agora);
+    if(agora&&!el.querySelector('.agoratag')){const h=el.querySelector('td:first-child, .avh, .cwh h3, .cal');if(h)h.insertAdjacentHTML(h.classList.contains('cal')?'afterend':'beforeend','<span class="agoratag">Esta semana</span>')}
+    if(!alvo&&(agora||a>=hoje))alvo=el});
+  if(!rolar||!alvo)return false;
+  requestAnimationFrame(()=>{const r=alvo.getBoundingClientRect();const lista=alvo.closest('.wklist');
+    if(lista&&lista.scrollWidth>lista.clientWidth+4){lista.scrollLeft+=r.left-lista.getBoundingClientRect().left-8;return}
+    if(lista&&lista.scrollHeight>lista.clientHeight+4){lista.scrollTop+=r.top-lista.getBoundingClientRect().top-8;return}
+    if(lista)return;/* listas de semanas curtas: não mexe na página */
+    if(r.top>window.innerHeight*0.7||r.bottom<0)window.scrollTo({top:window.scrollY+r.top-Math.max(90,window.innerHeight*0.25),behavior:'smooth'})});return true}
+/* telas redesenhadas por partes (sem passar pelo renderAll) também ganham o destaque */
+let semObs=0;new MutationObserver(()=>{if(semObs)return;semObs=requestAnimationFrame(()=>{semObs=0;if(semanaAtual(ui.rolarSemana))ui.rolarSemana=false})}).observe(document.getElementById('main')||document.body,{childList:true,subtree:true});
 
 /* ================= Sorteio de irmãs (Faça Seu Melhor no Ministério) ================= */
 const meses=()=>Math.max(0,+(cfg.intervaloMeses??2)||0);
@@ -1244,8 +1271,9 @@ APO.parse=function(text,opts){
     // sequência: ministério tem que vir antes da vida pelo número
     if(vida.length){const v0=Math.min(...vida.map(x=>x.n));mini=rest.filter(x=>x.n<v0);vida=rest.filter(x=>x.n>=v0)}
     const p1=parts.find(x=>x.n===1);
+    const lb=/Leitura da B[íi]blia\s*\(\s*\d{1,2}\s*min\)\s*(.{2,60}?\(th\s+li[çc][ãa]o\s+\d{1,2}\))/i.exec(flat);
     weeks.push({semana:h.d1+'/'+(m1+1)+'–'+h.d2+'/'+(h.m2+1),data:md.getFullYear()+'-'+String(md.getMonth()+1).padStart(2,'0')+'-'+String(md.getDate()).padStart(2,'0'),
-      leituraSemanal:h.leit,canticoInicial:ini?ini.n:'',canticoMeio:mid?mid.n:'',canticoFinal:fin?fin.n:'',
+      leituraSemanal:h.leit,leituraTexto:lb?lb[1].replace(/\s+/g,' ').trim():'',canticoInicial:ini?ini.n:'',canticoMeio:mid?mid.n:'',canticoFinal:fin?fin.n:'',
       tesouros:p1?p1.tema:'',ministerio:mini.map(x=>({tema:x.tema,min:x.min,tipo:x.tipo})),vida:vida.map(x=>({tema:x.tema,min:x.min})),
       avisos:[!p1&&'tema de Tesouros não encontrado',!est&&'estudo bíblico não encontrado',!mini.length&&'partes do ministério não encontradas',!vida.length&&'partes da Vida Cristã não encontradas',!ini&&'cântico inicial não encontrado'].filter(Boolean)})
   });
@@ -1278,7 +1306,7 @@ function weekMonday(d){const x=parse(d);const off=(x.getDay()+6)%7;x.setDate(x.g
 function impTarget(date){const mon=weekMonday(date);const sun=parse(mon);sun.setDate(sun.getDate()+6);const s2=iso(sun);return sortedWeeks().find(w=>w.data>=mon&&w.data<=s2)||null}
 function impPanel(){
   const head=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><h2>Importar apostila</h2><button class="btn small ghost" data-a="impclose">Fechar</button></div>`;
-  const drop=`<label class="drop" for="impfile"><b>Escolha o arquivo da apostila</b><span class="hint">PDF ou RTF da Apostila da Reunião Vida e Ministério. O sistema lê as semanas, a leitura da Bíblia, os cânticos e os temas das partes. Os nomes não são preenchidos.</span><span class="btn primary dropbtn">Escolher arquivo</span><input type="file" id="impfile"></label>`;
+  const drop=`<label class="drop" for="impfile"><b>Escolha o arquivo da apostila</b><span class="hint">PDF ou RTF da Apostila da Reunião Vida e Ministério. O sistema lê as semanas, a leitura semanal da Bíblia, o texto da Leitura da Bíblia, os cânticos e os temas das partes. Os nomes não são preenchidos.</span><span class="btn primary dropbtn">Escolher arquivo</span><input type="file" id="impfile"></label>`;
   if(!imp)return`<div class="panel imp">${head}${drop}</div>`;
   if(imp.lendo)return`<div class="panel imp">${head}<p>Lendo ${esc(imp.nome)}…</p></div>`;
   if(imp.erro)return`<div class="panel imp">${head}${drop}<div class="drawres short">${esc(imp.erro)}</div>${impDiag.tipo?`<details class="hint"><summary>Detalhes técnicos (para enviar ao suporte)</summary><p style="margin:6px 0">Arquivo: ${esc(imp.nome||'sem nome')} · tipo identificado: ${esc(impDiag.tipo)} · ${impDiag.bytes||0} bytes${impDiag.paginas?' · '+impDiag.paginas+' páginas':''} · ${impDiag.chars??0} letras lidas</p>${impDiag.amostra?`<pre style="white-space:pre-wrap;font-size:12px;max-height:200px;overflow:auto;background:var(--surface);padding:8px;border-radius:6px">${esc(impDiag.amostra)}</pre>`:''}</details>`:''}</div>`;
@@ -1291,6 +1319,7 @@ function impPanel(){
       <ul>
         <li><b>Cânticos:</b> ${esc(x.canticoInicial||'?')} · ${esc(x.canticoMeio||'?')} · ${esc(x.canticoFinal||'?')}</li>
         <li><b>Tesouros:</b> ${esc(x.tesouros||'—')}</li>
+        <li><b>Leitura da Bíblia:</b> ${esc(x.leituraTexto||'—')}</li>
         <li><b>Ministério:</b> ${x.ministerio.map((m,j)=>esc((4+j)+'. '+m.tema+' ('+m.min+')'+(m.tipo&&m.tipo!=='demo'?' · '+(TIPOS.find(t=>t[0]===m.tipo)||['',''])[1].toLowerCase():''))).join('; ')||'—'}</li>
         <li><b>Vida Cristã:</b> ${x.vida.map(m=>esc(m.tema+' ('+m.min+')')).join('; ')||'—'}</li>
       </ul>${x.avisos.length?`<div class="warnline">Confira: ${esc(x.avisos.join('; '))}.</div>`:''}</div></div>`}).join('')}
@@ -1312,7 +1341,7 @@ function impApply(){
   list.forEach(x=>{const tg=impTarget(x.data);const base=tg?clone(tg):newWeek(x.data);
     const keepM=base.ministerio||[],keepV=base.vida||[];
     const w=norm(Object.assign(base,{data:x.data,leituraSemanal:x.leituraSemanal,canticoInicial:x.canticoInicial,canticoMeio:x.canticoMeio,canticoFinal:x.canticoFinal}));
-    w.tesouros.tema=x.tesouros;
+    w.tesouros.tema=x.tesouros;if(x.leituraTexto)w.leitura=Object.assign({},w.leitura,{tema:x.leituraTexto});
     w.ministerio=x.ministerio.map((m,j)=>({tema:m.tema,min:m.min,tipo:m.tipo||'',pub:(keepM[j]||{}).pub||'',ajudante:(keepM[j]||{}).ajudante||''}));
     w.vida=x.vida.map((m,j)=>({tema:m.tema,min:m.min,pub:(keepV[j]||{}).pub||''}));
     if(tg&&tg.data!==x.data){delete weeks[tg.data];removeDoc('semanas',tg.data)}
@@ -1371,7 +1400,7 @@ function rSemanas(){
       <div class="sec tes"><h3><i></i>Tesouros da Palavra de Deus</h3>
         <div class="row r3"><label class="f">Tema do discurso<input type="text" data-f="tesouros.tema" value="${esc(w.tesouros.tema)}" placeholder="Tema da apostila"></label><div class="fixed">10 min</div><label class="f">Orador${S('tesouros.pub','tesouros',w.tesouros.pub)}</label></div>
         <div class="row r3"><div class="fixed">Encontre Joias Espirituais</div><div class="fixed">10 min</div><label class="f">Designado${S('joias.pub','joias',w.joias.pub)}</label></div>
-        <div class="row r3"><div class="fixed">Leitura da Bíblia</div><div class="fixed">4 min</div><label class="f">Estudante${S('leitura.pub','leitura',w.leitura.pub)}</label></div>
+        <div class="row r3"><div class="fixed">Leitura da Bíblia${w.leitura.tema?`<small class="ltema">${esc(w.leitura.tema)}</small>`:''}</div><div class="fixed">4 min</div><label class="f">Estudante${S('leitura.pub','leitura',w.leitura.pub)}</label></div>
       </div>
       <div class="sec min"><div class="sec-h"><h3><i></i>Faça Seu Melhor no Ministério</h3>
           <div class="drawbar"><span class="hint">${avail} irmã${avail===1?'':'s'} livre${avail===1?'':'s'} (${meses()} meses)</span><button class="btn small" data-a="draw">Sortear irmãs</button><button class="btn small ghost" data-a="redraw">Sortear de novo</button></div></div>
@@ -1515,16 +1544,16 @@ const PACTS={
 document.addEventListener('submit',e=>{if(e.target.id!=='pform')return;e.preventDefault();const d=readDraft();if(!d.nome){toast('Escreva o nome');return}
   const id=ui.pub||(d.nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)+'-'+Math.random().toString(36).slice(2,6));
   const was=!!ui.pub;pubs[id]=d;queueSave('publicadores',id,d);ui.pub=id;draft=null;rPubs();toast(was?'Alterações salvas':d.nome+' adicionado')});
-document.addEventListener('input',e=>{if(e.target.id==='pq'){ui.pubFilter=e.target.value;draft=readDraft();const p=e.target.selectionStart;rPubs();const el=$('#pq');el.focus();el.setSelectionRange(p,p)}});
+/* busca: espera a pessoa parar de digitar (fica leve em celulares simples) */
+document.addEventListener('input',e=>{if(e.target.id==='pq'){ui.pubFilter=e.target.value;clearTimeout(ui.pqT);ui.pqT=setTimeout(()=>{const el0=$('#pq');if(!el0)return;draft=readDraft();const p=el0.selectionStart;rPubs();const el=$('#pq');el.focus();el.setSelectionRange(p,p)},140)}});
 document.addEventListener('change',e=>{if(e.target.id==='pc'){ui.pubCat=e.target.value;draft=readDraft();rPubs()}});
 function fmtTel(t){const d=String(t).replace(/\D/g,'').replace(/^55(?=\d{10,11}$)/,'');if(d.length===11)return`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;if(d.length===10)return`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;return t}
 function waNumber(t){let d=String(t||'').replace(/\D/g,'').replace(/^0+/,'');if(!d)return'';if(d.length<=11)d='55'+d;return d}
 
 /* ================= Confirmações: quem confirmou, quem não pode e quem ainda não respondeu ================= */
 function confItens(dias){const hoje=iso(new Date()),ate=shiftDays(hoje,dias);const out=[];
-  Object.keys(pubs).forEach(pid=>{if(!pubs[pid]||pubs[pid].ativo===false)return;
-    myItems(pid,hoje).forEach(it=>{if(it.date>ate)return;const r=resp[respKey(it.col,it.id,it.field,pid)];
-      const ac=acessoDe(pid);out.push(Object.assign({},it,{pid,st:r&&r.status==='ok'?'ok':r&&r.status==='nao'?'nao':ac==='sem'?'sem':'pend',ac,em:r&&r.em}))})});
+  itensDe(hoje,null).forEach(it=>{const pid=it.pid;if(it.date>ate||!pubs[pid]||pubs[pid].ativo===false)return;const r=resp[respKey(it.col,it.id,it.field,pid)];
+    const ac=acessoDe(pid);out.push(Object.assign({},it,{pid,st:r&&r.status==='ok'?'ok':r&&r.status==='nao'?'nao':ac==='sem'?'sem':'pend',ac,em:r&&r.em}))});
   return out.sort((a,b)=>(a.date+(a.hora||'')+a.titulo).localeCompare(b.date+(b.hora||'')+b.titulo)||pname(a.pid).localeCompare(pname(b.pid),'pt'))}
 const CF_TXT={ok:'Confirmou',nao:'Não pode',pend:'Sem resposta',sem:'Sem acesso ao painel'};
 function confLembrete(it){const p=pubs[it.pid]||{};const n=waNumber(p.tel);if(!n)return'';const d=parse(it.date);
@@ -1662,7 +1691,7 @@ function layoutPages(sel,sub,kind,stage){
     if(body.scrollHeight>body.clientHeight+1&&body.children.length>1){el.remove();newPage();body.appendChild(el)}});
 }
 document.addEventListener('change',e=>{if(e.target.classList&&e.target.classList.contains('pw')){const P=printState();e.target.checked?P.set.add(e.target.value):P.set.delete(e.target.value);rPrint()}});
-document.addEventListener('input',e=>{if(e.target.id==='psub'){ui.printSub=e.target.value;const P=printState();layoutPages(P.sel,ui.printSub||P.autoSub,P.kind)}});
+document.addEventListener('input',e=>{if(e.target.id==='psub'){ui.printSub=e.target.value;clearTimeout(ui.psubT);ui.psubT=setTimeout(()=>{if(ui.tab!=='imprimir')return;const P=printState();layoutPages(P.sel,ui.printSub||P.autoSub,P.kind)},200)}});
 let rzT;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(ui.tab==='imprimir')rPrint()},200)});
 
 async function saveFile(filename,blob){
@@ -1826,7 +1855,8 @@ function waMsgs(){
   const by={};rl.forEach(r=>{(by[r.pub]=by[r.pub]||[]).push(r.txt)});
   const dt=parse(md);
   return Object.entries(by).map(([pid,list])=>{const p=pubs[pid]||{nome:'(removido)'};
-    let msg=(cfg.mensagem||DEF_MSG);if(K)msg=msg.replace(/Reunião Vida e Ministério Cristãos?/g,reu);
+    /* o nome da congregação no fim, depois do agradecimento, não vai mais (modelos antigos ainda o tinham) */
+    let msg=(cfg.mensagem||DEF_MSG).replace(/(Obrigad[oa]!?)\s*\n\s*\{congregacao\}\s*$/,'$1');if(K)msg=msg.replace(/Reunião Vida e Ministério Cristãos?/g,reu);
     msg=msg.replace(/\{nome\}/g,tc(p.nome.split(' ')[0])).replace(/\{nome_completo\}/g,tc(p.nome)).replace(/\{reuniao\}/g,reu)
       .replace(/\{data\}/g,br(md)).replace(/\{dia_semana\}/g,DIAS[dt.getDay()]).replace(/\{hora\}/g,K?(cfg.horaFds||''):cfg.hora)
       .replace(/\{designacoes\}/g,list.map(t=>'• '+t).join('\n')).replace(/\{congregacao\}/g,cfg.congregacao||'');
@@ -1955,7 +1985,7 @@ function rFds(){
   const list=`<div class="panel weeklist">
     <div class="monthnav"><button class="btn small ghost" data-a="fprev" aria-label="Mês anterior">‹</button><strong>${monthLabel(ui.fdsMonth)}</strong><button class="btn small ghost" data-a="fnext" aria-label="Próximo mês">›</button></div>
     ${inM.length?'<div class="wklist">'+inM.map(f=>wkItem('fpick',f.data,f.data,filledFds(f),fdsSlots(f),f.data===ui.fdsSel)).join('')+'</div>':`<div class="empty">${mode==='db'&&!loaded.f?'Carregando…':'Nenhuma reunião neste mês ainda.'}</div>`}
-    <div class="wkacts"><button class="btn" data-a="faddmonth">Criar datas do mês</button><button class="btn" data-a="faddone">+ Nova data</button></div>
+    <div class="wkacts"><button class="btn" data-a="faddmonth">Criar datas do mês</button><button class="btn" data-a="faddone">+ Nova data</button><button class="btn" data-a="senopen">Importar A Sentinela</button></div>
   </div>`;
   const f=ui.fdsSel&&fds[ui.fdsSel];let ed;
   if(!f){ed=`<div class="panel editor"><h2 style="margin:0;font-size:18px">Programação do fim de semana</h2><p class="muted" style="margin:0">Use <b>Criar datas do mês</b> para criar as reuniões de ${+cfg.diaFds===0?'domingo':DIAS[cfg.diaFds]} do mês. Em cada uma, escolha o discurso público na lista, o orador, o artigo de A Sentinela e quem dirige e lê. O dia e o horário ficam em Ajustes.</p></div>`}
@@ -2003,6 +2033,7 @@ function rFds(){
         <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn small" href="#whatsapp" data-a="fgowa">Enviar pelo WhatsApp</a><a class="btn small primary" href="#imprimir" data-a="fgoprint">Imprimir / PDF</a></div>
       </div>
     </div>`}
+  if(ui.senImp)ed=senPanel();
   $('#v-fimdesemana').innerHTML=misBanner('fs')+`<div class="split">${list}${ed}</div>`;
 }
 function weekFds(f){
@@ -2023,7 +2054,7 @@ function weekFds(f){
 Object.assign(PACTS,{
   fprev:()=>{ui.fdsMonth=shiftMonth(ui.fdsMonth,-1);ui.fdsSel=null;rFds()},
   fnext:()=>{ui.fdsMonth=shiftMonth(ui.fdsMonth,1);ui.fdsSel=null;rFds()},
-  fpick:b=>{ui.fdsSel=b.dataset.id;ui.delAsk=null;rFds()},
+  fpick:b=>{ui.fdsSel=b.dataset.id;ui.delAsk=null;ui.senImp=false;senImp=null;rFds()},
   faddone:()=>{const d=nextFdsDate();saveFds(newFds(d));ui.fdsSel=d;ui.fdsMonth=d.slice(0,7);rFds();toast('Reunião de '+br(d)+' criada')},
   faddmonth:()=>{const[y,m]=ui.fdsMonth.split('-').map(Number);const x=new Date(y,m-1,1);while(x.getDay()!==+cfg.diaFds)x.setDate(x.getDate()+1);let n=0,first=null;
     while(x.getMonth()===m-1){const d=iso(x);if(!fds[d]){saveFds(newFds(d));n++;first=first||d}x.setDate(x.getDate()+7)}
@@ -2110,8 +2141,8 @@ function rLimpeza(){
       ${gs.length?'':`<div class="drawres short">Cadastre os grupos de limpeza em "Grupos" primeiro.</div>`}
       <div class="tablewrap"><table class="pubs ltab"><thead><tr><th>Data</th><th>Dia</th><th>Tarefa</th><th>Grupo</th><th>Designados</th></tr></thead><tbody>
       ${slots.map(s=>{const a=lmp[s.id],g=a&&lgr[a.grupo];
-        if(s.sem)return`<tr><td style="font-variant-numeric:tabular-nums">${br(s.data).slice(0,5)}</td><td>${DIAS3[parse(s.data).getDay()]}</td><td colspan="3"><span class="evtag">${EVTAG[s.ev]}</span> <span class="muted">Sem reunião nesta semana</span></td></tr>`;
-        return`<tr style="cursor:default"><td style="font-variant-numeric:tabular-nums">${br(s.data).slice(0,5)}</td><td>${DIAS3[parse(s.data).getDay()]}</td><td>${LTIPO[s.tipo]}</td>
+        if(s.sem)return`<tr data-dia="${s.data}"><td style="font-variant-numeric:tabular-nums">${br(s.data).slice(0,5)}</td><td>${DIAS3[parse(s.data).getDay()]}</td><td colspan="3"><span class="evtag">${EVTAG[s.ev]}</span> <span class="muted">Sem reunião nesta semana</span></td></tr>`;
+        return`<tr data-dia="${s.data}" style="cursor:default"><td style="font-variant-numeric:tabular-nums">${br(s.data).slice(0,5)}</td><td>${DIAS3[parse(s.data).getDay()]}</td><td>${LTIPO[s.tipo]}</td>
           <td><div style="display:flex;gap:6px;align-items:center"><span class="lpill" style="background:${g?lcor(g.letra):'transparent'}">${g?g.letra:''}</span><select class="lsel" data-id="${esc(s.id)}" data-date="${esc(s.data)}" data-tipo="${esc(s.tipo)}" aria-label="Grupo de ${br(s.data)}"><option value="">—</option>${gs.map(x=>`<option value="${x.letra}" ${a&&a.grupo===x.letra?'selected':''}>${x.letra} · ${esc(x.nome)}</option>`).join('')}</select></div></td>
           <td class="muted" style="font-size:13px;min-width:200px">${g?esc(groupMembers(g).join(', ')):''}</td></tr>`}).join('')||'<tr><td colspan="5" class="muted">Nenhuma data neste mês.</td></tr>'}
       </tbody></table></div>
@@ -2198,7 +2229,7 @@ PV.limp=(ym,x,y,W)=>{const y0=y,d=PV.doc,slots=limpSlots(ym);
 function limpMsgs(ym){const by={};limpSlots(ym).forEach(s=>{const a=lmp[s.id];if(!s.sem&&a&&a.grupo&&lgr[a.grupo])(by[a.grupo]=by[a.grupo]||[]).push(s)});
   return Object.keys(by).sort().map(L=>{const g=lgr[L],ss=by[L],p=pubs[g.dirigente]||null;
     const lista=ss.map(s=>'• '+cap(DIAS[parse(s.data).getDay()])+', '+br(s.data).slice(0,5)+' — '+LTIPO[s.tipo]).join('\n');
-    const msgL=`Olá, ${p?tc(p.nome.split(' ')[0]):'irmão'}!\n\nO ${g.nome} (Grupo ${L}) está designado para a limpeza do Salão do Reino em ${monthLabel(ym)}:\n\n${lista}\n\nPor favor, avise os irmãos do grupo. Obrigado!\n${cfg.congregacao||''}`;
+    const msgL=`Olá, ${p?tc(p.nome.split(' ')[0]):'irmão'}!\n\nO ${g.nome} (Grupo ${L}) está designado para a limpeza do Salão do Reino em ${monthLabel(ym)}:\n\n${lista}\n\nPor favor, avise os irmãos do grupo. Obrigado!`;
     const msgG=`*Limpeza do Salão do Reino · ${g.nome} (Grupo ${L})*\n${cap(monthLabel(ym))}\n\n${lista}\n\nIrmãos do grupo: ${groupMembers(g).join(', ')}.\nObrigado pela ajuda!`;
     return{L,g,p,msgL,msgG}})}
 function rWaLimp(seg){
@@ -2408,9 +2439,9 @@ function rAV(){
     return`<select class="avsel" data-id="${esc(s.id)}" data-f="${field}" data-i="${idx==null?'':idx}" aria-label="${field} ${br(s.data)}"><option value="">—</option>${ids.map(id=>`<option value="${id}" ${id===val?'selected':''}>${esc(tc(pname(id)))}${isElder(id)?' · ancião':''} · ${avSince(id,s.data)}</option>`).join('')}</select>`};
   const B=bros(),O=avOps();
   const cards=slots.map(s=>{const lab=`<div class="avh"><b>${br(s.data).slice(0,5)}</b><span>${cap(DIAS[parse(s.data).getDay()])} · ${s.kind==='meio'?'Meio de semana':'Fim de semana'}</span>${s.ev&&!s.sem?`<span class="evtag">${EVTAG[s.ev]}</span>`:''}</div>`;
-    if(s.sem)return`<div class="panel avcard">${lab}<p class="muted" style="margin:0">Sem reunião nesta semana (${esc(EVENTOS[s.ev])}).</p></div>`;
+    if(s.sem)return`<div class="panel avcard" data-dia="${s.data}">${lab}<p class="muted" style="margin:0">Sem reunião nesta semana (${esc(EVENTOS[s.ev])}).</p></div>`;
     const d=avNorm(avd[s.id]||avBlank(s.data));const w=avWarn(s,d);
-    return`<div class="panel avcard">${lab}
+    return`<div class="panel avcard" data-dia="${s.data}">${lab}
       <div class="avgrid"><label class="f">Áudio/Vídeo${sel(s,'av',null,d.av,O)}</label><label class="f">Palco${sel(s,'palco',null,d.palco,B)}</label>
       <label class="f">Microfone${sel(s,'mic',0,d.mic[0],B)}${sel(s,'mic',1,d.mic[1],B)}</label>
       <label class="f">Indicadores${sel(s,'ind',0,d.ind[0],B)}${sel(s,'ind',1,d.ind[1],B)}${sel(s,'ind',2,d.ind[2],B)}</label></div>
@@ -2456,7 +2487,7 @@ function avMsgs(ym){const by={};avSlots(ym).filter(s=>!s.sem).forEach(s=>{const 
     const add=(id,f)=>{if(id)(by[id]=by[id]||[]).push('• '+cap(DIAS[parse(s.data).getDay()])+', '+br(s.data).slice(0,5)+' — '+f)};
     add(d.av,'Áudio e vídeo');add(d.palco,'Palco');d.mic.forEach(m=>add(m,'Microfone'));d.ind.forEach(m=>add(m,'Indicador'))});
   return Object.entries(by).map(([pid,list])=>{const p=pubs[pid]||{nome:'(removido)'};
-    const msg=`Olá, ${tc(p.nome.split(' ')[0])}!\n\nSuas designações de apoio às reuniões em ${monthLabel(ym)}:\n\n${list.join('\n')}\n\nSe não puder em alguma data, avise com antecedência, por favor. Obrigado!\n${cfg.congregacao||''}`;
+    const msg=`Olá, ${tc(p.nome.split(' ')[0])}!\n\nSuas designações de apoio às reuniões em ${monthLabel(ym)}:\n\n${list.join('\n')}\n\nSe não puder em alguma data, avise com antecedência, por favor. Obrigado!`;
     return{pid,p,msg}}).sort((a,b)=>a.p.nome.localeCompare(b.p.nome,'pt'))}
 function rWaAV(seg){const ym=ui.waAV||(ui.waAV=iso(new Date()).slice(0,7));const ms=avMsgs(ym);const env=(cfg.avEnviados||{})[ym]||{};const sent=ms.filter(m=>env[m.pid]).length;
   $('#v-whatsapp').innerHTML=`<div class="wa-top">${seg}<label class="f">Mês<select id="wawav">${avMonths().map(m=>`<option value="${m}" ${m===ym?'selected':''}>${cap(monthLabel(m))}</option>`).join('')}</select></label>
@@ -2566,9 +2597,9 @@ function rCampo(){
       <div class="monthnav" style="margin:0;gap:10px"><button class="btn small ghost" data-a="cprev" aria-label="Mês anterior">‹</button><strong>${monthLabel(ui.campoMonth)}</strong><button class="btn small ghost" data-a="cnext" aria-label="Próximo mês">›</button></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">${miss.length?`<button class="btn small primary" data-a="cgen">Gerar ${miss.length} semana${miss.length>1?'s':''} pelos modelos</button>`:''}<a class="btn small" href="#imprimir" data-a="cgoprint">Imprimir / PDF</a><a class="btn small" href="#whatsapp" data-a="cgowa">Avisar pelo WhatsApp</a></div></div>
       ${ws.map(mon=>{const c=cmp[mon];const tp=evTipo(mon);const tag=tp?`<span class="evtag">${EVTAG[tp]}</span>`:'';
-        if(!c)return`<div class="panel cweek empty"><div class="cwh"><h3>${esc(campoLabel(mon))} ${tag}</h3></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="muted" style="font-size:14px">Semana ainda não montada.</span><button class="btn small primary" data-a="cnew" data-w="${mon}">Criar pelo modelo ${campoAB(mon)}${campoUltima(mon)?' (domingo: '+esc(nextIsolado(mon))+')':''}</button>${cmp[shiftDays(mon,-7)]?`<button class="btn small" data-a="ccopy" data-w="${mon}">Copiar a semana anterior</button>`:''}</div></div>`;
+        if(!c)return`<div class="panel cweek empty" data-dia="${mon}" data-ate="${shiftDays(mon,6)}"><div class="cwh"><h3>${esc(campoLabel(mon))} ${tag}</h3></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="muted" style="font-size:14px">Semana ainda não montada.</span><button class="btn small primary" data-a="cnew" data-w="${mon}">Criar pelo modelo ${campoAB(mon)}${campoUltima(mon)?' (domingo: '+esc(nextIsolado(mon))+')':''}</button>${cmp[shiftDays(mon,-7)]?`<button class="btn small" data-a="ccopy" data-w="${mon}">Copiar a semana anterior</button>`:''}</div></div>`;
         const w=campoWarn(c);
-        return`<div class="panel cweek"><div class="cwh"><h3>${esc(campoLabel(mon))} <span class="abtag" title="Modelo usado">${esc(c.modelo||campoAB(mon))}</span> ${isoSunday(c)?'<span class="isotag">Território isolado</span>':''} ${tag}</h3>
+        return`<div class="panel cweek" data-dia="${mon}" data-ate="${shiftDays(mon,6)}"><div class="cwh"><h3>${esc(campoLabel(mon))} <span class="abtag" title="Modelo usado">${esc(c.modelo||campoAB(mon))}</span> ${isoSunday(c)?'<span class="isotag">Território isolado</span>':''} ${tag}</h3>
           <div style="display:flex;gap:6px;flex-wrap:wrap">${ui.delAsk==='cdel'+mon?`<span class="confirm">Apagar a semana? <button class="btn small danger" data-a="cdelok" data-w="${mon}">Apagar</button><button class="btn small" data-a="cno">Cancelar</button></span>`:ui.delAsk&&ui.delAsk.startsWith('cap'+mon)?`<span class="confirm">Substituir tudo pelo modelo ${ui.delAsk.slice(-1)}? <button class="btn small danger" data-a="capok" data-w="${mon}" data-k="${ui.delAsk.slice(-1)}">Substituir</button><button class="btn small" data-a="cno">Cancelar</button></span>`:`<button class="btn small ghost" data-a="ciso" data-w="${mon}">${isoSunday(c)?'Domingo normal':'Domingo em território isolado'}</button><button class="btn small ghost" data-a="capask" data-w="${mon}" data-k="${campoAB(mon)==='A'?'B':'A'}">Trocar para o modelo ${campoAB(mon)==='A'?'B':'A'}</button><button class="btn small ghost danger" data-a="cdel" data-w="${mon}">Apagar</button>`}</div></div>
           ${campoRowsEd(mon,c.saidas||[])}
           <label class="f">Observação na folha (opcional)<input type="text" class="cnota" data-w="${mon}" value="${esc(c.nota||'')}" placeholder="Ex.: domingo, saída única no território isolado"></label>
@@ -2633,7 +2664,7 @@ PV.campo=(mon,x,y,W)=>{const y0=y,d=PV.doc,c=cmp[mon];if(!c)return 0;
 function campoMsgs(mon){const c=cmp[mon];if(!c)return[];const by={};
   sortSaidas(c.saidas||[]).forEach(r=>{if(!r.dir)return;(by[r.dir]=by[r.dir]||[]).push('• '+DIAS_C[r.dia]+', '+br(cDate(mon,r.dia)).slice(0,5)+' às '+r.hora+' — '+r.mod+(r.terr?' ('+r.terr+')':''))});
   return Object.entries(by).map(([pid,list])=>{const p=pubs[pid]||{nome:'(removido)'};
-    const msg=`Olá, ${tc(p.nome.split(' ')[0])}!\n\nVocê vai dirigir a saída de campo na semana de ${campoLabel(mon)}:\n\n${list.join('\n')}\n\nSe não puder em alguma, avise com antecedência, por favor. Obrigado!\n${cfg.congregacao||''}`;
+    const msg=`Olá, ${tc(p.nome.split(' ')[0])}!\n\nVocê vai dirigir a saída de campo na semana de ${campoLabel(mon)}:\n\n${list.join('\n')}\n\nSe não puder em alguma, avise com antecedência, por favor. Obrigado!`;
     return{pid,p,msg}}).sort((a,b)=>a.p.nome.localeCompare(b.p.nome,'pt'))}
 function campoGroupMsg(mon){const c=cmp[mon];if(!c)return'';
   return`*Saídas de campo — ${campoLabel(mon)}*\n\n`+campoGroups(c).map(g=>`*${DIAS_C[g.dia]} (${br(cDate(mon,g.dia)).slice(0,5)})*\n`+g.rows.map(r=>`${r.hora} · ${r.mod}${r.terr?' · '+r.terr:''}${r.dir?' · '+dirShort(r.dir):''}`).join('\n')).join('\n\n')+(c.nota?'\n\n'+c.nota:'')}
@@ -2702,17 +2733,19 @@ let resp={};               // respostas (confirmações) por id do documento
 let nomesRemote=null;      // quadro/nomes como está no banco
 const respKey=(col,id,field,pid)=>[col,id,field,pid].join('~').replace(/\//g,'_');
 const horaDe=date=>parse(date).getDay()===+cfg.diaFds?(cfg.horaFds||''):(cfg.hora||'');
-function myItems(pid,from){const out=[];const add=o=>out.push(o);
-  sortedWeeks().forEach(w=>{const d=meetDate(w);if(d<from)return;roles(w).forEach(r=>{if(r.pub===pid)add({k:'meio',col:'semanas',id:w.data,field:r.field,date:d,hora:cfg.hora,titulo:'Reunião do meio de semana',txt:r.txt})})});
-  sortedFds().forEach(f=>{if(f.data<from)return;rolesFds(f).forEach(r=>{if(r.pub===pid)add({k:'fds',col:'fimdesemana',id:f.data,field:r.field,date:f.data,hora:cfg.horaFds||'',titulo:'Reunião do fim de semana',txt:r.txt})})});
-  Object.values(avd).forEach(d0=>{const d=avNorm(d0);if(!d.data||d.data<from)return;const A=(field,txt)=>add({k:'av',col:'av',id:d.data,field,date:d.data,hora:horaDe(d.data),titulo:'Áudio/vídeo e indicadores',txt});
-    if(d.av===pid)A('av','Áudio e vídeo');if(d.palco===pid)A('palco','Palco');d.mic.forEach((x,i)=>{if(x===pid)A('mic.'+i,'Microfone volante')});d.ind.forEach((x,i)=>{if(x===pid)A('ind.'+i,'Indicador')})});
+/* designações a partir de "from": de um publicador (so=id) ou de todos (so=null, usado na agenda dos avisos) — uma só passada pelos dados */
+function itensDe(from,so){const out=[];const add=(p,o)=>{if(p&&(so==null||p===so))out.push(Object.assign({pid:p},o))};
+  sortedWeeks().forEach(w=>{const d=meetDate(w);if(d<from)return;roles(w).forEach(r=>add(r.pub,{k:'meio',col:'semanas',id:w.data,field:r.field,date:d,hora:cfg.hora,titulo:'Reunião do meio de semana',txt:r.txt}))});
+  sortedFds().forEach(f=>{if(f.data<from)return;rolesFds(f).forEach(r=>add(r.pub,{k:'fds',col:'fimdesemana',id:f.data,field:r.field,date:f.data,hora:cfg.horaFds||'',titulo:'Reunião do fim de semana',txt:r.txt}))});
+  Object.values(avd).forEach(d0=>{const d=avNorm(d0);if(!d.data||d.data<from)return;const A=(p,field,txt)=>add(p,{k:'av',col:'av',id:d.data,field,date:d.data,hora:horaDe(d.data),titulo:'Áudio/vídeo e indicadores',txt});
+    A(d.av,'av','Áudio e vídeo');A(d.palco,'palco','Palco');d.mic.forEach((x,i)=>A(x,'mic.'+i,'Microfone volante'));d.ind.forEach((x,i)=>A(x,'ind.'+i,'Indicador'))});
   Object.entries(lmp).forEach(([id,s])=>{if(!s||!s.data||s.data<from||!s.grupo)return;const g=lgr[s.grupo];if(!g)return;
-    const dir=g.dirigente===pid;if(!dir&&!(g.membros||[]).some(m=>m.id===pid))return;
-    add({k:'limp',col:'limpeza',id,field:'grupo',date:s.data,hora:s.tipo==='reuniao'?'após a reunião':'',titulo:'Limpeza do Salão do Reino',txt:(s.tipo==='semanal'?'Limpeza semanal':'Limpeza após a reunião')+' · Grupo '+(g.letra||s.grupo)+(dir?' (você dirige o grupo)':'')})});
-  Object.values(cmp).forEach(c=>(c.saidas||[]).forEach(r=>{if(r.dir!==pid)return;const date=cDate(c.semana,r.dia);if(date<from)return;
-    add({k:'campo',col:'campo',id:c.semana,field:'saida.'+r.dia+'.'+String(r.hora||'').replace(':','h'),date,hora:r.hora,titulo:'Saída de campo',txt:'Dirigir: '+r.mod+(r.terr?' · '+r.terr:'')})}));
+    const quem=new Set([g.dirigente,...(g.membros||[]).map(m=>m.id)]);
+    quem.forEach(p=>{const dir=p===g.dirigente;add(p,{k:'limp',col:'limpeza',id,field:'grupo',date:s.data,hora:s.tipo==='reuniao'?'após a reunião':'',titulo:'Limpeza do Salão do Reino',txt:(s.tipo==='semanal'?'Limpeza semanal':'Limpeza após a reunião')+' · Grupo '+(g.letra||s.grupo)+(dir?' (você dirige o grupo)':'')})})});
+  Object.values(cmp).forEach(c=>(c.saidas||[]).forEach(r=>{const date=cDate(c.semana,r.dia);if(date<from)return;
+    add(r.dir,{k:'campo',col:'campo',id:c.semana,field:'saida.'+r.dia+'.'+String(r.hora||'').replace(':','h'),date,hora:r.hora,titulo:'Saída de campo',txt:'Dirigir: '+r.mod+(r.terr?' · '+r.terr:'')})}));
   return out.sort((a,b)=>(a.date+(a.hora||'')).localeCompare(b.date+(b.hora||'')))}
+function myItems(pid,from){return pid?itensDe(from,pid):[]}
 const KCOR={meio:'var(--tes)',fds:'var(--pub)',av:'var(--sent)',limp:'var(--min)',campo:'var(--accent)'};
 function icsFor(it){const p2=n=>String(n).padStart(2,'0');const d=it.date.replace(/-/g,'');const m=/^(\d{1,2}):(\d{2})$/.exec(it.hora||'');
   const st=m?d+'T'+p2(m[1])+m[2]+'00':null;let en=null;if(m){const t=new Date(parse(it.date));t.setHours(+m[1]+1,+m[2]);en=iso(t).replace(/-/g,'')+'T'+p2(t.getHours())+p2(t.getMinutes())+'00'}
@@ -2940,7 +2973,10 @@ function fonteApply(){document.documentElement.style.setProperty('--pz',String(f
 fonteApply();
 let instalarEvt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instalarEvt=e;instalarBox()});
-window.addEventListener('appinstalled',()=>{instalarEvt=null;try{localStorage.setItem('vmc-instalado','1')}catch(e){}ui.instForcar=false;instalarBox();toast('Aplicativo instalado')});
+window.addEventListener('appinstalled',()=>{instalarEvt=null;try{localStorage.setItem('vmc-instalado','1')}catch(e){}ui.instForcar=false;ui.instalando=0;instalarBox();toast('Aplicativo instalado. O ícone Designar está na tela inicial.')});
+/* já instalado neste aparelho? (Chrome no Android sabe dizer) — evita oferecer de novo e criar cópias */
+let jaInstalado=false;try{if(navigator.getInstalledRelatedApps)navigator.getInstalledRelatedApps().then(l=>{if(l&&l.length){jaInstalado=true;instalarBox()}}).catch(()=>{})}catch(e){}
+const instaladoAqui=()=>{if(jaInstalado)return true;try{return localStorage.getItem('vmc-instalado')==='1'}catch(e){return false}};
 const ehIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const ehApp=()=>window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 /* navegador "embutido" (aberto de dentro do WhatsApp, Instagram, Facebook...): não deixa instalar */
@@ -2950,10 +2986,14 @@ const ehSamsung=()=>/SamsungBrowser/i.test(navigator.userAgent);
 function instalarTexto(){
   if(ehIOS())return['Coloque na tela inicial','No <b>Safari</b>, toque no botão <b>Compartilhar</b> (o quadrado com a seta para cima) e depois em <b>Adicionar à Tela de Início</b>. Na primeira vez que abrir pelo ícone, entre de novo com a sua conta.'];
   if(ehEmbutido())return['Abra no navegador para instalar','Você abriu o link de dentro de outro aplicativo (como o WhatsApp), que não permite instalar. Toque nos <b>três pontinhos ⋮</b> no alto e em <b>Abrir no Chrome</b> (ou <b>Abrir no navegador</b>). Lá aparece a opção de instalar.'];
-  if(ehAndroid()&&ehSamsung())return['Instale no celular','No <b>Samsung Internet</b>, toque no menu <b>≡</b> (embaixo, à direita), depois em <b>Adicionar página a</b> › <b>Tela inicial</b>. Se aparecer um ícone de download na barra de endereço, também pode tocar nele.'];
-  if(ehAndroid())return['Instale no celular','No <b>Chrome</b>, toque nos <b>três pontinhos ⋮</b> (no alto, à direita) e em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b> › <b>Instalar</b>.'];
+  if(ehAndroid()&&ehSamsung())return['Instale no celular','No <b>Samsung Internet</b>, toque no menu <b>≡</b> (embaixo, à direita), depois em <b>Adicionar página a</b> › <b>Tela inicial</b>. Se aparecer um ícone de download na barra de endereço, também pode tocar nele. Toque <b>uma vez só</b>: o ícone pode levar até 2 minutos para aparecer.'];
+  if(ehAndroid())return['Instale no celular','No <b>Chrome</b>, toque nos <b>três pontinhos ⋮</b> (no alto, à direita) e em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b> › <b>Instalar</b>. Toque <b>uma vez só</b>: o ícone pode levar até 2 minutos para aparecer.'];
   return['Instale no computador','No <b>Chrome</b> ou no <b>Edge</b>, clique no ícone de instalar no fim da barra de endereço (um monitor com uma seta) ou, no menu, em <b>Instalar Designar</b>.']}
-function instalarCard(forcar){if(!window.FBX||ehApp())return'';let ok=false;try{ok=localStorage.getItem('vmc-instalar-fechado')==='1'}catch(e){}if(ok&&!forcar)return'';
+function instalarCard(forcar){if(!window.FBX||ehApp())return'';let ok=false;try{ok=localStorage.getItem('vmc-instalar-fechado')==='1'}catch(e){}
+  /* instalação em andamento: o Android leva até uns 2 minutos para criar o ícone; outro toque cria uma cópia */
+  if(ui.instalando&&Date.now()-ui.instalando<180000)return`<div class="instcard"><div><b>Instalando…</b><span>O celular pode levar <b>até 2 minutos</b> para colocar o ícone <b>Designar</b> na tela inicial. Não precisa tocar de novo: cada toque cria mais uma cópia.</span></div><div class="instacts"><button class="btn small ghost" data-a="instfechar">Entendi</button></div></div>`;
+  if(instaladoAqui()){if(!forcar)return'';return`<div class="instcard"><div><b>Já está instalado neste aparelho</b><span>Procure o ícone <b>Designar</b> na tela inicial ou na gaveta de aplicativos. Se houver mais de um, segure o ícone que sobrar e toque em <b>Desinstalar</b> (ou <b>Remover</b>); os dados não se perdem.</span></div><div class="instacts"><button class="btn small ghost" data-a="instfechar">Entendi</button></div></div>`}
+  if(ok&&!forcar)return'';
   if(instalarEvt)return`<div class="instcard"><div><b>Instale como aplicativo</b><span>Ele fica na tela inicial, com ícone próprio, e abre direto, como um aplicativo.</span></div><div class="instacts"><button class="btn small primary" data-a="instalar">Instalar</button><button class="btn small ghost" data-a="instfechar">Agora não</button></div></div>`;
   const [t,d]=instalarTexto();
   return`<div class="instcard"><div><b>${t}</b><span>${d}</span></div><div class="instacts"><button class="btn small ghost" data-a="instfechar">Entendi</button></div></div>`}
@@ -2961,7 +3001,8 @@ function instalarCard(forcar){if(!window.FBX||ehApp())return'';let ok=false;try{
 function instalarBox(){const b=$('#instBox');if(!b)return;const h=window.FBX&&window.FBX.email?instalarCard(ui.instForcar):'';b.innerHTML=h;b.hidden=!h;if(typeof avisoBox==='function')avisoBox()}
 Object.assign(PACTS,{
   fonte:b=>{try{localStorage.setItem('vmc-fonte',b.dataset.v)}catch(e){}fonteApply();rPainel()},
-  instalar:async()=>{if(!instalarEvt)return;instalarEvt.prompt();try{await instalarEvt.userChoice}catch(e){}instalarEvt=null;instalarBox()},
+  instalar:async b=>{if(!instalarEvt||ui.instalando)return;if(b){b.disabled=true;b.textContent='Aguarde…'}const ev=instalarEvt;instalarEvt=null;ev.prompt();let r=null;try{r=await ev.userChoice}catch(e){}
+    if(r&&r.outcome==='accepted'){ui.instalando=Date.now();try{localStorage.setItem('vmc-instalado','1')}catch(e){}}instalarBox()},
   instmenu:()=>{const m=$('#contaMenu');if(m)m.hidden=true;ui.instForcar=true;instalarBox();window.scrollTo({top:0,behavior:'smooth'})},
   instfechar:()=>{try{localStorage.setItem('vmc-instalar-fechado','1')}catch(e){}ui.instForcar=false;instalarBox()}});
 
@@ -3194,6 +3235,11 @@ async function diagnostico(){const out=[];const add=(ok,t,d)=>out.push({ok,t,d})
   try{await loadScript(XLSX_URL);add(!!window.XLSX,'Planilhas (Excel)','Leitor de planilhas funcionando.')}catch(e){add(false,'Planilhas (Excel)','O leitor de planilhas não carregou.')}
   const sw='serviceWorker' in navigator&&location.protocol==='https:';let swOk=false;if(sw){try{swOk=!!(await navigator.serviceWorker.getRegistration())}catch(e){}}
   add(swOk||!sw,'Aplicativo e uso sem internet',swOk?'Instalável e com cópia no aparelho.':sw?'Ainda não ativado neste aparelho. Recarregue a página uma vez.':'Disponível só no endereço https do site.');
+  /* avisos no celular */
+  if(typeof VAPID==='undefined'||!VAPID)add(false,'Avisos no celular','Desligados: falta a chave pública "Web Push" no config.js (Firebase › Configurações › Cloud Messaging).');
+  else{let n=null,ag=null;try{n=(await fdb().collection('avisos').get()).size}catch(e){}try{const d=await fdb().doc('quadro/agenda').get();ag=d.exists?Object.keys(d.data().itens||{}).length:0}catch(e){}
+    const st=avisoEstado();const aqui={ativo:'ativados neste aparelho',desligado:'ainda não ativados neste aparelho (menu da conta › Avisos no celular)',negado:'bloqueados pelo navegador neste aparelho',ios:'no iPhone, só com o aplicativo instalado',sem:'este navegador não recebe avisos'}[st];
+    add(n!==null&&ag>0,'Avisos no celular',`${n===null?'Não consegui contar os aparelhos':n+' aparelho'+(n===1?'':'s')+' com avisos ativados'} · agenda com ${ag||0} publicadores · ${aqui}. O envio é feito pelo GitHub (aba Actions › Avisos das designações), que precisa do segredo FIREBASE_SERVICE_ACCOUNT.`)}
   return out}
 function drawDiag(){const box=$('#diagBox');if(!box)return;const F=window.FBX;if(!F||F.papel!=='admin'||!F.ping){box.innerHTML='';return}
   const r=ui.diag;box.innerHTML=`<div class="accbox"><h3 style="margin:0 0 4px;font-size:16px">Conferir o site</h3><p class="hint" style="margin:0 0 10px">Use depois de cada publicação no GitHub: confere se todos os arquivos estão lá, se a versão é a mais nova e se banco, PDF e planilhas funcionam neste aparelho.</p>
@@ -3315,7 +3361,7 @@ Object.assign(PACTS,{
 /* ===== Agenda para os avisos: um resumo das designações de cada publicador, do mês atual em diante ===== */
 let agendaRemote=null;
 function agendaMapa(){const from=iso(new Date()).slice(0,7)+'-01';const m={};const L=s=>String(s==null?'':s).replace(/\|/g,'/').replace(/\s+/g,' ').trim();
-  Object.keys(pubs).forEach(pid=>{const its=myItems(pid,from).slice(0,60);if(its.length)m[pid]=its.map(it=>[it.date,L(it.hora),L(it.titulo),L(String(it.txt).split('\n')[0])].join('|'))});return m}
+  itensDe(from,null).forEach(it=>{if(!pubs[it.pid])return;const l=m[it.pid]=m[it.pid]||[];if(l.length<60)l.push([it.date,L(it.hora),L(it.titulo),L(String(it.txt).split('\n')[0])].join('|'))});return m}
 function syncAgenda(){const F=window.FBX;if(!F||!VAPID||!['admin','editor'].includes(F.papel)||agendaRemote===null||!(loaded.p&&loaded.w))return;
   clearTimeout(syncAgenda.t);
   /* espera os dados assentarem (todas as coleções chegarem) e grava no máximo uma vez a cada 30 s */
@@ -3325,6 +3371,88 @@ function syncAgenda(){const F=window.FBX;if(!F||!VAPID||!['admin','editor'].incl
     syncAgenda.ultima=Date.now();const ant=agendaRemote;agendaRemote=map;store.set('quadro','agenda',{itens:map}).catch(()=>{agendaRemote=ant})},espera)}
 function agendaInit(){const F=window.FBX;if(!F||!VAPID||!['admin','editor'].includes(F.papel)||agendaInit.ok)return;agendaInit.ok=true;
   fdb().doc('quadro/agenda').onSnapshot(s=>{if(s.metadata.hasPendingWrites)return;agendaRemote=(s.exists&&s.data().itens)||{};syncAgenda()},()=>{})}
+
+/* ================= Importar A Sentinela (edição de estudo) ================= */
+/* Lê o PDF ou o RTF da revista de estudo e preenche, em cada reunião do fim de semana,
+   o título do artigo e os cânticos (o do início do estudo e o final). Os nomes não mudam. */
+const SEN={};
+SEN.MESES=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+SEN.mi=s=>SEN.MESES.indexOf(String(s||'').toUpperCase().replace('MARCO','MARÇO'));
+SEN.limpa=s=>String(s||'').replace(/\s+/g,' ').replace(/\s+([,.;:!?”’])/g,'$1').replace(/([“‘])\s+/g,'$1')
+  /* "l ínguas": letra solta antes de uma vogal acentuada, sobra de PDFs */
+  .replace(/(^|\s)(\p{Ll}) ([áéíóúâêôãõ]\p{Ll}+)/gu,'$1$2$3').trim();
+SEN.parse=function(text,opts){opts=opts||{};const dia=opts.dia??0;
+  const t=String(text).replace(/[\x00-\x08\x0b-\x1f\x7f]+/g,'\n___\n').replace(/\u00a0/g,' ').replace(/[ \t]+/g,' ').replace(/ ?\n ?/g,'\n');
+  const M='(JANEIRO|FEVEREIRO|MARÇO|MARCO|ABRIL|MAIO|JUNHO|JULHO|AGOSTO|SETEMBRO|OUTUBRO|NOVEMBRO|DEZEMBRO)';
+  /* cabeçalho de cada artigo: "2-8 DE NOVEMBRO DE 2026" ou "30 DE NOVEMBRO–6 DE DEZEMBRO DE 2026" (só uma semana) */
+  const rh=new RegExp('(\\d{1,2})\\s*(?:DE\\s+'+M+'\\s*)?[-–]\\s*(\\d{1,2})\\s+DE\\s+'+M+'\\s+DE\\s+(20\\d\\s?\\d)','g');
+  const heads=[];let m;
+  while((m=rh.exec(t))){const ano=+m[5].replace(/\s/g,''),m2=SEN.mi(m[4]),m1=m[2]?SEN.mi(m[2]):m2;const d1=+m[1],d2=+m[3];
+    const ini=new Date(m1>m2?ano-1:ano,m1,d1),fim=new Date(ano,m2,d2);
+    if(Math.round((fim-ini)/864e5)!==6||ini.getDay()!==1)continue;
+    const seg=iso(ini);if(heads.some(h=>h.seg===seg))continue;heads.push({seg,idx:m.index,end:rh.lastIndex,ini,fim})}
+  /* índice ("Estudo para 2-8 de novembro  2  Título") dá o título completo do artigo */
+  const toc={};const rt=/Estudo para (\d{1,2})(?:\s+de\s+(\p{L}+))?\s*[-–]\s*(\d{1,2})\s+de\s+(\p{L}+)\s+\d{1,3}\s+([\s\S]+?)(?=\n?_{3,}|\n\s*Estudo para|\n\s*Esta publica|$)/giu;
+  while((m=rt.exec(t))){const mm=SEN.mi(m[2]||m[4]);if(mm<0)continue;toc[(+m[1])+'/'+mm]=SEN.limpa(m[5])}
+  const out=heads.sort((a,b)=>a.idx-b.idx).map((h,k)=>{
+    const body=t.slice(h.end,k+1<heads.length?heads[k+1].idx:t.length).split(/\n\s*Estudo para \d/)[0];
+    const cants=[...body.matchAll(/C[ÂA]NTICO\s+(\d{1,3})\b/gi)].map(x=>x[1]);
+    let tema=toc[h.ini.getDate()+'/'+h.ini.getMonth()]||'';let aviso=[];
+    /* o índice às vezes emenda o texto seguinte: fica só a parte do título que aparece no próprio artigo */
+    if(tema){const N=s=>s.toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');const nb=N(t.slice(Math.max(0,h.idx-2500),h.end+1500));const ws=tema.split(' ');let ok='';
+      for(let n=Math.min(ws.length,30);n>=1;n--){const pf=ws.slice(0,n).join(' ');if(nb.includes(N(pf))){ok=pf;break}}
+      tema=ok.replace(/[—–-]\s*$/,'').trim()}
+    if(!tema){/* sem índice: as linhas antes do texto-tema, tirando o cântico e o nome dele */
+      const pre=body.split(/\n\s*[“"]/)[0].split(/\n\s*\n/).map(b=>b.trim()).filter(b=>b&&!/^C[ÂA]NTICO\s+\d/i.test(b));
+      const antes=body.split(/C[ÂA]NTICO\s+\d{1,3}/i)[0].trim();
+      tema=SEN.limpa(antes.length>8?antes:(pre[0]||''));if(tema)aviso.push('confira o título')}
+    const md=new Date(h.ini);md.setDate(md.getDate()+((+dia)+6)%7);
+    if(!cants.length)aviso.push('cânticos não encontrados');else if(cants.length<2)aviso.push('cântico final não encontrado');
+    if(!tema)aviso.push('título não encontrado');
+    return{semana:h.ini.getDate()+'/'+(h.ini.getMonth()+1)+'–'+h.fim.getDate()+'/'+(h.fim.getMonth()+1),seg:h.seg,data:iso(md),tema,
+      canticoSentinela:cants[0]||'',canticoFinal:cants.length>1?cants[cants.length-1]:'',avisos:aviso,on:true}});
+  return{semanas:out}};
+
+let senImp=null;
+function senTarget(date){const mon=weekMonday(date);const s2=shiftDays(mon,6);return sortedFds().find(f=>f.data>=mon&&f.data<=s2)||null}
+function senPanel(){
+  const head=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><h2>Importar A Sentinela</h2><button class="btn small ghost" data-a="senclose">Fechar</button></div>`;
+  const drop=`<label class="drop" for="senfile"><b>Escolha o arquivo de A Sentinela</b><span class="hint">PDF ou RTF da edição de estudo, baixada do jw.org. O sistema lê, de cada semana, o título do artigo, o cântico do estudo e o cântico final. Os nomes não mudam.</span><span class="btn primary dropbtn">Escolher arquivo</span><input type="file" id="senfile"></label>`;
+  const S=senImp;
+  if(!S)return`<div class="panel imp">${head}${drop}</div>`;
+  if(S.lendo)return`<div class="panel imp">${head}<p>Lendo ${esc(S.nome)}…</p></div>`;
+  if(S.erro)return`<div class="panel imp">${head}${drop}<div class="drawres short">${esc(S.erro)}</div></div>`;
+  const on=S.semanas.filter(x=>x.on);
+  return`<div class="panel imp">${head}
+    <p class="hint" style="margin:0">${esc(S.nome)}: ${S.semanas.length} artigo${S.semanas.length===1?'':'s'} de estudo. As datas usam o dia da reunião (${DIAS[cfg.diaFds]}). Reuniões que já existem são atualizadas e mantêm os nomes já escolhidos.</p>
+    ${S.semanas.map((x,i)=>{const tg=senTarget(x.data);return`<div class="impw ${x.on?'':'off'}">
+      <input type="checkbox" class="senon" data-i="${i}" ${x.on?'checked':''} aria-label="Importar a semana ${esc(x.semana)}">
+      <div><div class="top"><input type="date" class="sendate" data-i="${i}" value="${x.data}" aria-label="Data da reunião"><b>Semana ${esc(x.semana)}</b>${tg?`<span class="tagupd">atualiza ${br(tg.data).slice(0,5)}</span>`:'<span class="tagnew">nova</span>'}</div>
+      <ul><li><b>Artigo:</b> ${esc(x.tema||'—')}</li><li><b>Cânticos:</b> ${esc(x.canticoSentinela||'?')} (estudo) · ${esc(x.canticoFinal||'?')} (final)</li></ul>
+      ${x.avisos.length?`<div class="warnline">Confira: ${esc(x.avisos.join('; '))}.</div>`:''}</div></div>`}).join('')}
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" data-a="sengo" ${on.length?'':'disabled'}>Importar ${on.length} semana${on.length===1?'':'s'}</button><button class="btn" data-a="senclose">Cancelar</button></div>
+  </div>`}
+async function senRead(f){senImp={nome:f.name,lendo:true};impDiag={};rFds();
+  try{const t=await fileToText(f);const r=SEN.parse(t,{dia:cfg.diaFds});
+    if(!r.semanas.length){
+      if(APO.parse(t,{dia:cfg.dia}).semanas.length)throw new Error('Este arquivo é a Apostila da Reunião Vida e Ministério. Para importá-la, use a aba Meio de semana › Importar apostila.');
+      throw new Error(impDiag.tipo==='pdf'&&t.replace(/\s/g,'').length<200?'Este PDF não tem texto que possa ser lido (parece ser uma imagem). Use o PDF original de A Sentinela, baixado do jw.org, ou o RTF.':'Não encontrei artigos de estudo neste arquivo. Confira se é A Sentinela (edição de estudo), em PDF ou RTF.')}
+    senImp={nome:f.name,semanas:r.semanas}}
+  catch(e){senImp={nome:f.name,erro:(e&&e.message)||'Não foi possível ler o arquivo.'};if(/carregou/.test(senImp.erro))senImp.erro='Não foi possível carregar o leitor de PDF. Verifique a internet e tente de novo.';else if(/Invalid PDF|PDF structure|password/i.test(senImp.erro))senImp.erro='Este PDF está danificado ou protegido e não pode ser lido. Baixe a revista de novo no jw.org e tente outra vez.'}
+  rFds()}
+function senApply(){const list=senImp.semanas.filter(x=>x.on);let n=0,first=null;
+  list.forEach(x=>{const tg=senTarget(x.data);const f=normF(tg?clone(tg):newFds(x.data));
+    if(x.tema)f.sentinela.tema=x.tema;if(x.canticoSentinela)f.canticoSentinela=x.canticoSentinela;if(x.canticoFinal)f.canticoFinal=x.canticoFinal;
+    saveFds(f);n++;if(!first||f.data<first)first=f.data});
+  senImp=null;ui.senImp=false;if(first){ui.fdsSel=first;ui.fdsMonth=first.slice(0,7)}rFds();toast(n+' reuni'+(n===1?'ão atualizada':'ões atualizadas'))}
+Object.assign(PACTS,{
+  senopen:()=>{ui.senImp=true;senImp=null;rFds();const el=document.querySelector('#v-fimdesemana .imp');if(el)el.scrollIntoView({block:'start',behavior:'smooth'})},
+  senclose:()=>{ui.senImp=false;senImp=null;rFds()},
+  sengo:()=>senApply()});
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.id==='senfile'&&t.files&&t.files[0])senRead(t.files[0]);
+  if(t.classList&&t.classList.contains('senon')&&senImp){senImp.semanas[+t.dataset.i].on=t.checked;rFds()}
+  if(t.classList&&t.classList.contains('sendate')&&t.value&&senImp){senImp.semanas[+t.dataset.i].data=t.value;rFds()}});
 
 /* ================= Início: roda depois que todas as partes foram carregadas ================= */
 route();init();

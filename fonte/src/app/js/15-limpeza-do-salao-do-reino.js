@@ -49,8 +49,8 @@ function rLimpeza(){
       ${gs.length?'':`<div class="drawres short">Cadastre os grupos de limpeza em "Grupos" primeiro.</div>`}
       <div class="tablewrap"><table class="pubs ltab"><thead><tr><th>Data</th><th>Dia</th><th>Tarefa</th><th>Grupo</th><th>Designados</th></tr></thead><tbody>
       ${slots.map(s=>{const a=lmp[s.id],g=a&&lgr[a.grupo];
-        if(s.sem)return`<tr><td style="font-variant-numeric:tabular-nums">${br(s.data).slice(0,5)}</td><td>${DIAS3[parse(s.data).getDay()]}</td><td colspan="3"><span class="evtag">${EVTAG[s.ev]}</span> <span class="muted">Sem reunião nesta semana</span></td></tr>`;
-        return`<tr style="cursor:default"><td style="font-variant-numeric:tabular-nums">${br(s.data).slice(0,5)}</td><td>${DIAS3[parse(s.data).getDay()]}</td><td>${LTIPO[s.tipo]}</td>
+        if(s.sem)return`<tr data-dia="${s.data}"><td style="font-variant-numeric:tabular-nums">${br(s.data).slice(0,5)}</td><td>${DIAS3[parse(s.data).getDay()]}</td><td colspan="3"><span class="evtag">${EVTAG[s.ev]}</span> <span class="muted">Sem reunião nesta semana</span></td></tr>`;
+        return`<tr data-dia="${s.data}" style="cursor:default"><td style="font-variant-numeric:tabular-nums">${br(s.data).slice(0,5)}</td><td>${DIAS3[parse(s.data).getDay()]}</td><td>${LTIPO[s.tipo]}</td>
           <td><div style="display:flex;gap:6px;align-items:center"><span class="lpill" style="background:${g?lcor(g.letra):'transparent'}">${g?g.letra:''}</span><select class="lsel" data-id="${esc(s.id)}" data-date="${esc(s.data)}" data-tipo="${esc(s.tipo)}" aria-label="Grupo de ${br(s.data)}"><option value="">—</option>${gs.map(x=>`<option value="${x.letra}" ${a&&a.grupo===x.letra?'selected':''}>${x.letra} · ${esc(x.nome)}</option>`).join('')}</select></div></td>
           <td class="muted" style="font-size:13px;min-width:200px">${g?esc(groupMembers(g).join(', ')):''}</td></tr>`}).join('')||'<tr><td colspan="5" class="muted">Nenhuma data neste mês.</td></tr>'}
       </tbody></table></div>
@@ -137,7 +137,7 @@ PV.limp=(ym,x,y,W)=>{const y0=y,d=PV.doc,slots=limpSlots(ym);
 function limpMsgs(ym){const by={};limpSlots(ym).forEach(s=>{const a=lmp[s.id];if(!s.sem&&a&&a.grupo&&lgr[a.grupo])(by[a.grupo]=by[a.grupo]||[]).push(s)});
   return Object.keys(by).sort().map(L=>{const g=lgr[L],ss=by[L],p=pubs[g.dirigente]||null;
     const lista=ss.map(s=>'• '+cap(DIAS[parse(s.data).getDay()])+', '+br(s.data).slice(0,5)+' — '+LTIPO[s.tipo]).join('\n');
-    const msgL=`Olá, ${p?tc(p.nome.split(' ')[0]):'irmão'}!\n\nO ${g.nome} (Grupo ${L}) está designado para a limpeza do Salão do Reino em ${monthLabel(ym)}:\n\n${lista}\n\nPor favor, avise os irmãos do grupo. Obrigado!\n${cfg.congregacao||''}`;
+    const msgL=`Olá, ${p?tc(p.nome.split(' ')[0]):'irmão'}!\n\nO ${g.nome} (Grupo ${L}) está designado para a limpeza do Salão do Reino em ${monthLabel(ym)}:\n\n${lista}\n\nPor favor, avise os irmãos do grupo. Obrigado!`;
     const msgG=`*Limpeza do Salão do Reino · ${g.nome} (Grupo ${L})*\n${cap(monthLabel(ym))}\n\n${lista}\n\nIrmãos do grupo: ${groupMembers(g).join(', ')}.\nObrigado pela ajuda!`;
     return{L,g,p,msgL,msgG}})}
 function rWaLimp(seg){

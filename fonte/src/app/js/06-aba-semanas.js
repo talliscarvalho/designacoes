@@ -45,7 +45,7 @@ function rSemanas(){
       <div class="sec tes"><h3><i></i>Tesouros da Palavra de Deus</h3>
         <div class="row r3"><label class="f">Tema do discurso<input type="text" data-f="tesouros.tema" value="${esc(w.tesouros.tema)}" placeholder="Tema da apostila"></label><div class="fixed">10 min</div><label class="f">Orador${S('tesouros.pub','tesouros',w.tesouros.pub)}</label></div>
         <div class="row r3"><div class="fixed">Encontre Joias Espirituais</div><div class="fixed">10 min</div><label class="f">Designado${S('joias.pub','joias',w.joias.pub)}</label></div>
-        <div class="row r3"><div class="fixed">Leitura da Bíblia</div><div class="fixed">4 min</div><label class="f">Estudante${S('leitura.pub','leitura',w.leitura.pub)}</label></div>
+        <div class="row r3"><div class="fixed">Leitura da Bíblia${w.leitura.tema?`<small class="ltema">${esc(w.leitura.tema)}</small>`:''}</div><div class="fixed">4 min</div><label class="f">Estudante${S('leitura.pub','leitura',w.leitura.pub)}</label></div>
       </div>
       <div class="sec min"><div class="sec-h"><h3><i></i>Faça Seu Melhor no Ministério</h3>
           <div class="drawbar"><span class="hint">${avail} irmã${avail===1?'':'s'} livre${avail===1?'':'s'} (${meses()} meses)</span><button class="btn small" data-a="draw">Sortear irmãs</button><button class="btn small ghost" data-a="redraw">Sortear de novo</button></div></div>

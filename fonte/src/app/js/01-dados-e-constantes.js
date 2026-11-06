@@ -13,7 +13,7 @@ const CANTICOS=["As qualidades de Jeová", "Teu nome é Jeová", "Jeová, minha 
 /* "83" vira "83 - “De casa em casa”"; texto já completo fica como está */
 const cant=v=>{v=String(v||'').trim();const m=/^(\d{1,3})\.?\s*$/.exec(v);return m&&CANTICOS[+m[1]-1]?m[1]+' - '+CANTICOS[+m[1]-1]:v};
 const MIN_TEMAS=['Iniciando conversas','Cultivando o interesse','Fazendo discípulos','Explicando suas crenças','Discurso','O que você diria?'];
-const DEF_MSG='Olá, {nome}!\n\nVocê tem designação na {reuniao} de {dia_semana}, {data}:\n\n{designacoes}\n\nSe não puder participar, avise com antecedência, por favor. Obrigado!\n{congregacao}';
+const DEF_MSG='Olá, {nome}!\n\nVocê tem designação na {reuniao} de {dia_semana}, {data}:\n\n{designacoes}\n\nSe não puder participar, avise com antecedência, por favor. Obrigado!';
 const DEF_CFG={congregacao:'Congregação',dia:4,hora:'19:30',papel:'A4',modelo:'cores',mensagem:DEF_MSG,intervaloMeses:2,diaFds:0,horaFds:'09:00',diaLimpeza:2};
 
 let pubs={}, weeks={}, fds={}, evs={}, lgr={}, lmp={}, stk={}, avd={}, cmp={}, cfg={...DEF_CFG};
@@ -44,11 +44,11 @@ function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeou
 function setStatus(t,cls){const s=$('#status');s.className='status '+(cls||'');$('#statusTxt').textContent=t}
 
 function newWeek(date){return{data:date,leituraSemanal:'',canticoInicial:'',oracaoInicial:'',presidente:'',
-  tesouros:{tema:'',pub:''},joias:{pub:''},leitura:{pub:''},
+  tesouros:{tema:'',pub:''},joias:{pub:''},leitura:{pub:'',tema:''},
   ministerio:[{tema:'Iniciando conversas',min:3,pub:'',ajudante:''},{tema:'Cultivando o interesse',min:4,pub:'',ajudante:''},{tema:'Discurso',min:5,pub:'',ajudante:''}],
   canticoMeio:'',vida:[{tema:'',min:15,pub:''}],estudo:{dirigente:'',leitor:''},canticoFinal:'',oracaoFinal:'',enviados:{}}}
 function norm(w){const b=newWeek(w.data);const o=Object.assign(b,w);
-  o.tesouros=Object.assign({tema:'',pub:''},w.tesouros);o.joias=Object.assign({pub:''},w.joias);o.leitura=Object.assign({pub:''},w.leitura);
+  o.tesouros=Object.assign({tema:'',pub:''},w.tesouros);o.joias=Object.assign({pub:''},w.joias);o.leitura=Object.assign({pub:'',tema:''},w.leitura);
   o.estudo=Object.assign({dirigente:'',leitor:''},w.estudo);o.ministerio=Array.isArray(w.ministerio)?w.ministerio:b.ministerio;o.vida=Array.isArray(w.vida)?w.vida:b.vida;o.enviados=w.enviados||{};return o}
 const TIPOS=[['demo','Demonstração'],['discurso','Discurso'],['consideracao','Consideração'],['presidente','Feita pelo presidente']];
 const partTipo=p=>p.tipo||(/o que voc[eê] diria/i.test(p.tema||'')?'consideracao':/discurso/i.test(p.tema||'')?'discurso':'demo');
@@ -80,7 +80,7 @@ function roles(w){
   add(w.oracaoInicial,'oracaoInicial','Oração inicial'+(w.canticoInicial?' (após o Cântico '+w.canticoInicial.split(' ')[0]+')':''));
   add(w.tesouros.pub,'tesouros.pub','Tesouros da Palavra de Deus: “'+(w.tesouros.tema||'discurso')+'” (10 min)');
   add(w.joias.pub,'joias.pub','Encontre Joias Espirituais (10 min)');
-  add(w.leitura.pub,'leitura.pub','Leitura da Bíblia (4 min)'+(w.leituraSemanal?' · '+w.leituraSemanal:''));
+  add(w.leitura.pub,'leitura.pub','Leitura da Bíblia (4 min)'+(w.leitura.tema?' · '+w.leitura.tema:w.leituraSemanal?' · '+w.leituraSemanal:''));
   w.ministerio.forEach((p,i)=>{const n=4+i;if(isPres(p))return;
     add(p.pub,'ministerio.'+i+'.pub','Faça Seu Melhor no Ministério, parte '+n+': '+(p.tema||'')+' ('+(p.min||'?')+' min)'+(p.ajudante&&!isDiscurso(p)?'\n   Ajudante: '+pn(p.ajudante):''));
     if(!isDiscurso(p))add(p.ajudante,'ministerio.'+i+'.ajudante','Ajudante na parte '+n+': '+(p.tema||'')+' ('+(p.min||'?')+' min)'+(p.pub?'\n   Estudante: '+pn(p.pub):''));});

@@ -11,6 +11,7 @@ function renderAll(fromData){
   ['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio','confirmacoes'].forEach(t=>$('#v-'+t).hidden=t!==ui.tab);
   const v=$('#v-'+ui.tab);
   lembreteS89();pedidoBox();instalarBox();avisoBox();
+  if(ui.abaAnterior!==ui.tab){ui.abaAnterior=ui.tab;ui.rolarSemana=true}
   if(fromData&&v.contains(document.activeElement)&&document.activeElement.matches('input,textarea,select'))return; // não atrapalha quem está digitando
   ({semanas:rSemanas,fimdesemana:rFds,limpeza:rLimpeza,av:rAV,campo:rCampo,publicadores:rPubs,imprimir:rPrint,whatsapp:rWa,ajustes:rAjustes,painel:rPainel,pubimport:rPubImport,equilibrio:rEquilibrio,confirmacoes:rConfirm})[ui.tab]();
 }
@@ -52,8 +53,23 @@ function sheetHead(date,hora){const d=parse(date);return`<div class="sheethead">
 function wkItem(act,id,date,n,t,sel){const tp=evTipo(id),off=SEM_REUNIAO(tp);const dt=parse(date);
   const title=off?EVENTOS[tp]:tp==='visita'?'Visita do superintendente':n>=t?'Semana completa':(t-n)+(t-n>1?' designações em aberto':' designação em aberto');
   const lab=cap(DIAS[dt.getDay()])+', '+dt.getDate()+' de '+MESES[dt.getMonth()]+': '+title;
-  return`<button class="wk${off?' ev':''}" data-a="${act}" data-id="${esc(id)}" aria-current="${sel}" aria-label="${esc(lab)}"><span class="cal" aria-hidden="true"><small>${DIAS[dt.getDay()].slice(0,3).toUpperCase()}</small><b>${pad(dt.getDate())}</b></span>
+  return`<button class="wk${off?' ev':''}" data-dia="${esc(date)}" data-a="${act}" data-id="${esc(id)}" aria-current="${sel}" aria-label="${esc(lab)}"><span class="cal" aria-hidden="true"><small>${DIAS[dt.getDay()].slice(0,3).toUpperCase()}</small><b>${pad(dt.getDate())}</b></span>
     <span class="wi" aria-hidden="true"><span class="wt">${esc(title)}</span>${off?'<span class="wev">Sem reunião nesta semana</span>':`<span class="wbar"><i><span style="width:${t?Math.round(100*Math.min(n,t)/t):0}%"></span></i>${n} de ${t}</span>`}</span></button>`}
 function sortedWeeks(){return Object.values(weeks).sort((a,b)=>a.data<b.data?-1:1)}
 function upcomingWeek(){const t=iso(new Date());const ws=sortedWeeks();return(ws.find(w=>w.data>=t)||ws[ws.length-1]||{}).data||null}
 
+
+/* semana atual: destaca as datas desta semana (segunda a domingo) e, ao abrir a aba, rola até ela */
+function semanaAtual(rolar){const v=$('#v-'+ui.tab);if(!v)return;const hoje=iso(new Date()),seg=weekMonday(hoje),dom=shiftDays(seg,6);
+  const els=[...v.querySelectorAll('[data-dia]')];let alvo=null;
+  els.forEach(el=>{const d=el.dataset.dia,a=el.dataset.ate||d;const agora=d<=dom&&a>=seg;el.classList.toggle('agora',agora);
+    if(agora&&!el.querySelector('.agoratag')){const h=el.querySelector('td:first-child, .avh, .cwh h3, .cal');if(h)h.insertAdjacentHTML(h.classList.contains('cal')?'afterend':'beforeend','<span class="agoratag">Esta semana</span>')}
+    if(!alvo&&(agora||a>=hoje))alvo=el});
+  if(!rolar||!alvo)return false;
+  requestAnimationFrame(()=>{const r=alvo.getBoundingClientRect();const lista=alvo.closest('.wklist');
+    if(lista&&lista.scrollWidth>lista.clientWidth+4){lista.scrollLeft+=r.left-lista.getBoundingClientRect().left-8;return}
+    if(lista&&lista.scrollHeight>lista.clientHeight+4){lista.scrollTop+=r.top-lista.getBoundingClientRect().top-8;return}
+    if(lista)return;/* listas de semanas curtas: não mexe na página */
+    if(r.top>window.innerHeight*0.7||r.bottom<0)window.scrollTo({top:window.scrollY+r.top-Math.max(90,window.innerHeight*0.25),behavior:'smooth'})});return true}
+/* telas redesenhadas por partes (sem passar pelo renderAll) também ganham o destaque */
+let semObs=0;new MutationObserver(()=>{if(semObs)return;semObs=requestAnimationFrame(()=>{semObs=0;if(semanaAtual(ui.rolarSemana))ui.rolarSemana=false})}).observe(document.getElementById('main')||document.body,{childList:true,subtree:true});

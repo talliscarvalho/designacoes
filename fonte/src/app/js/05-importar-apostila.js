@@ -80,8 +80,9 @@ APO.parse=function(text,opts){
     // sequência: ministério tem que vir antes da vida pelo número
     if(vida.length){const v0=Math.min(...vida.map(x=>x.n));mini=rest.filter(x=>x.n<v0);vida=rest.filter(x=>x.n>=v0)}
     const p1=parts.find(x=>x.n===1);
+    const lb=/Leitura da B[íi]blia\s*\(\s*\d{1,2}\s*min\)\s*(.{2,60}?\(th\s+li[çc][ãa]o\s+\d{1,2}\))/i.exec(flat);
     weeks.push({semana:h.d1+'/'+(m1+1)+'–'+h.d2+'/'+(h.m2+1),data:md.getFullYear()+'-'+String(md.getMonth()+1).padStart(2,'0')+'-'+String(md.getDate()).padStart(2,'0'),
-      leituraSemanal:h.leit,canticoInicial:ini?ini.n:'',canticoMeio:mid?mid.n:'',canticoFinal:fin?fin.n:'',
+      leituraSemanal:h.leit,leituraTexto:lb?lb[1].replace(/\s+/g,' ').trim():'',canticoInicial:ini?ini.n:'',canticoMeio:mid?mid.n:'',canticoFinal:fin?fin.n:'',
       tesouros:p1?p1.tema:'',ministerio:mini.map(x=>({tema:x.tema,min:x.min,tipo:x.tipo})),vida:vida.map(x=>({tema:x.tema,min:x.min})),
       avisos:[!p1&&'tema de Tesouros não encontrado',!est&&'estudo bíblico não encontrado',!mini.length&&'partes do ministério não encontradas',!vida.length&&'partes da Vida Cristã não encontradas',!ini&&'cântico inicial não encontrado'].filter(Boolean)})
   });
@@ -114,7 +115,7 @@ function weekMonday(d){const x=parse(d);const off=(x.getDay()+6)%7;x.setDate(x.g
 function impTarget(date){const mon=weekMonday(date);const sun=parse(mon);sun.setDate(sun.getDate()+6);const s2=iso(sun);return sortedWeeks().find(w=>w.data>=mon&&w.data<=s2)||null}
 function impPanel(){
   const head=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><h2>Importar apostila</h2><button class="btn small ghost" data-a="impclose">Fechar</button></div>`;
-  const drop=`<label class="drop" for="impfile"><b>Escolha o arquivo da apostila</b><span class="hint">PDF ou RTF da Apostila da Reunião Vida e Ministério. O sistema lê as semanas, a leitura da Bíblia, os cânticos e os temas das partes. Os nomes não são preenchidos.</span><span class="btn primary dropbtn">Escolher arquivo</span><input type="file" id="impfile"></label>`;
+  const drop=`<label class="drop" for="impfile"><b>Escolha o arquivo da apostila</b><span class="hint">PDF ou RTF da Apostila da Reunião Vida e Ministério. O sistema lê as semanas, a leitura semanal da Bíblia, o texto da Leitura da Bíblia, os cânticos e os temas das partes. Os nomes não são preenchidos.</span><span class="btn primary dropbtn">Escolher arquivo</span><input type="file" id="impfile"></label>`;
   if(!imp)return`<div class="panel imp">${head}${drop}</div>`;
   if(imp.lendo)return`<div class="panel imp">${head}<p>Lendo ${esc(imp.nome)}…</p></div>`;
   if(imp.erro)return`<div class="panel imp">${head}${drop}<div class="drawres short">${esc(imp.erro)}</div>${impDiag.tipo?`<details class="hint"><summary>Detalhes técnicos (para enviar ao suporte)</summary><p style="margin:6px 0">Arquivo: ${esc(imp.nome||'sem nome')} · tipo identificado: ${esc(impDiag.tipo)} · ${impDiag.bytes||0} bytes${impDiag.paginas?' · '+impDiag.paginas+' páginas':''} · ${impDiag.chars??0} letras lidas</p>${impDiag.amostra?`<pre style="white-space:pre-wrap;font-size:12px;max-height:200px;overflow:auto;background:var(--surface);padding:8px;border-radius:6px">${esc(impDiag.amostra)}</pre>`:''}</details>`:''}</div>`;
@@ -127,6 +128,7 @@ function impPanel(){
       <ul>
         <li><b>Cânticos:</b> ${esc(x.canticoInicial||'?')} · ${esc(x.canticoMeio||'?')} · ${esc(x.canticoFinal||'?')}</li>
         <li><b>Tesouros:</b> ${esc(x.tesouros||'—')}</li>
+        <li><b>Leitura da Bíblia:</b> ${esc(x.leituraTexto||'—')}</li>
         <li><b>Ministério:</b> ${x.ministerio.map((m,j)=>esc((4+j)+'. '+m.tema+' ('+m.min+')'+(m.tipo&&m.tipo!=='demo'?' · '+(TIPOS.find(t=>t[0]===m.tipo)||['',''])[1].toLowerCase():''))).join('; ')||'—'}</li>
         <li><b>Vida Cristã:</b> ${x.vida.map(m=>esc(m.tema+' ('+m.min+')')).join('; ')||'—'}</li>
       </ul>${x.avisos.length?`<div class="warnline">Confira: ${esc(x.avisos.join('; '))}.</div>`:''}</div></div>`}).join('')}
@@ -148,7 +150,7 @@ function impApply(){
   list.forEach(x=>{const tg=impTarget(x.data);const base=tg?clone(tg):newWeek(x.data);
     const keepM=base.ministerio||[],keepV=base.vida||[];
     const w=norm(Object.assign(base,{data:x.data,leituraSemanal:x.leituraSemanal,canticoInicial:x.canticoInicial,canticoMeio:x.canticoMeio,canticoFinal:x.canticoFinal}));
-    w.tesouros.tema=x.tesouros;
+    w.tesouros.tema=x.tesouros;if(x.leituraTexto)w.leitura=Object.assign({},w.leitura,{tema:x.leituraTexto});
     w.ministerio=x.ministerio.map((m,j)=>({tema:m.tema,min:m.min,tipo:m.tipo||'',pub:(keepM[j]||{}).pub||'',ajudante:(keepM[j]||{}).ajudante||''}));
     w.vida=x.vida.map((m,j)=>({tema:m.tema,min:m.min,pub:(keepV[j]||{}).pub||''}));
     if(tg&&tg.data!==x.data){delete weeks[tg.data];removeDoc('semanas',tg.data)}

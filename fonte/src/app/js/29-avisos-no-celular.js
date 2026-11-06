@@ -48,7 +48,7 @@ Object.assign(PACTS,{
 /* ===== Agenda para os avisos: um resumo das designações de cada publicador, do mês atual em diante ===== */
 let agendaRemote=null;
 function agendaMapa(){const from=iso(new Date()).slice(0,7)+'-01';const m={};const L=s=>String(s==null?'':s).replace(/\|/g,'/').replace(/\s+/g,' ').trim();
-  Object.keys(pubs).forEach(pid=>{const its=myItems(pid,from).slice(0,60);if(its.length)m[pid]=its.map(it=>[it.date,L(it.hora),L(it.titulo),L(String(it.txt).split('\n')[0])].join('|'))});return m}
+  itensDe(from,null).forEach(it=>{if(!pubs[it.pid])return;const l=m[it.pid]=m[it.pid]||[];if(l.length<60)l.push([it.date,L(it.hora),L(it.titulo),L(String(it.txt).split('\n')[0])].join('|'))});return m}
 function syncAgenda(){const F=window.FBX;if(!F||!VAPID||!['admin','editor'].includes(F.papel)||agendaRemote===null||!(loaded.p&&loaded.w))return;
   clearTimeout(syncAgenda.t);
   /* espera os dados assentarem (todas as coleções chegarem) e grava no máximo uma vez a cada 30 s */

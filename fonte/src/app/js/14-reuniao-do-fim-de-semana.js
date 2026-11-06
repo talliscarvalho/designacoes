@@ -33,7 +33,7 @@ function rFds(){
   const list=`<div class="panel weeklist">
     <div class="monthnav"><button class="btn small ghost" data-a="fprev" aria-label="Mês anterior">‹</button><strong>${monthLabel(ui.fdsMonth)}</strong><button class="btn small ghost" data-a="fnext" aria-label="Próximo mês">›</button></div>
     ${inM.length?'<div class="wklist">'+inM.map(f=>wkItem('fpick',f.data,f.data,filledFds(f),fdsSlots(f),f.data===ui.fdsSel)).join('')+'</div>':`<div class="empty">${mode==='db'&&!loaded.f?'Carregando…':'Nenhuma reunião neste mês ainda.'}</div>`}
-    <div class="wkacts"><button class="btn" data-a="faddmonth">Criar datas do mês</button><button class="btn" data-a="faddone">+ Nova data</button></div>
+    <div class="wkacts"><button class="btn" data-a="faddmonth">Criar datas do mês</button><button class="btn" data-a="faddone">+ Nova data</button><button class="btn" data-a="senopen">Importar A Sentinela</button></div>
   </div>`;
   const f=ui.fdsSel&&fds[ui.fdsSel];let ed;
   if(!f){ed=`<div class="panel editor"><h2 style="margin:0;font-size:18px">Programação do fim de semana</h2><p class="muted" style="margin:0">Use <b>Criar datas do mês</b> para criar as reuniões de ${+cfg.diaFds===0?'domingo':DIAS[cfg.diaFds]} do mês. Em cada uma, escolha o discurso público na lista, o orador, o artigo de A Sentinela e quem dirige e lê. O dia e o horário ficam em Ajustes.</p></div>`}
@@ -81,6 +81,7 @@ function rFds(){
         <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn small" href="#whatsapp" data-a="fgowa">Enviar pelo WhatsApp</a><a class="btn small primary" href="#imprimir" data-a="fgoprint">Imprimir / PDF</a></div>
       </div>
     </div>`}
+  if(ui.senImp)ed=senPanel();
   $('#v-fimdesemana').innerHTML=misBanner('fs')+`<div class="split">${list}${ed}</div>`;
 }
 function weekFds(f){
@@ -101,7 +102,7 @@ function weekFds(f){
 Object.assign(PACTS,{
   fprev:()=>{ui.fdsMonth=shiftMonth(ui.fdsMonth,-1);ui.fdsSel=null;rFds()},
   fnext:()=>{ui.fdsMonth=shiftMonth(ui.fdsMonth,1);ui.fdsSel=null;rFds()},
-  fpick:b=>{ui.fdsSel=b.dataset.id;ui.delAsk=null;rFds()},
+  fpick:b=>{ui.fdsSel=b.dataset.id;ui.delAsk=null;ui.senImp=false;senImp=null;rFds()},
   faddone:()=>{const d=nextFdsDate();saveFds(newFds(d));ui.fdsSel=d;ui.fdsMonth=d.slice(0,7);rFds();toast('Reunião de '+br(d)+' criada')},
   faddmonth:()=>{const[y,m]=ui.fdsMonth.split('-').map(Number);const x=new Date(y,m-1,1);while(x.getDay()!==+cfg.diaFds)x.setDate(x.getDate()+1);let n=0,first=null;
     while(x.getMonth()===m-1){const d=iso(x);if(!fds[d]){saveFds(newFds(d));n++;first=first||d}x.setDate(x.getDate()+7)}

@@ -6,7 +6,8 @@ function waMsgs(){
   const by={};rl.forEach(r=>{(by[r.pub]=by[r.pub]||[]).push(r.txt)});
   const dt=parse(md);
   return Object.entries(by).map(([pid,list])=>{const p=pubs[pid]||{nome:'(removido)'};
-    let msg=(cfg.mensagem||DEF_MSG);if(K)msg=msg.replace(/Reunião Vida e Ministério Cristãos?/g,reu);
+    /* o nome da congregação no fim, depois do agradecimento, não vai mais (modelos antigos ainda o tinham) */
+    let msg=(cfg.mensagem||DEF_MSG).replace(/(Obrigad[oa]!?)\s*\n\s*\{congregacao\}\s*$/,'$1');if(K)msg=msg.replace(/Reunião Vida e Ministério Cristãos?/g,reu);
     msg=msg.replace(/\{nome\}/g,tc(p.nome.split(' ')[0])).replace(/\{nome_completo\}/g,tc(p.nome)).replace(/\{reuniao\}/g,reu)
       .replace(/\{data\}/g,br(md)).replace(/\{dia_semana\}/g,DIAS[dt.getDay()]).replace(/\{hora\}/g,K?(cfg.horaFds||''):cfg.hora)
       .replace(/\{designacoes\}/g,list.map(t=>'• '+t).join('\n')).replace(/\{congregacao\}/g,cfg.congregacao||'');
