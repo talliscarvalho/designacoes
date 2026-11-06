@@ -587,3 +587,10 @@ tr.agora .agoratag{display:block;margin:4px 0 0;width:max-content}
   .eqtab td[data-l]::before{content:attr(data-l) " ";font-size:11.5px}
   .eqtab td[colspan]{flex:1 1 100%}
 }
+/* cabeçalho dos cartões de A/V: data, dia e o selo sempre na mesma posição (selo à direita, na primeira linha) */
+.avh{display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:2px;align-items:center}
+.avh>b{grid-column:1;grid-row:1}
+.avh>span:not(.agoratag):not(.evtag){grid-column:1/-1;grid-row:2}
+.avh>.evtag{grid-column:1/-1;justify-self:start}
+.avh>.agoratag{grid-column:2;grid-row:1;justify-self:end;margin:0}
+.cwh h3 .agoratag{margin-left:8px}
