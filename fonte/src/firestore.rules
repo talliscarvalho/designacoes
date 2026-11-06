@@ -2,12 +2,15 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Quem está conectado com uma conta Google verificada
+    // Conectado com conta Google, link no e-mail (e-mail verificado) ou celular confirmado por SMS
     function conectado() {
-      return request.auth != null && request.auth.token.email_verified == true;
+      return request.auth != null
+        && ((request.auth.token.get('email', null) != null && request.auth.token.get('email_verified', false) == true)
+            || request.auth.token.get('phone_number', null) != null);
     }
+    // Identificação de quem está conectado: o e-mail ou, para quem entrou pelo celular, o número (+55DDDNÚMERO)
     function email() {
-      return request.auth.token.email.lower();
+      return request.auth.token.get('email', null) != null ? request.auth.token.email.lower() : request.auth.token.phone_number;
     }
     // Administrador principal (fixo)
     // >>> TROQUE AQUI ao instalar em outra congregação: o mesmo e-mail de "dono" do config.js <<<

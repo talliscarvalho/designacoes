@@ -86,13 +86,16 @@
       document.getElementById('fbOut').onclick=()=>auth.signOut();return}
     const H=(t,p)=>`<h1 class="fbh">${t}</h1>${p?`<p class="fbsub">${p}</p>`:''}`;
     const body={
-      login:H('Entrar','Entre com o e-mail que você informou aos anciãos.')+`<button class="fbbtn" id="fbLogin"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar com Google</button>
+      login:H('Entrar','Entre com o e-mail ou o celular que você informou aos anciãos.')+`<button class="fbbtn" id="fbLogin"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar com Google</button>
         <div class="fbor"><span>ou receba um link no e-mail</span></div>
-        <form id="fbMailForm" class="fbmail" novalidate><label for="fbMail" class="fblab">E-mail</label><input type="email" id="fbMail" required maxlength="254" placeholder="nome@exemplo.com" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false"><button class="fbbtn fbprim" type="submit">Enviar link de acesso</button></form>`,
+        <form id="fbMailForm" class="fbmail" novalidate><label for="fbMail" class="fblab">E-mail</label><input type="email" id="fbMail" required maxlength="254" placeholder="nome@exemplo.com" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false"><button class="fbbtn fbprim" type="submit">Enviar link de acesso</button></form>
+        <div class="fbor"><span>ou</span></div><button class="fbbtn" id="fbTelGo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18h2"/></svg>Entrar com o celular (SMS)</button>`,
+      tel:H('Entrar com o celular','Enviaremos um código por SMS para o número que você informou aos anciãos.')+`<form id="fbTelForm" class="fbmail" novalidate><label for="fbTel" class="fblab">Celular com DDD</label><input type="tel" id="fbTel" required maxlength="20" placeholder="(75) 99999-9999" autocomplete="tel-national" inputmode="tel"><button class="fbbtn fbprim" type="submit" id="fbTelSend">Enviar código</button></form><button class="fbbtn fbsec" id="fbBack">Voltar</button>`,
+      codigo:H('Digite o código',`Enviamos um SMS com 6 números para <b>${t(fmtTelBR(msg))}</b>.`)+`<form id="fbCodForm" class="fbmail" novalidate><label for="fbCod" class="fblab">Código</label><input type="text" id="fbCod" required maxlength="6" placeholder="000000" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" class="fbcod"><button class="fbbtn fbprim" type="submit">Entrar</button></form><button class="fbbtn fbsec" id="fbTelOutro">Usar outro número</button>`,
       link:H('Confira seu e-mail',`Enviamos um link de acesso para <b>${t(msg)}</b>.`)+`<p class="fbnote">Abra o e-mail <b>neste mesmo aparelho</b> e toque no link. Se não chegar em alguns minutos, veja a caixa de spam.</p><button class="fbbtn" id="fbBack">Usar outro e-mail</button>`,
       confirmar:H('Confirme o e-mail','Para terminar a entrada, digite o e-mail para o qual o link foi enviado.')+`<form id="fbConfForm" class="fbmail"><label for="fbConf" class="fblab">E-mail</label><input type="email" id="fbConf" required maxlength="254" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="nome@exemplo.com"><button class="fbbtn fbprim" type="submit">Entrar</button></form>`,
       espera:`<div class="fbwait" role="status"><span class="fbspin" aria-hidden="true"></span><p>${t(msg||'Conectando…')}</p></div>`,
-      negado:H('Acesso ainda não liberado',`A conta <b>${t(msg)}</b> ainda não tem acesso ao sistema.`)+`<p class="fbnote">Peça a um administrador para incluir este e-mail em Ajustes › Acesso ao sistema. Depois, recarregue a página.</p><button class="fbbtn" id="fbOut">Entrar com outra conta</button>`,
+      negado:H('Acesso ainda não liberado',`A conta <b>${t(String(msg||'').startsWith('+')?fmtTelBR(msg):msg)}</b> ainda não tem acesso ao sistema.`)+`<p class="fbnote">Peça a um administrador para incluir ${String(msg||'').startsWith('+')?'este celular':'este e-mail'} em Ajustes › Acesso ao sistema. Depois, recarregue a página.</p><button class="fbbtn" id="fbOut">Entrar com outra conta</button>`,
       erro:H('Não foi possível entrar',t(msg))+`<button class="fbbtn" id="fbLogin">Tentar de novo</button>`,
       falha:H('Não foi possível carregar','Verifique a internet e tente de novo.')+`<p class="fbnote">Se continuar, desative bloqueadores de anúncios ou extensões de privacidade para este site, ou abra em outro navegador.</p><button class="fbbtn" id="fbRetry">Tentar de novo</button>`
     }[kind]||'';
@@ -105,6 +108,10 @@
     const mf=document.getElementById('fbMailForm');if(mf)mf.onsubmit=e=>{e.preventDefault();const v=document.getElementById('fbMail').value.trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){alertBox('Digite um e-mail válido, como nome@exemplo.com.');document.getElementById('fbMail').focus();return}sendLink(v)};
     const cf=document.getElementById('fbConfForm');if(cf)cf.onsubmit=e=>{e.preventDefault();finishLink(document.getElementById('fbConf').value)};
     const bk=document.getElementById('fbBack');if(bk)bk.onclick=()=>gate('login');
+    const tg=document.getElementById('fbTelGo');if(tg)tg.onclick=()=>gate('tel');
+    const tf=document.getElementById('fbTelForm');if(tf)tf.onsubmit=e=>{e.preventDefault();const n=telE164(document.getElementById('fbTel').value);if(!n){alertBox('Digite o celular com DDD, como (75) 99999-9999.');document.getElementById('fbTel').focus();return}sendSms(n)};
+    const cf2=document.getElementById('fbCodForm');if(cf2)cf2.onsubmit=e=>{e.preventDefault();const c=document.getElementById('fbCod').value.replace(/\D/g,'');if(c.length!==6){alertBox('O código tem 6 números.');return}confirmSms(c)};
+    const to=document.getElementById('fbTelOutro');if(to)to.onclick=()=>gate('tel');
     const ob=document.getElementById('fbOut');if(ob)ob.onclick=()=>auth.signOut().then(()=>gate('login'));
   }
   function alertBox(m){const g=document.querySelector('#fbgate .fbpanel')||document.querySelector('#fbgate .fbcard');if(!g)return;let a=g.querySelector('.fberr');if(!a){a=document.createElement('p');a.className='fberr';a.setAttribute('role','alert');g.appendChild(a)}a.textContent=m}
@@ -120,6 +127,20 @@
       gate('erro','Não foi possível entrar ('+(e.code||e.message||'erro')+').');
     }
   }
+  /* entrada pelo celular: código por SMS (precisa do plano Blaze no Firebase) */
+  const telE164=v=>{let d=String(v||'').replace(/\D/g,'');if(d.startsWith('0'))d=d.replace(/^0+/,'');if(d.length===10||d.length===11)d='55'+d;if(/^55\d{10}$/.test(d)&&/[6-9]/.test(d[4]))d=d.slice(0,4)+'9'+d.slice(4);return /^55\d{10,11}$/.test(d)?'+'+d:null};
+  const fmtTelBR=v=>{const d=String(v||'').replace(/\D/g,'').replace(/^55/,'');return d.length===11?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:d.length===10?`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`:String(v||'')};
+  FBX.telE164=telE164;FBX.fmtTel=fmtTelBR;
+  let rv=null,confirmacao=null,telAtual='';
+  async function sendSms(n){const btn=document.getElementById('fbTelSend');if(btn){btn.disabled=true;btn.textContent='Enviando…'}
+    try{if(rv){try{rv.clear()}catch(e){}rv=null}rv=new firebase.auth.RecaptchaVerifier('fbTelSend',{size:'invisible'});
+      confirmacao=await auth.signInWithPhoneNumber(n,rv);telAtual=n;gate('codigo',n)}
+    catch(e){if(rv){try{rv.clear()}catch(x){}rv=null}
+      const m={'auth/billing-not-enabled':'A entrada por SMS ainda não está liberada no Firebase: ela precisa do plano Blaze (pago por uso). Entre com Google ou pelo e-mail.','auth/operation-not-allowed':'A entrada pelo celular ainda não foi ativada no Firebase (Authentication › Método de login › Telefone).','auth/invalid-phone-number':'Esse número não parece válido. Confira o DDD.','auth/too-many-requests':'Muitas tentativas seguidas. Espere alguns minutos e tente de novo.','auth/quota-exceeded':'O limite de SMS foi atingido. Tente mais tarde ou entre com Google.','auth/captcha-check-failed':'A verificação de segurança falhou. Recarregue a página e tente de novo.','auth/network-request-failed':'Sem conexão com a internet. Verifique a rede e tente de novo.'};
+      gate('tel');alertBox(m[e.code]||'Não foi possível enviar o código ('+(e.code||'erro')+').')}}
+  async function confirmSms(c){if(!confirmacao){gate('tel');return}gate('espera','Entrando…');
+    try{await confirmacao.confirm(c)}
+    catch(e){gate('codigo',telAtual);alertBox(e.code==='auth/invalid-verification-code'?'Código incorreto. Confira o SMS e digite de novo.':e.code==='auth/code-expired'?'O código expirou. Toque em "Usar outro número" e peça um novo.':'Não foi possível entrar ('+(e.code||'erro')+').')}}
   /* entrada por link no e-mail (sem senha) */
   const MAILKEY='vmc-mail-login';
   async function sendLink(email){email=String(email||'').trim().toLowerCase();if(!email)return;gate('espera','Enviando o link para '+email+'…');
@@ -136,9 +157,9 @@
     fs.doc('aceites/'+FBX.email).set({ultimo:ts()},{merge:true}).catch(()=>{})}
   auth.onAuthStateChanged(async u=>{
     if(!u){if(started){location.reload();return}if(completingLink)return;gate('login');return}
-    const email=String(u.email||'').toLowerCase();
+    const email=String(u.email||u.phoneNumber||'').toLowerCase();
     if(started){if(email!==FBX.email)location.reload();return}
-    gate('espera','Verificando acesso de '+email+'…');
+    gate('espera','Verificando acesso de '+(email.startsWith('+')?fmtTelBR(email):email)+'…');
     let papel=null;
     if(email===OWNER)papel='admin';
     let pubId=null,lido=false;

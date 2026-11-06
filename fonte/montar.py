@@ -23,11 +23,11 @@ SUB=[('https://www.gstatic.com/firebasejs/10.14.1/','lib/'),('https://cdnjs.clou
 s,b=app,boot
 for a,c in SUB:s=s.replace(a,c);b=b.replace(a,c)
 assert 'cdnjs' not in s and 'gstatic.com/firebasejs' not in b
-CSP=("default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com; "
+CSP=("default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com https://www.google.com https://www.gstatic.com; "
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; "
   "img-src 'self' data: blob: https://*.googleusercontent.com https://www.gstatic.com https://www.google.com; "
-  "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://apis.google.com https://fonts.googleapis.com https://fonts.gstatic.com; "
-  "frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; "
+  "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://apis.google.com https://www.google.com https://fonts.googleapis.com https://fonts.gstatic.com; "
+  "frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com https://www.google.com https://recaptcha.google.com; worker-src 'self' blob:; manifest-src 'self'; "
   "object-src 'none'; base-uri 'self'; form-action 'self'")
 fav="data:image/svg+xml,"+urllib.parse.quote(f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='#2F5249'/><path fill='white' transform='translate(4 4)' d='{MARCA}'/></svg>",safe="/:=' ")
 head=f'''<!doctype html>
