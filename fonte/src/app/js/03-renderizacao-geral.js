@@ -67,7 +67,8 @@ function upcomingWeek(){const t=iso(new Date());const ws=sortedWeeks();return(ws
 function semanaAtual(rolar){const v=$('#v-'+ui.tab);if(!v)return;const hoje=iso(new Date()),seg=weekMonday(hoje),dom=shiftDays(seg,6);
   const els=[...v.querySelectorAll('[data-dia]')];let alvo=null;
   els.forEach(el=>{const d=el.dataset.dia,a=el.dataset.ate||d;const agora=d<=dom&&a>=seg;el.classList.toggle('agora',agora);
-    if(agora&&!el.querySelector('.agoratag')){const h=el.querySelector('td:first-child, .avh, .cwh h3, .cal');if(h)h.insertAdjacentHTML(h.classList.contains('cal')?'afterend':'beforeend','<span class="agoratag">Esta semana</span>')}
+    if(agora&&!el.querySelector('.agoratag')){const h=el.querySelector('.wi, td:first-child, .avh, .cwh h3');if(h)h.insertAdjacentHTML(h.classList.contains('wi')?'afterbegin':'beforeend','<span class="agoratag">Esta semana</span>')}
+    if(!agora){const t=el.querySelector('.agoratag');if(t)t.remove()}
     if(!alvo&&(agora||a>=hoje))alvo=el});
   if(!rolar||!alvo)return false;
   requestAnimationFrame(()=>{const r=alvo.getBoundingClientRect();const lista=alvo.closest('.wklist');

@@ -35,7 +35,7 @@
   const CFG=window.DESIGNAR_CONFIG||{};
   const FIREBASE_CONFIG=CFG.firebase;
   const OWNER=String(CFG.dono||'').trim().toLowerCase();
-  const APP="Designar", VERSAO="2026.11.06-1554", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
+  const APP="Designar", VERSAO="2026.11.06-1607", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
   const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,whatsapp:CFG.whatsapp||'',pub:{}};
   const t=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let resolveReady,rejectReady;const readyP=new Promise((r,j)=>{resolveReady=r;rejectReady=j});
@@ -877,8 +877,7 @@ tr.agora>td{background:var(--accent-soft)}
 tr.agora>td:first-child{box-shadow:inset 3px 0 0 var(--accent);font-weight:700}
 tr.agora .agoratag{display:block;margin:4px 0 0;width:max-content}
 .avcard.agora,.cweek.agora{box-shadow:0 0 0 2px var(--accent)}
-.wk.agora .agoratag{position:absolute;top:6px;right:8px;margin:0;font-size:10px}
-.wk.agora{position:relative}
+.wk.agora .agoratag{align-self:flex-start;margin:0 0 4px;font-size:10.5px}
 .agoratag,.avh .agoratag,.cwh .agoratag{color:#fff!important}
 :root[data-theme="dark"] .agoratag{color:var(--accent-fg)!important}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .agoratag{color:var(--accent-fg)!important}}
@@ -1187,7 +1186,8 @@ function upcomingWeek(){const t=iso(new Date());const ws=sortedWeeks();return(ws
 function semanaAtual(rolar){const v=$('#v-'+ui.tab);if(!v)return;const hoje=iso(new Date()),seg=weekMonday(hoje),dom=shiftDays(seg,6);
   const els=[...v.querySelectorAll('[data-dia]')];let alvo=null;
   els.forEach(el=>{const d=el.dataset.dia,a=el.dataset.ate||d;const agora=d<=dom&&a>=seg;el.classList.toggle('agora',agora);
-    if(agora&&!el.querySelector('.agoratag')){const h=el.querySelector('td:first-child, .avh, .cwh h3, .cal');if(h)h.insertAdjacentHTML(h.classList.contains('cal')?'afterend':'beforeend','<span class="agoratag">Esta semana</span>')}
+    if(agora&&!el.querySelector('.agoratag')){const h=el.querySelector('.wi, td:first-child, .avh, .cwh h3');if(h)h.insertAdjacentHTML(h.classList.contains('wi')?'afterbegin':'beforeend','<span class="agoratag">Esta semana</span>')}
+    if(!agora){const t=el.querySelector('.agoratag');if(t)t.remove()}
     if(!alvo&&(agora||a>=hoje))alvo=el});
   if(!rolar||!alvo)return false;
   requestAnimationFrame(()=>{const r=alvo.getBoundingClientRect();const lista=alvo.closest('.wklist');

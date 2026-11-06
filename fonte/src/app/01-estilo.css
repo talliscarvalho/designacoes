@@ -554,8 +554,7 @@ tr.agora>td{background:var(--accent-soft)}
 tr.agora>td:first-child{box-shadow:inset 3px 0 0 var(--accent);font-weight:700}
 tr.agora .agoratag{display:block;margin:4px 0 0;width:max-content}
 .avcard.agora,.cweek.agora{box-shadow:0 0 0 2px var(--accent)}
-.wk.agora .agoratag{position:absolute;top:6px;right:8px;margin:0;font-size:10px}
-.wk.agora{position:relative}
+.wk.agora .agoratag{align-self:flex-start;margin:0 0 4px;font-size:10.5px}
 .agoratag,.avh .agoratag,.cwh .agoratag{color:#fff!important}
 :root[data-theme="dark"] .agoratag{color:var(--accent-fg)!important}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .agoratag{color:var(--accent-fg)!important}}
