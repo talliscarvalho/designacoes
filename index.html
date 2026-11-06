@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Designações · Congregação Jorrinho</title>
+<title>Designar</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#2F5249">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232F5249'/%3E%3Cpath d='M7 9.5A1.5 1.5 0 0 1 8.5 8H15v16H8.5A1.5 1.5 0 0 1 7 22.5zM25 9.5A1.5 1.5 0 0 0 23.5 8H17v16h6.5a1.5 1.5 0 0 0 1.5-1.5z' fill='none' stroke='white' stroke-width='1.8'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232F5249'/%3E%3Crect x='6' y='8' width='20' height='18' rx='2.5' fill='none' stroke='white' stroke-width='2.2'/%3E%3Cpath d='M6 13h20M11 5.5v5M21 5.5v5' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M11.5 19l3 3 6-6' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
 </head>
 <body>
@@ -14,8 +14,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
-/* Conexão com o Firebase: login com Google e lista de acesso (coleção "acesso").
-   O administrador principal abaixo também está fixo nas regras do Firestore. */
+/* Conexão com o Firebase: login com Google, lista de acesso ("acesso"), aceite do termo de uso ("aceites")
+   e dados públicos do aviso de privacidade ("publico/info"). O administrador principal também está fixo nas regras. */
+(function(){try{const t=localStorage.getItem('vmc-tema');if(t==='claro')document.documentElement.dataset.theme='light';else if(t==='escuro')document.documentElement.dataset.theme='dark'}catch(e){}})();
 (function(){
   const FIREBASE_CONFIG={
     apiKey:"AIzaSyDdYSL5n_QKqgPAZQAdyhsGx9O1EriutU8",
@@ -26,29 +27,98 @@
     appId:"1:565921295019:web:77c633172ac8581e71e5ee"
   };
   const OWNER="talliscarvalhoo@gmail.com";
-  const FBX=window.FBX={papel:null,email:null,owner:OWNER};
+  const APP="Designar", VERSAO="2026.11.05", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
+  const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,pub:{}};
+  const t=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let resolveReady,rejectReady;const readyP=new Promise((r,j)=>{resolveReady=r;rejectReady=j});
+  readyP.catch(()=>{}); /* o sistema trata a falha em init(); evita aviso de promessa sem tratamento */
   FBX.ready=()=>readyP;
-  if(!window.firebase){document.addEventListener('DOMContentLoaded',()=>gate('erro','Não foi possível carregar o Firebase. Verifique a internet e recarregue a página.'));rejectReady({code:'sem-firebase'});return}
+
+  /* ---------- Textos: aviso de privacidade, termo de uso e sobre ---------- */
+  const resp=()=>FBX.pub.responsavel?t(FBX.pub.responsavel):'os anciãos da congregação';
+  const contato=()=>FBX.pub.contato?` pelo contato <b>${t(FBX.pub.contato)}</b>`:'';
+  const cong=()=>FBX.pub.congregacao?'a Congregação '+t(String(FBX.pub.congregacao).replace(/^Congrega[cç][aã]o\s+/i,'')):'a congregação que usa este sistema';
+  const DOCS={
+    privacidade:()=>`<h2>Aviso de privacidade</h2><p class="fbdate">Atualizado em ${DOCS_DATA}</p>
+      <p>Este aviso explica, de forma simples, quais dados pessoais o ${APP} guarda, para que eles servem e quais são os seus direitos, conforme a Lei Geral de Proteção de Dados (LGPD, Lei nº 13.709/2018).</p>
+      <h3>Quem cuida dos dados</h3><p>O sistema é usado por ${cong()} para organizar os seus arranjos. Os responsáveis pelos dados são ${resp()}${contato()}.</p>
+      <h3>Quais dados são guardados</h3><ul>
+        <li><b>Dos publicadores:</b> nome, telefone (WhatsApp), em que partes cada um pode ser designado, privilégios de serviço (ancião, servo ministerial, pioneiro), histórico de designações, grupo de limpeza e saídas de campo que dirige.</li>
+        <li><b>De quem tem acesso ao sistema:</b> e-mail e nome da conta Google, nível de permissão, data do aceite do termo de uso, último acesso e registro das alterações feitas.</li></ul>
+      <p>Não são guardados endereço, data de nascimento, documentos nem dados financeiros.</p>
+      <h3>Dado sensível</h3><p>Como essas informações revelam a vinculação religiosa das pessoas, a LGPD as trata como <b>dado pessoal sensível</b>. Por isso, o acesso é restrito e o uso se limita aos arranjos internos da congregação.</p>
+      <h3>Para que são usados</h3><p>Exclusivamente para organizar e comunicar designações das reuniões, da limpeza do Salão do Reino, de áudio/vídeo e indicadores e das saídas de campo, além do controle de itens de limpeza. Os dados <b>não são vendidos, não são usados para propaganda e não são compartilhados</b> com terceiros para outros fins.</p>
+      <h3>Quem pode ver</h3><p>Somente pessoas autorizadas por um administrador, com login pela conta Google. Há três níveis: só visualizar, editar e administrar. As folhas impressas para o quadro de anúncios mostram apenas o nome de quem tem cada designação. As mensagens de aviso são enviadas pelo WhatsApp do próprio usuário, a partir do celular dele.</p>
+      <h3>Onde ficam guardados</h3><p>No Google Firebase (Cloud Firestore), com servidor em São Paulo (Brasil). O login é feito pelo Google. A página do sistema é hospedada no GitHub Pages, que não recebe os dados pessoais. Cópias de segurança baixadas por administradores ficam sob a responsabilidade de quem as baixou.</p>
+      <h3>Por quanto tempo</h3><p>Enquanto forem necessários para os arranjos da congregação. Quando um publicador deixa a congregação ou pede a exclusão, os dados dele são removidos do cadastro. Quem deixa de ter acesso ao sistema é retirado da lista de acesso.</p>
+      <h3>Seus direitos</h3><p>Você pode pedir para <b>saber quais dados seus estão guardados</b>, <b>corrigir</b> algo errado, <b>apagar</b> os seus dados ou <b>tirar dúvidas</b> sobre este aviso. Para isso, fale com ${resp()}${contato()}.</p>
+      <h3>Segurança</h3><p>Conexão criptografada (HTTPS), acesso só com login e lista de autorizados, regras de permissão no servidor e registro de quem alterou cada informação.</p>
+      <h3>Cookies e rastreamento</h3><p>O sistema não usa cookies de propaganda, não tem rastreamento e não coleta estatísticas de uso. O navegador guarda apenas o login e algumas preferências de tela.</p>`,
+    termos:()=>`<h2>Termo de uso e confidencialidade</h2><p class="fbdate">Versão ${TERMOS_V} · ${DOCS_DATA}</p>
+      <p>O ${APP} reúne nomes, telefones e informações dos publicadores da congregação. Ao usar o sistema, você se compromete a:</p><ol>
+        <li><b>Usar os dados só para os arranjos da congregação</b> (designações, limpeza, áudio/vídeo e indicadores, saídas de campo e avisos), nunca para outros fins.</li>
+        <li><b>Não compartilhar</b> telefones, listas, prints de tela, PDFs com dados pessoais ou cópias de segurança com quem não tem acesso autorizado.</li>
+        <li><b>Não emprestar o seu acesso</b> e sair da conta em aparelhos de outras pessoas.</li>
+        <li><b>Avisar um administrador</b> se perder o celular, se a sua conta Google for invadida ou se perceber algum uso indevido.</li>
+        <li><b>Manter os dados corretos</b> e respeitar os pedidos de correção ou exclusão feitos pelos publicadores.</li>
+        <li>Saber que <b>as alterações ficam registradas</b> com o seu nome, data e hora.</li></ol>
+      <p>O acesso pode ser retirado a qualquer momento pelos administradores. Leia também o <a href="#" data-doc="privacidade">aviso de privacidade</a>.</p>`,
+    sobre:()=>`<h2>Sobre o ${APP}</h2><p class="fbdate">Versão ${VERSAO}</p>
+      <p><b>${APP}</b> reúne num só lugar as designações da congregação. O lema vem de 1 Pedro 4:10: cada um usa o dom que recebeu para servir aos outros, e tudo fica em seu lugar.</p>
+      <p>O sistema organiza designações das reuniões do meio de semana e do fim de semana, limpeza do Salão do Reino, áudio/vídeo e indicadores, saídas de campo e itens de limpeza, com folhas em PDF para o quadro de anúncios e avisos pelo WhatsApp.</p>
+      <p>É uma ferramenta independente, feita para uso interno das congregações, e não é um produto oficial de nenhuma organização.</p>
+      <h3>Responsável</h3><p>${FBX.pub.responsavel?t(FBX.pub.responsavel)+(FBX.pub.contato?' · '+t(FBX.pub.contato):''):'Os anciãos da congregação.'}</p>
+      <p><a href="#" data-doc="privacidade">Aviso de privacidade</a> · <a href="#" data-doc="termos">Termo de uso</a></p>`
+  };
+  function openDoc(k){let o=document.getElementById('fbdoc');if(!o){o=document.createElement('div');o.id='fbdoc';document.body.appendChild(o)}
+    o.innerHTML=`<div class="fbdocback"></div><div class="fbdocbox" role="dialog" aria-modal="true"><button class="fbdocx" aria-label="Fechar">✕</button><div class="fbdoctxt">${DOCS[k]()}</div><div class="fbdocfoot"><button class="fbbtn fbsec" data-close>Fechar</button></div></div>`;
+    o.hidden=false;const close=()=>{o.hidden=true};o.querySelector('.fbdocback').onclick=close;o.querySelector('.fbdocx').onclick=close;o.querySelector('[data-close]').onclick=close;
+    o.querySelector('.fbdoctxt').scrollTop=0;o.querySelector('.fbdocx').focus()}
+  FBX.openDoc=openDoc;
+  document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('[data-doc]');if(!a)return;e.preventDefault();openDoc(a.dataset.doc)});
+  document.addEventListener('keydown',e=>{const o=document.getElementById('fbdoc');if(e.key==='Escape'&&o&&!o.hidden)o.hidden=true});
+
+  const LOGO=`<div class="fblogo" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><path d="M8.5 14.5l2.3 2.3 4.7-4.7"/></svg></div>`;
+  const LINKS=`<div class="fblinks"><a href="#" data-doc="privacidade">Aviso de privacidade</a><span>·</span><a href="#" data-doc="termos">Termo de uso</a><span>·</span><a href="#" data-doc="sobre">Sobre</a></div>`;
+  if(!window.firebase){const fail=()=>{gate('falha');const b=document.getElementById('fbRetry');if(b)b.onclick=()=>location.reload()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fail);else fail();rejectReady({code:'sem-firebase'});return}
   firebase.initializeApp(FIREBASE_CONFIG);
   const auth=firebase.auth(),fs=firebase.firestore();
   auth.languageCode='pt';
   const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
+  const ts=()=>firebase.firestore.FieldValue.serverTimestamp();
+  fs.doc('publico/info').get().then(d=>{if(d.exists)FBX.pub=d.data()||{}}).catch(()=>{});
 
   function gate(kind,msg){let g=document.getElementById('fbgate');
     if(!g){g=document.createElement('div');g.id='fbgate';document.body.appendChild(g)}
-    const t=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-    g.innerHTML=`<div class="fbcard"><div class="fblogo" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 1 4 17.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg></div>
-      <h1>Designações · Congregação Jorrinho</h1>
-      ${kind==='login'?`<p>Entre com a sua conta Google para ver e editar as designações.</p><button class="fbbtn" id="fbLogin"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Entrar com Google</button>`:''}
+    if(kind==='termos'){g.innerHTML=`<div class="fbcard fbwide"><div class="fbdoctxt fbinline">${DOCS.termos()}</div>
+        <label class="fbchk"><input type="checkbox" id="fbAgree"><span>Li e concordo com o termo de uso e com o <a href="#" data-doc="privacidade">aviso de privacidade</a>.</span></label>
+        <button class="fbbtn fbprim" id="fbAccept" disabled>Aceitar e entrar</button><button class="fbbtn fbsec" id="fbOut">Não aceito, sair</button></div>`;
+      g.hidden=false;const c=document.getElementById('fbAgree'),b=document.getElementById('fbAccept');c.onchange=()=>{b.disabled=!c.checked};
+      b.onclick=async()=>{b.disabled=true;b.textContent='Salvando…';try{await fs.doc('aceites/'+FBX.email).set({versao:TERMOS_V,em:ts(),ultimo:ts(),nome:FBX.nome||''});enter()}catch(e){b.disabled=false;b.textContent='Aceitar e entrar';alertBox('Não foi possível registrar o aceite ('+(e.code||'erro')+'). Tente de novo.')}};
+      document.getElementById('fbOut').onclick=()=>auth.signOut();return}
+    g.innerHTML=`<div class="fbcard">${LOGO}
+      <h1 class="fbname">${APP}</h1>
+      <div class="fbpron">As designações da congregação, num só lugar</div>
+      <p class="fbslogan">Cada um com seu dom,<br>tudo em seu lugar.</p>
+      <div class="fbref">Inspirado em 1 Pedro 4:10</div>
+      ${kind==='login'?`<p>Entre com a sua conta Google ou receba um link de acesso no seu e-mail.</p><button class="fbbtn" id="fbLogin"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Entrar com Google</button>
+        <div class="fbor"><span>ou</span></div>
+        <form id="fbMailForm" class="fbmail"><label for="fbMail" class="fbsr">Seu e-mail</label><input type="email" id="fbMail" required placeholder="seu e-mail (Hotmail, Outlook, Yahoo…)" autocomplete="email"><button class="fbbtn" type="submit">Receber link de acesso</button></form>`:''}
+      ${kind==='link'?`<p>Enviamos um link de acesso para <b>${t(msg)}</b>.</p><p class="fbsmall">Abra o e-mail <b>neste mesmo aparelho</b> e toque no link. Se não chegar em alguns minutos, olhe a caixa de spam.</p><button class="fbbtn" id="fbBack">Usar outro e-mail</button>`:''}
+      ${kind==='confirmar'?`<p>Para terminar a entrada, confirme o e-mail para o qual o link foi enviado.</p><form id="fbConfForm" class="fbmail"><label for="fbConf" class="fbsr">E-mail</label><input type="email" id="fbConf" required autocomplete="email" placeholder="seu e-mail"><button class="fbbtn fbprim" type="submit">Entrar</button></form>`:''}
       ${kind==='espera'?`<p>${t(msg||'Conectando…')}</p>`:''}
       ${kind==='negado'?`<p>A conta <b>${t(msg)}</b> ainda não tem acesso ao sistema.</p><p class="fbsmall">Peça a um administrador para incluir este e-mail em Ajustes › Acesso ao sistema. Depois, recarregue a página.</p><button class="fbbtn" id="fbOut">Entrar com outra conta</button>`:''}
       ${kind==='erro'?`<p>${t(msg)}</p><button class="fbbtn" id="fbLogin">Tentar de novo</button>`:''}
-    </div>`;
+      ${kind==='falha'?`<p>Não foi possível carregar o login. Verifique a internet e tente de novo.</p><p class="fbsmall">Se continuar, desative bloqueadores de anúncios ou extensões de privacidade para este site, ou abra em outro navegador.</p><button class="fbbtn" id="fbRetry">Tentar de novo</button>`:''}
+      ${LINKS}</div>`;
     g.hidden=false;
     const lb=document.getElementById('fbLogin');if(lb)lb.onclick=login;
+    const mf=document.getElementById('fbMailForm');if(mf)mf.onsubmit=e=>{e.preventDefault();sendLink(document.getElementById('fbMail').value)};
+    const cf=document.getElementById('fbConfForm');if(cf)cf.onsubmit=e=>{e.preventDefault();finishLink(document.getElementById('fbConf').value)};
+    const bk=document.getElementById('fbBack');if(bk)bk.onclick=()=>gate('login');
     const ob=document.getElementById('fbOut');if(ob)ob.onclick=()=>auth.signOut().then(()=>gate('login'));
   }
+  function alertBox(m){const g=document.querySelector('#fbgate .fbcard');if(!g)return;let a=g.querySelector('.fberr');if(!a){a=document.createElement('p');a.className='fberr';g.appendChild(a)}a.textContent=m}
   function hideGate(){const g=document.getElementById('fbgate');if(g)g.hidden=true}
   async function login(){
     gate('espera','Abrindo a janela do Google…');
@@ -57,74 +127,136 @@
       if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'){try{await auth.signInWithRedirect(provider);return}catch(e2){e=e2}}
       if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request'){gate('login');return}
       if(e.code==='auth/unauthorized-domain'){gate('erro','Este endereço ainda não foi autorizado no Firebase (Authentication › Configurações › Domínios autorizados): '+location.hostname);return}
+      if(e.code==='auth/network-request-failed'){gate('erro','Sem conexão com a internet. Verifique a rede e tente de novo.');return}
       gate('erro','Não foi possível entrar ('+(e.code||e.message||'erro')+').');
     }
   }
+  /* entrada por link no e-mail (sem senha) */
+  const MAILKEY='vmc-mail-login';
+  async function sendLink(email){email=String(email||'').trim().toLowerCase();if(!email)return;gate('espera','Enviando o link para '+email+'…');
+    try{await auth.sendSignInLinkToEmail(email,{url:location.origin+location.pathname,handleCodeInApp:true});try{localStorage.setItem(MAILKEY,email)}catch(e){}gate('link',email)}
+    catch(e){gate('erro',e.code==='auth/operation-not-allowed'?'A entrada por e-mail ainda não foi ativada no Firebase (Authentication › Método de login › E-mail/senha › Link do e-mail).':e.code==='auth/quota-exceeded'?'O limite diário de envio de links foi atingido. Tente amanhã ou entre com Google.':e.code==='auth/invalid-email'?'Esse e-mail não parece válido.':'Não foi possível enviar o link ('+(e.code||'erro')+').')}}
+  let completingLink=false;
+  async function finishLink(email){email=String(email||'').trim().toLowerCase();completingLink=true;gate('espera','Entrando…');
+    try{await auth.signInWithEmailLink(email,location.href);try{localStorage.removeItem(MAILKEY)}catch(e){}history.replaceState(null,'',location.pathname+location.hash)}
+    catch(e){completingLink=false;gate('erro',e.code==='auth/invalid-action-code'||e.code==='auth/expired-action-code'?'Este link já foi usado ou expirou. Peça um novo.':e.code==='auth/invalid-email'?'O e-mail não confere com o do link.':'Não foi possível entrar ('+(e.code||'erro')+').')}}
+  if(auth.isSignInWithEmailLink(location.href)){completingLink=true;let em=null;try{em=localStorage.getItem(MAILKEY)}catch(e){}
+    const go=()=>{if(em)finishLink(em);else gate('confirmar')};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go()}
   let started=false;
+  function enter(){started=true;hideGate();resolveReady(fs);
+    fs.doc('aceites/'+FBX.email).set({ultimo:ts()},{merge:true}).catch(()=>{})}
   auth.onAuthStateChanged(async u=>{
-    if(!u){if(started){location.reload();return}gate('login');return}
+    if(!u){if(started){location.reload();return}if(completingLink)return;gate('login');return}
     const email=String(u.email||'').toLowerCase();
     if(started){if(email!==FBX.email)location.reload();return}
     gate('espera','Verificando acesso de '+email+'…');
     let papel=null;
     if(email===OWNER)papel='admin';
-    else{try{const d=await fs.doc('acesso/'+email).get();if(d.exists)papel=(d.data()||{}).papel||'leitor'}catch(e){}}
+    let pubId=null;
+    try{const d=await fs.doc('acesso/'+email).get();if(d.exists){const x=d.data()||{};if(email!==OWNER)papel=x.papel||'leitor';pubId=x.pub||null}}catch(e){}
     if(!papel){gate('negado',email);return}
-    started=true;FBX.email=email;FBX.papel=papel;FBX.nome=u.displayName||'';
-    hideGate();resolveReady(fs);
+    FBX.email=email;FBX.papel=papel;FBX.pubId=pubId;FBX.nome=u.displayName||'';
+    if(papel==='publicador'&&!pubId){gate('erro','Seu acesso ainda não foi ligado a um cadastro de publicador. Peça a um administrador para fazer a ligação em Ajustes › Acesso ao sistema.');return}
+    let ok=false;try{const a=await fs.doc('aceites/'+email).get();ok=a.exists&&((a.data()||{}).versao||0)>=TERMOS_V}catch(e){}
+    if(!ok){gate('termos');return}
+    enter();
   });
   FBX.signOut=()=>auth.signOut();
+  FBX.ts=ts;
+  FBX.quiet=false;
+  FBX.log=(acao,col,id)=>{if(FBX.quiet)return Promise.resolve();return fs.collection('registro').add({acao,col,id:String(id),por:FBX.email,nome:FBX.nome||'',em:ts()}).catch(()=>{})};
+  FBX.recent=(cb,err)=>fs.collection('registro').orderBy('em','desc').limit(40).onSnapshot(s=>cb(s.docs.map(d=>d.data())),err);
   FBX.listAccess=(cb,err)=>fs.collection('acesso').onSnapshot(s=>cb(s.docs.map(d=>Object.assign({email:d.id},d.data()))),err);
-  FBX.setAccess=(email,papel)=>fs.doc('acesso/'+email.toLowerCase()).set({papel,por:FBX.email,em:new Date().toISOString()});
+  FBX.listAceites=(cb,err)=>fs.collection('aceites').onSnapshot(s=>{const m={};s.docs.forEach(d=>m[d.id]=d.data());cb(m)},err);
+  FBX.setAccess=(email,papel,pub)=>{const d={papel,por:FBX.email,em:new Date().toISOString()};if(pub!==undefined)d.pub=pub||null;return fs.doc('acesso/'+email.toLowerCase()).set(d,{merge:true})};
+  FBX.setResposta=(k,d)=>fs.doc('respostas/'+k).set(Object.assign({},d,{por:FBX.email,nome:FBX.nome||'',em:ts()}));
+  FBX.delResposta=k=>fs.doc('respostas/'+k).delete();
+  FBX.myPubDoc=()=>fs.doc('publicadores/'+FBX.pubId).get().then(d=>d.exists?d.data():null);
   FBX.delAccess=email=>fs.doc('acesso/'+email.toLowerCase()).delete();
+  FBX.setPublic=d=>fs.doc('publico/info').set(Object.assign({},FBX.pub,d,{_por:FBX.email,_em:ts()})).then(()=>{FBX.pub=Object.assign({},FBX.pub,d)});
   document.addEventListener('DOMContentLoaded',()=>{if(!started&&!document.getElementById('fbgate'))gate('espera','Conectando…')});
 })();
 </script>
 <style>
-#fbgate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg,#F4F5F2);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-#fbgate[hidden]{display:none}
-#fbgate .fbcard{width:100%;max-width:420px;background:var(--surface,#fff);color:var(--fg,#1b1b1b);border:1px solid var(--line,#ddd);border-radius:16px;padding:28px 24px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+#fbgate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg,#F4F5F2);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:auto}
+#fbgate[hidden],#fbdoc[hidden]{display:none}
+#fbgate .fbcard{width:100%;max-width:420px;background:var(--surface,#fff);color:var(--fg,#1b1b1b);border:1px solid var(--line,#ddd);border-radius:16px;padding:28px 24px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.08);margin:auto}
+#fbgate .fbcard.fbwide{max-width:560px;text-align:left}
 #fbgate .fblogo{width:52px;height:52px;border-radius:14px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:var(--accent,#2F5249);color:#fff}
-#fbgate h1{font-size:19px;margin:0 0 10px;line-height:1.3}
+#fbgate .fbname{font-size:30px;margin:0;line-height:1.15;letter-spacing:-.01em}
+#fbgate .fbpron{font-size:13.5px;color:var(--muted,#555);margin:4px 0 16px}#fbgate .fbpron b{color:var(--accent,#2F5249)}#fbgate .fbpron span{white-space:nowrap}
+#fbgate .fbslogan{font-size:17px;font-style:italic;color:var(--fg,#1b1b1b);margin:0 0 4px;line-height:1.4}
+#fbgate .fbref{font-size:12px;color:var(--muted,#555);margin-bottom:20px;letter-spacing:.02em}
 #fbgate p{margin:0 0 16px;font-size:15px;line-height:1.5;color:var(--muted,#555)}
-#fbgate p b{color:var(--fg,#1b1b1b);word-break:break-all}
+#fbgate p b{color:var(--fg,#1b1b1b);word-break:break-word}
 #fbgate .fbsmall{font-size:13.5px}
-#fbgate .fbbtn{display:inline-flex;align-items:center;gap:10px;justify-content:center;width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--line,#ccc);background:var(--surface,#fff);color:var(--fg,#1b1b1b);font-size:15.5px;font-weight:600;cursor:pointer}
-#fbgate .fbbtn:hover{background:var(--surface-2,#f2f2f2)}
+#fbgate .fbor{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--muted,#555);font-size:13px}
+#fbgate .fbor::before,#fbgate .fbor::after{content:"";flex:1;height:1px;background:var(--line,#ddd)}
+#fbgate .fbmail{display:flex;flex-direction:column;gap:8px}
+#fbgate .fbmail input{border:1px solid var(--line,#ccc);border-radius:10px;padding:12px 14px;font-size:16px;background:var(--surface,#fff);color:var(--fg,#1b1b1b);font-family:inherit}
+.fbsr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+#fbgate .fberr{color:var(--err,#B3261E);font-size:14px;margin:12px 0 0}
+.fbbtn{display:inline-flex;align-items:center;gap:10px;justify-content:center;width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--line,#ccc);background:var(--surface,#fff);color:var(--fg,#1b1b1b);font-size:15.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.fbbtn:hover{background:var(--surface-2,#f2f2f2)}
+.fbbtn.fbprim{background:var(--accent,#2F5249);color:var(--accent-fg,#fff);border-color:var(--accent,#2F5249);margin-top:6px}
+.fbbtn.fbprim:disabled{opacity:.45;cursor:not-allowed}
+.fbbtn.fbsec{border-color:transparent;background:transparent;font-weight:500;color:var(--muted,#555);margin-top:4px}
+.fblinks{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:18px;font-size:12.5px}
+.fblinks a,.fbdoctxt a,.fbchk a{color:var(--muted,#555);text-decoration:underline;text-underline-offset:2px}
+.fblinks span{color:var(--line,#ccc)}
+.fbchk{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.45;margin:14px 0 8px;cursor:pointer;color:var(--fg,#1b1b1b)}
+.fbchk input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--accent,#2F5249)}
+#fbdoc{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;padding:16px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#fbdoc .fbdocback{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+#fbdoc .fbdocbox{position:relative;width:100%;max-width:640px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;background:var(--surface,#fff);color:var(--fg,#1b1b1b);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.25)}
+#fbdoc .fbdoctxt{overflow:auto;padding:24px 24px 8px;overscroll-behavior:contain}
+#fbdoc .fbdocx{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:8px;border:0;background:transparent;color:var(--muted,#555);font-size:18px;cursor:pointer}
+#fbdoc .fbdocfoot{padding:10px 24px 16px;border-top:1px solid var(--line,#ddd)}
+#fbdoc .fbdocfoot .fbbtn{margin:0;border-color:var(--line,#ccc);color:var(--fg,#1b1b1b);font-weight:600}
+.fbdoctxt h2{font-size:21px;margin:0 36px 2px 0;line-height:1.25}
+.fbdoctxt h3{font-size:15.5px;margin:18px 0 4px}
+.fbdoctxt p,.fbdoctxt li{font-size:14.5px;line-height:1.55;color:var(--fg,#1b1b1b)}
+.fbdoctxt p{margin:0 0 8px}
+.fbdoctxt ul,.fbdoctxt ol{margin:4px 0 10px;padding-left:20px}.fbdoctxt li{margin-bottom:6px}
+.fbdoctxt .fbdate{font-size:12.5px;color:var(--muted,#555);margin-bottom:14px}
+#fbgate .fbinline p,#fbgate .fbinline li{color:var(--fg,#1b1b1b);font-size:14.5px;margin:0 0 8px}
+#fbgate .fbinline .fbdate{color:var(--muted,#555);font-size:12.5px}
+#fbgate .fbinline h2{margin:0 0 2px}
+@media (max-width:520px){#fbdoc{padding:0;align-items:flex-end}#fbdoc .fbdocbox{max-height:92vh;border-radius:14px 14px 0 0}#fbdoc .fbdoctxt{padding:20px 18px 8px}#fbgate .fbcard{padding:24px 18px}}
 </style>
 
-<title>Designações Vida e Ministério</title>
+<title>Designar</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Noto+Sans:ital,wght@0,400;0,600;0,700;1,600;1,700&family=Roboto+Condensed:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,600;1,700&family=Roboto+Condensed:wght@500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 /* Layout: app bar com abas; à esquerda a lista de semanas, à direita o editor colorido por seção (as mesmas cores da folha impressa). */
 :root{
-  --bg:#F3F5F4; --surface:#FFFFFF; --surface-2:#E9EEEC; --fg:#1C2623; --muted:#5D6B66; --line:#D5DDDA;
-  --accent:#2F5249; --accent-fg:#FFFFFF; --accent-soft:#DCE8E4;
-  --tes:#4F6B76; --tes-bg:#EDF1F3; --min:#B87308; --min-bg:#FBF1E3; --vida:#A61B2E; --vida-bg:#F8E6E8;
-  --pub:#2C4A7A; --pub-bg:#E9EDF4; --sent:#4D6A51; --sent-bg:#EDF1EC;
-  --ok:#2E7D4F; --warn:#B45309; --warn-bg:#FDF0DC; --err:#B42318;
-  --f-ui:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --bg:#F2F1EE; --surface:#FFFFFF; --surface-2:#F0EEEA; --fg:#1B1B1B; --muted:#5F6368; --line:#DAD8D3; --line-2:#ECEAE5; --line-b:#C9C6BF;
+  --accent:#2F5249; --accent-fg:#FFFFFF; --accent-soft:#E3ECE8;
+  --tes:#4E6A75; --tes-bg:#EDF1F3; --min:#94600B; --min-bg:#FBF1E3; --vida:#8C1C2B; --vida-bg:#F8E6E8;
+  --pub:#2C4A7A; --pub-bg:#E9EDF4; --sent:#4D6A51; --sent-bg:#EDF1EC; --open:#4A4F55;
+  --ok:#2E7D4F; --warn:#9A4A06; --warn-bg:#FBEFDF; --err:#B42318; --ev:#8C1C2B;
+  --f-ui:"Noto Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-print:"Noto Sans","Segoe UI",Calibri,Arial,sans-serif;
   --f-cond:"Roboto Condensed","Arial Narrow",Arial,sans-serif;
   /* papel: sempre branco, igual nos dois temas */
   --paper:#FFFFFF; --ink:#111111;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#121816; --surface:#1A2220; --surface-2:#232D2A; --fg:#E6ECEA; --muted:#9AA8A3; --line:#33403C;
-  --accent:#7FB8A6; --accent-fg:#0E1513; --accent-soft:#24362F;
-  --tes:#9DB7C2; --tes-bg:#1E272B; --min:#E6A646; --min-bg:#2A2216; --vida:#EE7F8E; --vida-bg:#2C1A1D;
-  --pub:#9DB4E0; --pub-bg:#1D2433; --sent:#A9C6AC; --sent-bg:#1D261F;
-  --ok:#6CC28F; --warn:#F0B35A; --warn-bg:#33270F; --err:#F2877E; color-scheme:dark}}
+  --bg:#141716; --surface:#1C201F; --surface-2:#262B29; --fg:#E8E9E7; --muted:#A3A8A6; --line:#343A38; --line-2:#2A2F2D; --line-b:#4A514E;
+  --accent:#8CC2B2; --accent-fg:#0E1513; --accent-soft:#22332D;
+  --tes:#4E6A75; --tes-bg:#1E272B; --min:#94600B; --min-bg:#2A2216; --vida:#8C1C2B; --vida-bg:#2C1A1D;
+  --pub:#2C4A7A; --pub-bg:#1D2433; --sent:#4D6A51; --sent-bg:#1D261F; --open:#4A4F55;
+  --ok:#6CC28F; --warn:#F0B35A; --warn-bg:#33270F; --err:#F2877E; --ev:#F08A98; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#121816; --surface:#1A2220; --surface-2:#232D2A; --fg:#E6ECEA; --muted:#9AA8A3; --line:#33403C;
-  --accent:#7FB8A6; --accent-fg:#0E1513; --accent-soft:#24362F;
-  --tes:#9DB7C2; --tes-bg:#1E272B; --min:#E6A646; --min-bg:#2A2216; --vida:#EE7F8E; --vida-bg:#2C1A1D;
-  --pub:#9DB4E0; --pub-bg:#1D2433; --sent:#A9C6AC; --sent-bg:#1D261F;
-  --ok:#6CC28F; --warn:#F0B35A; --warn-bg:#33270F; --err:#F2877E; color-scheme:dark}
+  --bg:#141716; --surface:#1C201F; --surface-2:#262B29; --fg:#E8E9E7; --muted:#A3A8A6; --line:#343A38; --line-2:#2A2F2D; --line-b:#4A514E;
+  --accent:#8CC2B2; --accent-fg:#0E1513; --accent-soft:#22332D;
+  --tes:#4E6A75; --tes-bg:#1E272B; --min:#94600B; --min-bg:#2A2216; --vida:#8C1C2B; --vida-bg:#2C1A1D;
+  --pub:#2C4A7A; --pub-bg:#1D2433; --sent:#4D6A51; --sent-bg:#1D261F; --open:#4A4F55;
+  --ok:#6CC28F; --warn:#F0B35A; --warn-bg:#33270F; --err:#F2877E; --ev:#F08A98; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-ui);font-size:15px;line-height:1.45}
@@ -133,28 +265,49 @@ button,input,select,textarea{font:inherit;color:inherit}
 .wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 
 header.app{background:var(--surface);border-bottom:1px solid var(--line)}
-header.app .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-block:14px}
-.brand{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
-.brand-mark{width:38px;height:38px;border-radius:9px;background:var(--accent);display:grid;place-items:center;flex:none}
-.brand-mark svg{width:22px;height:22px}
-.brand h1{font-size:18px;margin:0;line-height:1.2;text-wrap:balance}
-.brand p{margin:0;color:var(--muted);font-size:13px}
+header.app .wrap.top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:16px 6px}
+.brand{display:flex;align-items:baseline;gap:14px;min-width:0;flex:1;flex-wrap:wrap}
+.wordmark{font-family:var(--f-cond);font-weight:700;font-size:27px;letter-spacing:-.01em;color:var(--accent);line-height:1.1}
+.brand .sep{width:1px;height:22px;background:var(--line);align-self:center}
+.brand h1{font-size:16px;margin:0;line-height:1.2;font-weight:600}
+.brand h1:empty,.brand h1:empty~*{display:none}
 .status{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.status .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.status .dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
 .status.saving .dot{background:var(--warn)} .status.error{color:var(--err)} .status.error .dot{background:var(--err)}
-
-nav.tabs{display:flex;gap:2px 4px;flex-wrap:wrap;padding-block:0;margin-top:-2px}
-@media (max-width:620px){nav.tabs a{padding:8px 9px;font-size:13.5px}
-  header.app .wrap{padding-block:10px;gap:6px}.brand h1{font-size:17px}.brand p{font-size:12px}.brand-mark{width:34px;height:34px}
-  .status{flex-basis:100%;font-size:12.5px;padding-left:46px}}
-nav.tabs a{padding:11px 14px;text-decoration:none;color:var(--muted);font-weight:600;border-bottom:3px solid transparent;white-space:nowrap}
-nav.tabs a[aria-current="page"]{color:var(--fg);border-color:var(--accent)}
-nav.tabs a:hover{color:var(--fg)}
-
+nav.areas{display:flex;gap:4px 28px;flex-wrap:wrap}
+nav.areas a{padding:10px 0 12px;text-decoration:none;color:var(--muted);font-weight:500;border-bottom:3px solid transparent;white-space:nowrap}
+nav.areas a[aria-current="page"]{color:var(--fg);font-weight:600;border-color:var(--accent)}
+nav.areas a:hover{color:var(--fg)}
+nav.subtabs{display:flex;gap:6px 22px;flex-wrap:wrap;margin:-4px 0 18px}
+nav.subtabs:empty{display:none}
+nav.subtabs a{text-decoration:none;color:var(--muted);font-size:15px;display:flex;align-items:center;gap:8px;padding:6px 0;min-height:36px}
+nav.subtabs a[aria-current="page"]{color:var(--fg);font-weight:600}
+nav.subtabs a[aria-current="page"]::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
+nav.bnav{display:none}
+nav.bnav:empty,nav.areas:empty{display:none!important}
+.temabtn{width:40px;height:40px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer;flex:none}
+.temabtn:hover{background:var(--surface-2)}
+@media (max-width:720px){
+  header.app .wrap.top{padding-block:12px 12px;gap:10px}
+  .wordmark{font-size:22px}.brand{gap:0 10px;flex-direction:column;align-items:flex-start}.brand .sep{display:none}.brand h1{font-size:13.5px;font-weight:500;color:var(--muted)}
+  nav.areas{display:none}
+  nav.subtabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:0;margin:-22px -16px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+  nav.subtabs a{justify-content:center;padding:10px 4px 11px;border-bottom:3px solid transparent;font-size:14px;text-align:center}
+  nav.subtabs a[aria-current="page"]{border-color:var(--accent)}
+  nav.subtabs a[aria-current="page"]::before{display:none}
+  nav.bnav{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);padding:4px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+  nav.bnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;text-decoration:none;color:var(--muted);font-size:11px;letter-spacing:-.01em;white-space:nowrap;min-width:0}
+  nav.bnav a svg{width:22px;height:22px}
+  @media (max-width:380px){nav.bnav{padding-inline:0}nav.bnav a{font-size:10.2px;letter-spacing:-.02em}}
+  nav.bnav a[aria-current="page"]{color:var(--accent);font-weight:600}
+  main{padding-bottom:110px!important}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+  .appfoot{padding-bottom:96px!important}
+}
 main{padding-block:22px 60px}
-.banner{background:var(--warn-bg);color:var(--fg);border:1px solid var(--line);padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:14px}
+.banner{background:var(--warn-bg);color:var(--fg);padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:14px}
 
-.btn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--fg);font-size:14px}
+.btn{border:1px solid var(--line-b);background:var(--surface);padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--fg);font-size:14px}
 .btn:hover{background:var(--surface-2)}
 .btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 .btn.primary:hover{filter:brightness(1.08)}
@@ -164,43 +317,78 @@ main{padding-block:22px 60px}
 .btn.danger{color:var(--err)}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 
-label.f{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:600;color:var(--muted);min-width:0}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;color:var(--muted);min-width:0}
 input[type=text],input[type=tel],input[type=date],input[type=time],input[type=number],select,textarea{
-  border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:7px 9px;font-size:14.5px;width:100%;min-width:0;font-weight:400;color:var(--fg)}
+  border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 9px;font-size:14.5px;width:100%;min-width:0;font-weight:400;color:var(--fg)}
 textarea{resize:vertical;min-height:140px;line-height:1.5}
+select{appearance:none;-webkit-appearance:none;padding-right:30px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235F6368' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
 select.dup{border-color:var(--warn);background:var(--warn-bg)}
 input[type=number]{width:64px}
 
 /* Semanas */
 .split{display:grid;grid-template-columns:260px minmax(0,1fr);gap:20px;align-items:start}
 @media (max-width:820px){.split{grid-template-columns:minmax(0,1fr)}}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px}
-.weeklist{padding:12px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px}
+h2,h3{font-family:var(--f-cond);letter-spacing:0}
+.weeklist{background:transparent;border:0;padding:0}
 .monthnav{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:10px}
-.monthnav strong{font-size:16px;text-transform:capitalize}
-.wk{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:8px;padding:9px 10px;cursor:pointer;gap:8px}
-.wk:hover{background:var(--surface-2)}
-.wk[aria-current="true"]{background:var(--accent-soft);border-color:var(--accent)}
-.wk b{font-variant-numeric:tabular-nums}
-.pill{font-size:12px;border-radius:99px;padding:2px 8px;background:var(--surface-2);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
-.pill.full{background:var(--accent-soft);color:var(--accent)}
+.monthnav strong{font-family:var(--f-cond);font-size:23px;font-weight:700}
+.monthnav strong::first-letter{text-transform:uppercase}
+.wklist{display:flex;flex-direction:column;gap:6px}
+.wk{display:flex;align-items:center;gap:14px;width:100%;min-height:64px;text-align:left;background:transparent;border:1px solid transparent;border-radius:6px;padding:8px 12px 8px 8px;cursor:pointer}
+.wk:hover{background:var(--surface)}
+.wk[aria-current="true"]{background:var(--surface);border-color:var(--line-b);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.wk .cal{width:52px;height:52px;flex:none;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:var(--surface);border:1px solid var(--line);font-family:var(--f-cond)}
+.wk .cal small{font-size:11.5px;font-weight:600;letter-spacing:.08em}
+.wk .cal b{font-size:26px;font-weight:700;line-height:1}
+.wk[aria-current="true"] .cal{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.wk.ev .cal{background:transparent;border:1px dashed var(--line-b);color:var(--muted)}
+.wk.ev[aria-current="true"] .cal{border-style:solid;border-color:var(--ev);color:var(--ev)}
+.wk .wi{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.wk .wt{font-weight:600;font-size:14.5px;line-height:1.25}
+.wk .wbar{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.wk .wbar i{flex:1;height:4px;border-radius:2px;background:var(--line-2);overflow:hidden;display:block}
+.wk .wbar i span{display:block;height:100%;background:#7C9A8F}
+.wk[aria-current="true"] .wbar i span{background:var(--accent)}
+.wk .wev{font-size:12.5px;color:var(--ev);font-weight:600}
+.wkacts{display:flex;flex-direction:column;border-top:1px solid var(--line);padding-top:6px;margin-top:12px}
+.wkacts .btn{border:0;background:transparent;justify-content:flex-start;min-height:44px;padding:0 4px;font-weight:500;font-size:14.5px}
+.wkacts .btn:first-child{color:var(--accent);font-weight:600}
+.wkacts .btn:hover{background:transparent;text-decoration:underline}
+.pill{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill.full{color:var(--muted)}
 .weeklist .empty{color:var(--muted);font-size:14px;padding:6px 4px 10px}
-
-.editor{padding:18px;display:flex;flex-direction:column;gap:16px}
+@media (max-width:720px){
+  .wklist{flex-direction:row;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  .wk{flex:1 0 64px;flex-direction:column;justify-content:center;gap:4px;min-height:74px;padding:0;border:0;background:transparent!important;box-shadow:none!important}
+  .wk .cal{width:100%;height:70px}
+  .wk .wi{display:none}
+  .wkacts{flex-direction:row;flex-wrap:wrap;border-top:0;margin-top:8px;padding-top:0;gap:0 16px}
+  .wkacts .btn{min-height:40px;font-size:13.5px}
+}
+.editor{padding:22px 24px;display:flex;flex-direction:column;gap:16px}
+.sheethead{display:flex;flex-direction:column;gap:2px;padding:0 24px 14px;border-bottom:1px solid var(--line);margin:0 -24px}
+.sheethead small{font-family:var(--f-cond);font-size:13px;font-weight:600;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.sheethead h2{margin:0;font-size:36px;font-weight:700;line-height:1.05}
 .ed-head{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
 .ed-head label.f{flex:1 1 160px}
-.sec{border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line)}
-.sec h3{margin:0;font-size:15px;display:flex;align-items:center;gap:8px}
-.sec h3 i{width:10px;height:10px;border-radius:3px;display:inline-block}
-.sec.open{background:var(--surface-2)} .sec.open h3 i{background:var(--accent)}
-.sec.tes{background:var(--tes-bg)} .sec.tes h3{color:var(--tes)} .sec.tes h3 i{background:var(--tes)}
-.sec.min{background:var(--min-bg)} .sec.min h3{color:var(--min)} .sec.min h3 i{background:var(--min)}
-.sec.pub{background:var(--pub-bg)} .sec.pub h3{color:var(--pub)} .sec.pub h3 i{background:var(--pub)}
-.sec.sent{background:var(--sent-bg)} .sec.sent h3{color:var(--sent)} .sec.sent h3 i{background:var(--sent)}
-.evbox{display:flex;flex-direction:column;gap:10px;border:1px dashed var(--line);border-radius:10px;padding:12px}
+.sec{display:flex;flex-direction:column;gap:10px;margin:0 -24px;padding:0 24px 14px;border-bottom:1px solid var(--line-2)}
+.sec>h3,.sec>.sec-h{margin:0 -24px 4px;padding:7px 24px;background:var(--open);color:#FFFFFF;font-family:var(--f-cond);font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:8px;min-height:36px}
+.sec>.sec-h{justify-content:space-between;flex-wrap:wrap;padding-block:5px}
+.sec .sec-h h3{margin:0;padding:0;background:transparent;font-size:15px;color:#FFFFFF}
+.sec h3 i{display:none}
+.sec.tes>h3,.sec.tes>.sec-h{background:var(--tes)}
+.sec.min>h3,.sec.min>.sec-h{background:var(--min)}
+.sec.vida>h3,.sec.vida>.sec-h{background:var(--vida)}
+.sec.pub>h3,.sec.pub>.sec-h{background:var(--pub)}
+.sec.sent>h3,.sec.sent>.sec-h{background:var(--sent)}
+.sec .sec-h .hint{color:rgba(255,255,255,.88);text-transform:none;letter-spacing:0;font-family:var(--f-ui);font-weight:400}
+.sec .sec-h .btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.4);color:#FFFFFF;text-transform:none;letter-spacing:0;font-family:var(--f-ui)}
+.sec .sec-h .btn:hover{background:rgba(255,255,255,.26)}
+@media (max-width:720px){.editor{padding:18px 16px}.sheethead,.sec{margin-inline:-16px;padding-inline:16px}.sec>h3,.sec>.sec-h{margin-inline:-16px;padding-inline:16px}.sheethead h2{font-size:30px}}
+.evbox{display:flex;flex-direction:column;gap:10px}
 .evgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-.evtag{font-size:11.5px;border-radius:99px;padding:2px 8px;background:var(--warn-bg);color:var(--warn);font-weight:600;white-space:nowrap}
-.sec.vida{background:var(--vida-bg)} .sec.vida h3{color:var(--vida)} .sec.vida h3 i{background:var(--vida)}
+.evtag{font-size:12px;color:var(--ev);font-weight:700;white-space:nowrap;letter-spacing:.02em}
 .row{display:grid;grid-template-columns:minmax(0,1.4fr) 70px minmax(0,1fr) minmax(0,1fr) 34px;gap:8px;align-items:end}
 .row.r3{grid-template-columns:minmax(0,1.4fr) 70px minmax(0,2fr)}
 .row.r2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -211,21 +399,24 @@ input[type=number]{width:64px}
 .sec-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .drawbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .drawbar .hint{margin-right:4px}
-.drawres{font-size:13px;border-radius:8px;padding:8px 10px;background:var(--surface);border:1px solid var(--line)}
-.drawres.short{border-color:var(--warn);background:var(--warn-bg)}
+.drawres{font-size:13.5px;border-radius:6px;padding:9px 12px;background:var(--surface-2)}
+.drawres.short{background:var(--warn-bg)}
 .ed-foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .confirm{display:flex;gap:8px;align-items:center;font-size:14px}
 .imp{padding:18px;display:flex;flex-direction:column;gap:14px}
 .imp h2{margin:0;font-size:18px}
-.drop{border:2px dashed var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;background:var(--surface-2)}
+.drop{position:relative;border:2px dashed var(--line-b);border-radius:6px;padding:18px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;background:var(--surface-2);cursor:pointer}
+.drop input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.drop:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.dropbtn{pointer-events:none;min-height:44px}
 .impw{border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:start}
 .impw.off{opacity:.55}
 .impw .top{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .impw .top input[type=date]{width:auto}
 .impw ul{margin:4px 0 0;padding-left:18px;font-size:13.5px;color:var(--fg)}
 .impw li b{font-weight:600;color:var(--muted)}
-.tagnew{font-size:12px;border-radius:99px;padding:2px 8px;background:var(--accent-soft);color:var(--accent);font-weight:600}
-.tagupd{font-size:12px;border-radius:99px;padding:2px 8px;background:var(--warn-bg);color:var(--warn);font-weight:600}
+.tagnew{font-size:12px;color:var(--accent);font-weight:700}
+.tagupd{font-size:12px;color:var(--warn);font-weight:700}
 
 /* Publicadores */
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
@@ -238,8 +429,9 @@ table.pubs th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color
 table.pubs td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
 table.pubs tr{cursor:pointer} table.pubs tbody tr:hover{background:var(--surface-2)}
 table.pubs tr.sel{background:var(--accent-soft)}
-.tags{display:flex;flex-wrap:wrap;gap:4px}
-.tag{font-size:11.5px;padding:1px 7px;border-radius:99px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
+.tags{display:flex;flex-wrap:wrap;gap:2px 0;font-size:12.5px;color:var(--muted)}
+.tag{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.tag:not(:last-child)::after{content:"·";margin:0 6px;color:var(--line-b)}
 .pubform{padding:16px;display:flex;flex-direction:column;gap:12px;position:sticky;top:12px}
 .pubform h2{margin:0;font-size:17px}
 .checks{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
@@ -251,7 +443,7 @@ table.pubs tr.sel{background:var(--accent-soft)}
 .printctl{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
 @media (max-width:860px){.printctl{grid-template-columns:minmax(0,1fr)}}
 .pc-side{padding:16px;display:flex;flex-direction:column;gap:12px}
-.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg{display:flex;border:1px solid var(--line-b);border-radius:6px;overflow:hidden}
 .seg button{flex:1;border:0;background:var(--surface);padding:8px;cursor:pointer;font-weight:600;font-size:13.5px}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
 .seg.seg4{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
@@ -260,7 +452,7 @@ table.pubs tr.sel{background:var(--accent-soft)}
 
 /* listas com busca */
 select[data-cbx]{display:none!important}
-.cbx{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:7px 9px;font-size:14.5px;font-weight:400;color:var(--fg);cursor:pointer;min-height:36px}
+.cbx{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 9px;font-size:14.5px;font-weight:400;color:var(--fg);cursor:pointer;min-height:36px}
 .cbx span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .cbx::after{content:"";flex:none;width:7px;height:7px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);transform:rotate(45deg) translateY(-2px);margin-right:3px}
 .cbx.dup{border-color:var(--warn);background:var(--warn-bg)}
@@ -280,6 +472,35 @@ select[data-cbx]{display:none!important}
 .cbxg{padding:8px 12px 4px;font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
 .cbxnone{padding:12px;color:var(--muted);font-size:14px}
 .orh{display:flex;flex-direction:column;gap:6px}
+.lastmod{font-size:12.5px;color:var(--muted);margin:-2px 0 8px}
+.bkbox{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.bkbox[hidden]{display:none}
+.actlist{display:flex;flex-direction:column;max-height:360px;overflow:auto}
+.actrow{display:grid;grid-template-columns:128px minmax(0,1fr);gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+@media (max-width:520px){.actrow{grid-template-columns:1fr;gap:2px}}
+.appfoot{max-width:1180px;margin:8px auto 0;padding:18px 16px calc(28px + env(safe-area-inset-bottom,0px));display:flex;gap:6px 16px;flex-wrap:wrap;justify-content:center;font-size:12.5px;color:var(--muted)}
+.appfoot a{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+.accrow small{font-size:12px;line-height:1.5}
+.phead{display:flex;flex-direction:column;gap:2px;margin-bottom:14px}
+.phead small{font-family:var(--f-cond);font-size:13px;font-weight:600;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.phead h2{margin:0;font-size:34px;font-weight:700;line-height:1.05}
+.pseg{max-width:560px;margin-bottom:18px}
+.pbodyp{display:flex;flex-direction:column;gap:10px;max-width:760px}
+.pmes{margin:14px 0 2px;font-size:20px;font-weight:700}
+.pmes:first-child{margin-top:0}
+.pitem{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px}
+.pitem .cal{width:56px;height:56px;flex:none;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:var(--accent);color:var(--accent-fg);font-family:var(--f-cond)}
+.pitem .cal small{font-size:11.5px;font-weight:600;letter-spacing:.08em}.pitem .cal b{font-size:27px;font-weight:700;line-height:1}
+.pinfo{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.pinfo>small{font-family:var(--f-cond);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.pinfo>b{font-weight:600;font-size:15.5px;white-space:pre-line;line-height:1.4}
+.pacts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.pacts .btn{min-height:40px}
+.pst{font-size:14px;font-weight:700}.pst.ok{color:var(--ok)}.pst.nao{color:var(--ev)}
+.pnstage{max-width:760px}
+#v-painel a{color:var(--accent)}
+.pdl{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr);gap:8px 16px;font-size:14.5px}.pdl span{color:var(--muted)}.pdl b{font-weight:600;word-break:break-word}
+@media (max-width:520px){.pdl{grid-template-columns:1fr;gap:2px}.pdl b{margin-bottom:8px}.phead h2{font-size:28px}}
+.respbox{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:13.5px;margin:-4px 0 0}.respbox .nao{color:var(--ev);font-weight:600}
 .accbox{border-top:1px solid var(--line);padding-top:16px;margin-top:4px}
 .acclist{display:flex;flex-direction:column;margin:6px 0 10px}
 .accrow{display:grid;grid-template-columns:minmax(0,1fr) 170px auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
@@ -292,8 +513,8 @@ select[data-cbx]{display:none!important}
 .cweek.empty{border-style:dashed}
 .cwh{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
 .cwh h3{margin:0;font-size:17px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.isotag{font-size:11.5px;border-radius:99px;padding:2px 8px;background:var(--warn-bg);color:var(--err);font-weight:700}
-.abtag{font-size:11.5px;border-radius:99px;padding:2px 8px;background:var(--accent-soft);color:var(--accent);font-weight:700}
+.isotag{font-family:var(--f-ui);font-size:12.5px;color:var(--ev);font-weight:700}
+.abtag{font-family:var(--f-cond);font-size:12.5px;min-width:22px;height:22px;display:inline-grid;place-items:center;padding:0 5px;background:var(--line-2);color:var(--muted);font-weight:700}
 .crows{display:flex;flex-direction:column}
 .crow{display:grid;grid-template-columns:112px 96px minmax(0,1.15fr) minmax(0,1fr) minmax(0,1.2fr) 34px;gap:6px;align-items:center;padding:3px 0}
 .crow.chead{font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding-bottom:2px}
@@ -466,20 +687,18 @@ select[data-cbx]{display:none!important}
 </style>
 
 <header class="app">
-  <div class="wrap">
-    <div class="brand">
-      <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="#fff" d="M3 6.4c2.6-1.1 5.6-1 8 .7v11.2c-2.4-1.6-5.4-1.7-8-.6zM21 6.4c-2.6-1.1-5.6-1-8 .7v11.2c2.4-1.6 5.4-1.7 8-.6z"/></svg></div>
-      <div style="min-width:0"><h1 id="hName">Designações · Vida e Ministério</h1><p id="hSub">Reunião do meio de semana</p></div>
-    </div>
+  <div class="wrap top">
+    <div class="brand"><span class="wordmark">designar</span><span class="sep" aria-hidden="true"></span><h1 id="hName">Congregação</h1></div>
     <div class="status" id="status" role="status"><span class="dot"></span><span id="statusTxt">Carregando…</span></div>
+    <button class="temabtn" id="temaBtn" type="button"></button>
   </div>
-  <div class="wrap"><nav class="tabs" id="tabs">
-    <a href="#semanas">Meio de semana</a><a href="#fimdesemana">Fim de semana</a><a href="#limpeza">Limpeza</a><a href="#av">A/V e Indicadores</a><a href="#campo">Saídas de campo</a><a href="#publicadores">Publicadores</a><a href="#imprimir">Imprimir / PDF</a><a href="#whatsapp">WhatsApp</a><a href="#ajustes">Ajustes</a>
-  </nav></div>
+  <div class="wrap"><nav class="areas" id="areas" aria-label="Áreas"></nav></div>
 </header>
 
 <main class="wrap">
+  <nav class="subtabs" id="subtabs" aria-label="Seções"></nav>
   <div id="banner" class="banner" hidden></div>
+  <div id="bkBox" class="banner bkbox" hidden></div>
   <section id="v-semanas"></section>
   <section id="v-fimdesemana" hidden></section>
   <section id="v-limpeza" hidden></section>
@@ -489,8 +708,10 @@ select[data-cbx]{display:none!important}
   <section id="v-imprimir" hidden></section>
   <section id="v-whatsapp" hidden></section>
   <section id="v-ajustes" hidden></section>
+  <section id="v-painel" hidden></section>
 </main>
 <div id="toast" class="toast" hidden></div>
+<nav class="bnav" id="bnav" aria-label="Áreas"></nav>
 
 <script>
 /* ================= Dados e constantes ================= */
@@ -513,7 +734,7 @@ const DEF_CFG={congregacao:'Congregação',dia:4,hora:'19:30',papel:'A4',modelo:
 let pubs={}, weeks={}, fds={}, evs={}, lgr={}, lmp={}, stk={}, avd={}, cmp={}, cfg={...DEF_CFG};
 let loaded={p:false,w:false,c:false,f:false,e:false};
 let store=null, dl=null, mode='carregando';
-let ui={acc:null,accSub:false,campoMonth:null,campoView:'semanas',printSelC:null,waCampo:null,avMonth:null,printSelA:null,waAV:null,itAct:null,itNew:false,itShop:false,itCount:false,limpMonth:null,limpView:'escala',printSelL:null,waLimp:null,fdsMonth:null,fdsSel:null,printKind:'meio',printSelF:null,waKind:'meio',waFds:null,tab:'semanas',month:null,week:null,pub:null,pubFilter:'',pubCat:'',printSel:null,printSub:'',waWeek:null,delAsk:null};
+let ui={aceites:null,act:null,actSub:false,acc:null,accSub:false,campoMonth:null,campoView:'semanas',printSelC:null,waCampo:null,avMonth:null,printSelA:null,waAV:null,itAct:null,itNew:false,itShop:false,itCount:false,limpMonth:null,limpView:'escala',printSelL:null,waLimp:null,fdsMonth:null,fdsSel:null,printKind:'meio',printSelF:null,waKind:'meio',waFds:null,tab:'semanas',month:null,week:null,pub:null,pubFilter:'',pubCat:'',printSel:null,printSub:'',waWeek:null,delAsk:null};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -603,19 +824,31 @@ async function init(){
   try{if(window.claude&&window.claude.use){[db,dl]=await Promise.all([window.claude.use('db'),window.claude.use('downloads')])}}catch(e){}
   /* versão hospedada (GitHub Pages + Firebase): espera o login e usa o Firestore */
   if(!db&&window.FBX){setStatus('Aguardando login…');try{db=await window.FBX.ready()}catch(e){showBanner('Não foi possível conectar ao banco de dados ('+((e&&e.code)||'erro')+'). Recarregue a página.');setStatus('Sem conexão','error');return}
-    if(window.FBX.papel==='leitor')showBanner('Você tem acesso só para visualizar. Alterações feitas aqui não são salvas.')}
+    if(window.FBX.papel==='leitor')showBanner('Você tem acesso só para visualizar. Alterações feitas aqui não são salvas.');
+    document.body.insertAdjacentHTML('beforeend',`<footer class="appfoot"><span>${esc(window.FBX.app||'')} · versão ${esc(window.FBX.versao||'')}</span><a href="#" data-doc="sobre">Sobre</a><a href="#" data-doc="privacidade">Aviso de privacidade</a><a href="#" data-doc="termos">Termo de uso</a></footer>`)}
   if(db){mode='db';
     store={set:(c,id,d)=>db.collection(c).doc(id).set(d),del:(c,id)=>db.collection(c).doc(id).delete()};
+    /* versão hospedada: cada gravação leva quem alterou e quando (conferido pelas regras) e entra no registro de atividade */
+    if(window.FBX){const F=window.FBX;
+      store={set:async(c,id,d)=>{await db.collection(c).doc(id).set(Object.assign({},d,{_por:F.email,_nome:F.nome||'',_em:F.ts()}));if(c!=='quadro')F.log('alterou',c,id)},
+             del:async(c,id)=>{await db.collection(c).doc(id).delete();F.log('excluiu',c,id)}};
+      F.onBk=()=>bkCheck()}
     const tm=setTimeout(()=>{if(!(loaded.p&&loaded.w))showBanner('Os dados ainda não carregaram. Verifique a conexão; a página continua tentando.')},10000);
     const done=()=>{if(loaded.p&&loaded.w&&loaded.c){clearTimeout(tm);hideBanner();setStatus('Tudo salvo')}};
     const err=e=>{clearTimeout(tm);showBanner('A conexão com os dados foi interrompida ('+(e.code||'erro')+'). Recarregue a página.')};
-    db.collection('publicadores').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('publicadores',d.id)&&pubs[d.id]?pubs[d.id]:clone(d.data())});pubs=n;if(!s.metadata.fromCache)loaded.p=true;done();changed()},err);
+    const PO=painelOnly();
+    if(window.FBX){
+      db.doc('quadro/nomes').onSnapshot(s=>{const m=(s.exists&&s.data().nomes)||{};nomesRemote=m;if(PO){pubs={};Object.entries(m).forEach(([id,n])=>pubs[id]={nome:n});loaded.p=true;done()}changed()},err);
+      const rq=PO?db.collection('respostas').where('pub','==',window.FBX.pubId||'-'):db.collection('respostas');
+      rq.onSnapshot(s=>{const n={};s.docs.forEach(d=>n[d.id]=clone(d.data()));resp=n;changed()},()=>{});
+    }
+    if(!PO)db.collection('publicadores').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('publicadores',d.id)&&pubs[d.id]?pubs[d.id]:clone(d.data())});pubs=n;if(!s.metadata.fromCache)loaded.p=true;done();changed()},err);
     db.collection('semanas').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('semanas',d.id)&&weeks[d.id]?weeks[d.id]:norm(clone(d.data()))});weeks=n;if(!s.metadata.fromCache)loaded.w=true;done();changed()},err);
     db.collection('fimdesemana').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('fimdesemana',d.id)&&fds[d.id]?fds[d.id]:normF(clone(d.data()))});fds=n;if(!s.metadata.fromCache)loaded.f=true;changed()},err);
     db.collection('limpezaGrupos').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('limpezaGrupos',d.id)&&lgr[d.id]?lgr[d.id]:clone(d.data())});lgr=n;changed()},err);
     db.collection('campo').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('campo',d.id)&&cmp[d.id]?cmp[d.id]:clone(d.data())});cmp=n;changed()},err);
     db.collection('av').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('av',d.id)&&avd[d.id]?avd[d.id]:clone(d.data())});avd=n;changed()},err);
-    db.collection('estoque').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('estoque',d.id)&&stk[d.id]?stk[d.id]:clone(d.data())});stk=n;changed()},err);
+    if(!PO)db.collection('estoque').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('estoque',d.id)&&stk[d.id]?stk[d.id]:clone(d.data())});stk=n;changed()},err);
     db.collection('limpeza').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('limpeza',d.id)&&lmp[d.id]?lmp[d.id]:clone(d.data())});lmp=n;changed()},err);
     db.collection('eventos').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('eventos',d.id)&&evs[d.id]?evs[d.id]:clone(d.data())});evs=n;if(!s.metadata.fromCache)loaded.e=true;changed()},err);
     db.doc('config/geral').onSnapshot(s=>{if(!isLocalPending('config','geral'))cfg=Object.assign({},DEF_CFG,s.exists?clone(s.data()):{});if(!s.metadata.fromCache)loaded.c=true;done();changed()},err);
@@ -624,7 +857,7 @@ async function init(){
     store={set:async(c,id,data)=>{if(c==='publicadores')pubs[id]=data;else if(c==='semanas')weeks[id]=data;else if(c==='fimdesemana')fds[id]=data;else if(c==='eventos')evs[id]=data;else if(c==='limpezaGrupos')lgr[id]=data;else if(c==='limpeza')lmp[id]=data;else if(c==='estoque')stk[id]=data;else if(c==='av')avd[id]=data;else if(c==='campo')cmp[id]=data;else cfg=data;lsWrite()},
            del:async(c,id)=>{if(c==='publicadores')delete pubs[id];else if(c==='semanas')delete weeks[id];else if(c==='fimdesemana')delete fds[id];else if(c==='eventos')delete evs[id];else if(c==='limpezaGrupos')delete lgr[id];else if(c==='limpeza')delete lmp[id];else if(c==='estoque')delete stk[id];else if(c==='av')delete avd[id];else if(c==='campo')delete cmp[id];lsWrite()}};
     loaded={p:true,w:true,c:true,f:true,e:true};setStatus('Salvo neste navegador');
-    showBanner('Os dados ficam guardados só neste navegador, neste aparelho. Faça uma cópia de segurança em Ajustes de vez em quando.');
+    showBanner('Os dados estão salvos só neste aparelho. Faça uma cópia de segurança em Ajustes de vez em quando.');
     changed();
   }
 }
@@ -633,19 +866,56 @@ function hideBanner(){$('#banner').hidden=true}
 
 /* ================= Renderização geral ================= */
 let renderQueued=false;
-function changed(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;buildHist();renderAll(true)})}
+function changed(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;buildHist();renderAll(true);bkCheck();syncNomes()})}
 function renderAll(fromData){
-  $('#hName').textContent=cfg.congregacao&&cfg.congregacao!=='Congregação'?'Congregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):'Designações · Vida e Ministério';
-  $('#hSub').textContent='Meio de semana: '+DIAS[cfg.dia]+'s, '+cfg.hora+' · Fim de semana: '+(+cfg.diaFds===0?'domingos':DIAS[cfg.diaFds]+'s')+', '+(cfg.horaFds||'09:00');
-  document.querySelectorAll('#tabs a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+ui.tab?'page':'false'));
-  ['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes'].forEach(t=>$('#v-'+t).hidden=t!==ui.tab);
+  $('#hName').textContent=cfg.congregacao&&cfg.congregacao!=='Congregação'?'Congregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):'';
+  if(painelOnly())ui.tab='painel';
+  drawNav();
+  ['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel'].forEach(t=>$('#v-'+t).hidden=t!==ui.tab);
   const v=$('#v-'+ui.tab);
   if(fromData&&v.contains(document.activeElement)&&document.activeElement.matches('input,textarea,select'))return; // não atrapalha quem está digitando
-  ({semanas:rSemanas,fimdesemana:rFds,limpeza:rLimpeza,av:rAV,campo:rCampo,publicadores:rPubs,imprimir:rPrint,whatsapp:rWa,ajustes:rAjustes})[ui.tab]();
+  ({semanas:rSemanas,fimdesemana:rFds,limpeza:rLimpeza,av:rAV,campo:rCampo,publicadores:rPubs,imprimir:rPrint,whatsapp:rWa,ajustes:rAjustes,painel:rPainel})[ui.tab]();
 }
-function route(){ui.delAsk=null;const h=location.hash.slice(1);ui.tab=['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes'].includes(h)?h:'semanas';renderAll()}
+/* Tema: segue o sistema (automático) ou fica fixo em claro/escuro; a escolha fica guardada neste aparelho */
+const TEMAS=['auto','claro','escuro'];
+const TEMA_ICO={auto:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></svg>',
+  claro:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>',
+  escuro:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>'};
+const TEMA_TXT={auto:'Tema automático (segue o aparelho)',claro:'Tema claro',escuro:'Tema escuro'};
+function temaGet(){try{const t=localStorage.getItem('vmc-tema');return TEMAS.includes(t)?t:'auto'}catch(e){return'auto'}}
+function temaApply(t){const r=document.documentElement;if(t==='claro')r.dataset.theme='light';else if(t==='escuro')r.dataset.theme='dark';else delete r.dataset.theme;
+  const b=$('#temaBtn');if(b){b.innerHTML=TEMA_ICO[t];b.setAttribute('aria-label',TEMA_TXT[t]+'. Toque para trocar.');b.title=TEMA_TXT[t]}}
+temaApply(temaGet());
+document.addEventListener('click',e=>{if(!e.target.closest||!e.target.closest('#temaBtn'))return;const n=TEMAS[(TEMAS.indexOf(temaGet())+1)%3];try{localStorage.setItem('vmc-tema',n)}catch(err){}temaApply(n);toast(TEMA_TXT[n])});
+/* Navegação por áreas; cada área lembra a última aba aberta */
+const NAVI={cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
+  casa:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-6 8 6v9H4z"/><path d="M10 20v-5h4v5"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg>',
+  gente:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.8-3 3-4.5 5.5-4.5s4.7 1.5 5.5 4.5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.6c2 .2 3.6 1.5 4.3 4"/></svg>',
+  print:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg>',
+  mais:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"/></svg>'};
+const AREAS=[{k:'reunioes',l:'Reuniões',i:'cal',t:[['semanas','Meio de semana'],['fimdesemana','Fim de semana']]},
+  {k:'limpeza',l:'Limpeza',i:'casa',t:[['limpeza','Limpeza e itens'],['av','A/V e Indicadores']]},
+  {k:'pregacao',l:'Pregação',i:'pin',t:[['campo','Saídas de campo']]},
+  {k:'publicadores',l:'Publicadores',i:'gente',t:[['publicadores','Publicadores']]},
+  {k:'imprimir',l:'Imprimir',i:'print',t:[['imprimir','Imprimir / PDF']]},
+  {k:'mais',l:'Mais',i:'mais',t:[['whatsapp','WhatsApp'],['ajustes','Ajustes']]}];
+function navAreas(){if(painelOnly())return[];if(!myPubId())return AREAS;return AREAS.map(a=>a.k==='mais'?Object.assign({},a,{t:[['painel','Meu painel'],...a.t]}):a)}
+function drawNav(){const AR=navAreas();const cur=AR.find(a=>a.t.some(x=>x[0]===ui.tab))||AR[0]||{k:'',t:[]};ui.areaLast=ui.areaLast||{};ui.areaLast[cur.k]=ui.tab;
+  const href=a=>'#'+(ui.areaLast[a.k]||a.t[0][0]);
+  $('#areas').innerHTML=AR.map(a=>`<a href="${href(a)}" aria-current="${a===cur?'page':'false'}">${a.l}</a>`).join('');
+  $('#bnav').innerHTML=AR.map(a=>`<a href="${href(a)}" aria-current="${a===cur?'page':'false'}">${NAVI[a.i]}${a.l}</a>`).join('');
+  $('#subtabs').innerHTML=cur.t.length>1?cur.t.map(([k,l])=>`<a href="#${k}" aria-current="${k===ui.tab?'page':'false'}">${l}</a>`).join(''):''}
+function route(){ui.delAsk=null;const h=location.hash.slice(1);ui.tab=['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel'].includes(h)?h:'semanas';renderAll()}
 window.addEventListener('hashchange',route);
 
+/* cabeçalho da folha e item da lista de semanas (bloco de calendário + situação) */
+function sheetHead(date,hora){const d=parse(date);return`<div class="sheethead"><small>${DIAS[d.getDay()]} · ${esc(hora||'')}</small><h2>${d.getDate()} de ${MESES[d.getMonth()]}</h2></div>`}
+function wkItem(act,id,date,n,t,sel){const tp=evTipo(id),off=SEM_REUNIAO(tp);const dt=parse(date);
+  const title=off?EVENTOS[tp]:tp==='visita'?'Visita do superintendente':n>=t?'Semana completa':(t-n)+(t-n>1?' designações em aberto':' designação em aberto');
+  const lab=cap(DIAS[dt.getDay()])+', '+dt.getDate()+' de '+MESES[dt.getMonth()]+': '+title;
+  return`<button class="wk${off?' ev':''}" data-a="${act}" data-id="${id}" aria-current="${sel}" aria-label="${esc(lab)}"><span class="cal" aria-hidden="true"><small>${DIAS[dt.getDay()].slice(0,3).toUpperCase()}</small><b>${pad(dt.getDate())}</b></span>
+    <span class="wi" aria-hidden="true"><span class="wt">${esc(title)}</span>${off?'<span class="wev">Sem reunião nesta semana</span>':`<span class="wbar"><i><span style="width:${t?Math.round(100*Math.min(n,t)/t):0}%"></span></i>${n} de ${t}</span>`}</span></button>`}
 function sortedWeeks(){return Object.values(weeks).sort((a,b)=>a.data<b.data?-1:1)}
 function upcomingWeek(){const t=iso(new Date());const ws=sortedWeeks();return(ws.find(w=>w.data>=t)||ws[ws.length-1]||{}).data||null}
 
@@ -795,7 +1065,7 @@ function weekMonday(d){const x=parse(d);const off=(x.getDay()+6)%7;x.setDate(x.g
 function impTarget(date){const mon=weekMonday(date);const sun=parse(mon);sun.setDate(sun.getDate()+6);const s2=iso(sun);return sortedWeeks().find(w=>w.data>=mon&&w.data<=s2)||null}
 function impPanel(){
   const head=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><h2>Importar apostila</h2><button class="btn small ghost" data-a="impclose">Fechar</button></div>`;
-  const drop=`<label class="drop" for="impfile"><b>Escolha o arquivo da apostila</b><span class="hint">PDF ou RTF da Apostila da Reunião Vida e Ministério. O sistema lê as semanas, a leitura da Bíblia, os cânticos e os temas das partes. Os nomes não são preenchidos.</span><input type="file" id="impfile" accept=".pdf,.rtf,.txt,application/pdf,application/rtf,text/rtf"></label>`;
+  const drop=`<label class="drop" for="impfile"><b>Escolha o arquivo da apostila</b><span class="hint">PDF ou RTF da Apostila da Reunião Vida e Ministério. O sistema lê as semanas, a leitura da Bíblia, os cânticos e os temas das partes. Os nomes não são preenchidos.</span><span class="btn primary dropbtn">Escolher arquivo</span><input type="file" id="impfile"></label>`;
   if(!imp)return`<div class="panel imp">${head}${drop}</div>`;
   if(imp.lendo)return`<div class="panel imp">${head}<p>Lendo ${esc(imp.nome)}…</p></div>`;
   if(imp.erro)return`<div class="panel imp">${head}${drop}<div class="drawres short">${esc(imp.erro)}</div>${impDiag.tipo?`<details class="hint"><summary>Detalhes técnicos (para enviar ao suporte)</summary><p style="margin:6px 0">Arquivo: ${esc(imp.nome||'sem nome')} · tipo identificado: ${esc(impDiag.tipo)} · ${impDiag.bytes||0} bytes${impDiag.paginas?' · '+impDiag.paginas+' páginas':''} · ${impDiag.chars??0} letras lidas</p>${impDiag.amostra?`<pre style="white-space:pre-wrap;font-size:12px;max-height:200px;overflow:auto;background:var(--surface);padding:8px;border-radius:6px">${esc(impDiag.amostra)}</pre>`:''}</details>`:''}</div>`;
@@ -854,8 +1124,8 @@ function rSemanas(){
   const loadingTxt=mode==='db'&&!loaded.w?'Carregando semanas…':'Nenhuma semana neste mês ainda.';
   const list=`<div class="panel weeklist">
     <div class="monthnav"><button class="btn small ghost" data-a="mprev" aria-label="Mês anterior">‹</button><strong>${monthLabel(ui.month)}</strong><button class="btn small ghost" data-a="mnext" aria-label="Próximo mês">›</button></div>
-    ${inMonth.length?inMonth.map(w=>{const f=filledCount(w),t=slotCount(w);const tp=evTipo(w.data);return`<button class="wk" data-a="pick" data-id="${w.data}" aria-current="${w.data===ui.week}"><b>${br(meetDate(w)).slice(0,5)}</b>${SEM_REUNIAO(tp)?`<span class="evtag">${EVTAG[tp]}</span>`:`<span style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${tp?`<span class="evtag">${EVTAG[tp]}</span>`:''}<span class="pill ${f>=t?'full':''}">${f}/${t}</span></span>`}</button>`}).join(''):`<div class="empty">${loadingTxt}</div>`}
-    <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px"><button class="btn primary" style="width:100%;justify-content:center" data-a="addweek">+ Nova semana</button><button class="btn" style="width:100%;justify-content:center" data-a="impopen">Importar apostila</button>${inMonth.length?`<button class="btn" style="width:100%;justify-content:center" data-a="drawmonth">Sortear irmãs do mês</button>`:''}</div>
+    ${inMonth.length?'<div class="wklist">'+inMonth.map(w=>wkItem('pick',w.data,meetDate(w),filledCount(w),slotCount(w),w.data===ui.week)).join('')+'</div>':`<div class="empty">${loadingTxt}</div>`}
+    <div class="wkacts"><button class="btn" data-a="addweek">+ Nova semana</button><button class="btn" data-a="impopen">Importar apostila</button>${inMonth.length?`<button class="btn" data-a="drawmonth">Sortear irmãs do mês</button>`:''}</div>
   </div>`;
   let ed='';
   const w=ui.week&&weeks[ui.week];
@@ -871,7 +1141,7 @@ function rSemanas(){
     const avail=availableSisters(w).length;
     const SM=(path,cat,val)=>{const c=minConflicts(val,d,mh).length?'dup':'';return pubSelect(path,cat,val,d,dup(val)||c)};
     ed=`<div class="panel editor" id="editor">
-      <div class="ed-head">
+      ${sheetHead(meetDate(w),cfg.hora)}${respResumo('semanas',w.data,roles(w))}${lastMod(w)}<div class="ed-head">
         <label class="f">Data da reunião<input type="date" id="f-data" value="${d}" data-a="redate"></label>
         <label class="f">Leitura semanal da Bíblia<input type="text" id="f-leit" data-f="leituraSemanal" value="${esc(w.leituraSemanal)}" placeholder="Ex.: EZEQUIEL 1-5"></label>
         <label class="f">Presidente${S('presidente','presidente',w.presidente)}</label>
@@ -968,7 +1238,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
 /* ================= Aba Publicadores ================= */
 let draft=null;
 const PRIVS=[['anciao','Ancião'],['servo','Servo ministerial'],['pioneiro','Pioneiro']];const PRIVNAME=Object.fromEntries(PRIVS);
-function blankPub(){return{nome:'',tel:'',sexo:'M',cats:[],ativo:true,privilegios:[]}}
+function blankPub(){return{nome:'',tel:'',email:'',sexo:'M',cats:[],ativo:true,privilegios:[]}}
 function rPubs(){
   if(!draft){draft=ui.pub&&pubs[ui.pub]?clone(pubs[ui.pub]):blankPub()}
   const q=ui.pubFilter.toLowerCase();
@@ -989,9 +1259,10 @@ function rPubs(){
     <p class="hint">${total} publicadores cadastrados. Clique em um nome para editar.</p>
    </div>
    <form class="panel pubform" id="pform">
-     <h2>${ui.pub?'Editar publicador':'Novo publicador'}</h2>
+     <h2>${ui.pub?'Editar publicador':'Novo publicador'}</h2>${ui.pub?lastMod(pubs[ui.pub]):''}
      <label class="f">Nome<input type="text" id="p-nome" value="${esc(draft.nome)}" required></label>
      <label class="f">WhatsApp (com DDD)<input type="tel" id="p-tel" value="${esc(draft.tel)}" placeholder="(75) 99999-9999"></label>
+     <label class="f">E-mail (para entrar no painel)<input type="email" id="p-email" value="${esc(draft.email||'')}" placeholder="nome@gmail.com" autocomplete="off"></label>
      <div class="radios" role="radiogroup" aria-label="Sexo"><label><input type="radio" name="p-sexo" value="M" ${draft.sexo!=='F'?'checked':''}> Irmão</label><label><input type="radio" name="p-sexo" value="F" ${draft.sexo==='F'?'checked':''}> Irmã</label></div>
      <div><div class="f" style="font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px">Privilégios</div><div class="checks">${PRIVS.map(([k,l])=>`<label><input type="checkbox" name="p-priv" value="${k}" ${(draft.privilegios||[]).includes(k)?'checked':''}> ${l}</label>`).join('')}</div></div>
      <div><div class="f" style="font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px">Pode ser designado para</div>
@@ -1003,7 +1274,7 @@ function rPubs(){
      </div>
    </form></div>`;
 }
-function readDraft(){const f=$('#pform');if(!f)return draft;return{nome:$('#p-nome').value.trim(),tel:$('#p-tel').value.trim(),sexo:(f.querySelector('input[name=p-sexo]:checked')||{}).value||'M',cats:[...f.querySelectorAll('input[name=p-cat]:checked')].map(i=>i.value),privilegios:[...f.querySelectorAll('input[name=p-priv]:checked')].map(i=>i.value),ativo:$('#p-ativo').checked}}
+function readDraft(){const f=$('#pform');if(!f)return draft;return{nome:$('#p-nome').value.trim(),tel:$('#p-tel').value.trim(),email:(($('#p-email')||{}).value||'').trim().toLowerCase(),sexo:(f.querySelector('input[name=p-sexo]:checked')||{}).value||'M',cats:[...f.querySelectorAll('input[name=p-cat]:checked')].map(i=>i.value),privilegios:[...f.querySelectorAll('input[name=p-priv]:checked')].map(i=>i.value),ativo:$('#p-ativo').checked}}
 const PACTS={
   pnew:()=>{ui.pub=null;draft=blankPub();ui.delAsk=null;rPubs();$('#p-nome').focus()},
   pedit:b=>{ui.pub=b.dataset.id;draft=null;ui.delAsk=null;rPubs()},
@@ -1093,7 +1364,9 @@ function pageHead(sub,kind){
   return`<div class="ph"><h2>${cn}</h2><hr><p>Reunião Vida e Ministério Cristãos&nbsp; - &nbsp;${esc(sub)}</p></div>`}
 function printState(){const kind=ui.printKind||'meio';const C=kind==='campo',K=kind==='fds',L=kind==='limp'||kind==='av',AV=kind==='av';
   const all=C?sortedCampo().map(c=>({data:cThu(c.semana),mon:c.semana})):L?(AV?avMonths():limpMonths()).map(m=>({data:m+'-01',ym:m})):K?sortedFds():sortedWeeks();const key=C?'printSelC':AV?'printSelA':L?'printSelL':K?'printSelF':'printSel';
-  if(!ui[key]){const m=C?(ui.campoMonth||cThu(weekMonday(iso(new Date()))).slice(0,7)):AV?(ui.avMonth||iso(new Date()).slice(0,7)):L?(ui.limpMonth||iso(new Date()).slice(0,7)):((K?upcomingFds():upcomingWeek())||iso(new Date())).slice(0,7);ui[key]=new Set(all.filter(w=>w.data.startsWith(m)).map(w=>w.data))}
+  /* seleção feita antes de os dados chegarem (ex.: abrir direto em Imprimir): refaz quando os dados mudam */
+  if(ui[key]&&!ui[key].size&&ui[key+'N']!==all.length)ui[key]=null;
+  if(!ui[key]){ui[key+'N']=all.length;const m=C?(ui.campoMonth||cThu(weekMonday(iso(new Date()))).slice(0,7)):AV?(ui.avMonth||iso(new Date()).slice(0,7)):L?(ui.limpMonth||iso(new Date()).slice(0,7)):((K?upcomingFds():upcomingWeek())||iso(new Date())).slice(0,7);ui[key]=new Set(all.filter(w=>w.data.startsWith(m)).map(w=>w.data))}
   const sel=all.filter(w=>ui[key].has(w.data));return{kind,C,K,L,AV,all,key,set:ui[key],sel,autoSub:L?sel.map(w=>cap(monthLabel(w.ym))).join(', '):sel.length?cap(monthLabel(sel[0].data.slice(0,7))):''}}
 function rPrint(){
   const P=printState(),{C,K,L,all,sel}=P;
@@ -1111,8 +1384,8 @@ function rPrint(){
     <div class="stage" id="printStage"></div></div>`;
   layoutPages(sel,ui.printSub||P.autoSub,P.kind);
 }
-function layoutPages(sel,sub,kind){
-  const st=$('#printStage');if(!st)return;st.innerHTML='';
+function layoutPages(sel,sub,kind,stage){
+  const st=stage||$('#printStage');if(!st)return;st.innerHTML='';
   if(!sel.length){st.innerHTML=`<p class="muted">Marque o que deve aparecer na folha.</p>`;return}
   const[PW,PH]=PAPER[cfg.papel]||PAPER.A4;
   const avail=Math.min(st.clientWidth||PW,PW);const s=avail/PW;
@@ -1417,8 +1690,8 @@ function rFds(){
   if(!ui.fdsSel||!fds[ui.fdsSel])ui.fdsSel=(inM.find(f=>f.data>=iso(new Date()))||inM[0]||{}).data||null;
   const list=`<div class="panel weeklist">
     <div class="monthnav"><button class="btn small ghost" data-a="fprev" aria-label="Mês anterior">‹</button><strong>${monthLabel(ui.fdsMonth)}</strong><button class="btn small ghost" data-a="fnext" aria-label="Próximo mês">›</button></div>
-    ${inM.length?inM.map(f=>{const tp=evTipo(f.data);const t=fdsSlots(f),n=filledFds(f);return`<button class="wk" data-a="fpick" data-id="${f.data}" aria-current="${f.data===ui.fdsSel}"><b>${br(f.data).slice(0,5)}</b>${SEM_REUNIAO(tp)?`<span class="evtag">${EVTAG[tp]}</span>`:`<span style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${tp?`<span class="evtag">${EVTAG[tp]}</span>`:''}<span class="pill ${n>=t?'full':''}">${n}/${t}</span></span>`}</button>`}).join(''):`<div class="empty">${mode==='db'&&!loaded.f?'Carregando…':'Nenhuma reunião neste mês ainda.'}</div>`}
-    <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px"><button class="btn primary" style="width:100%;justify-content:center" data-a="faddmonth">Criar datas do mês</button><button class="btn" style="width:100%;justify-content:center" data-a="faddone">+ Nova data</button></div>
+    ${inM.length?'<div class="wklist">'+inM.map(f=>wkItem('fpick',f.data,f.data,filledFds(f),fdsSlots(f),f.data===ui.fdsSel)).join('')+'</div>':`<div class="empty">${mode==='db'&&!loaded.f?'Carregando…':'Nenhuma reunião neste mês ainda.'}</div>`}
+    <div class="wkacts"><button class="btn" data-a="faddmonth">Criar datas do mês</button><button class="btn" data-a="faddone">+ Nova data</button></div>
   </div>`;
   const f=ui.fdsSel&&fds[ui.fdsSel];let ed;
   if(!f){ed=`<div class="panel editor"><h2 style="margin:0;font-size:18px">Programação do fim de semana</h2><p class="muted" style="margin:0">Use <b>Criar datas do mês</b> para criar as reuniões de ${+cfg.diaFds===0?'domingo':DIAS[cfg.diaFds]} do mês. Em cada uma, escolha o discurso público na lista, o orador, o artigo de A Sentinela e quem dirige e lê. O dia e o horário ficam em Ajustes.</p></div>`}
@@ -1436,7 +1709,7 @@ function rFds(){
     const visMap=visitantes();const VIS=f.discurso.visitante;
     const dups=Object.entries(cnt).filter(([k,v])=>v>1).map(([k])=>pname(k));
     ed=`<div class="panel editor" id="feditor">
-      <div class="ed-head">
+      ${sheetHead(f.data,cfg.horaFds||'09:00')}${respResumo('fimdesemana',f.data,rolesFds(f))}${lastMod(f)}<div class="ed-head">
         <label class="f">Data da reunião<input type="date" class="fdate" value="${d}"></label>
         <label class="f">Presidente${G('presidente','presidenteFds',f.presidente)}</label>
       </div>
@@ -2035,7 +2308,7 @@ function rCampo(){
           <div style="display:flex;gap:6px;flex-wrap:wrap">${ui.delAsk==='cdel'+mon?`<span class="confirm">Apagar a semana? <button class="btn small danger" data-a="cdelok" data-w="${mon}">Apagar</button><button class="btn small" data-a="cno">Cancelar</button></span>`:ui.delAsk&&ui.delAsk.startsWith('cap'+mon)?`<span class="confirm">Substituir tudo pelo modelo ${ui.delAsk.slice(-1)}? <button class="btn small danger" data-a="capok" data-w="${mon}" data-k="${ui.delAsk.slice(-1)}">Substituir</button><button class="btn small" data-a="cno">Cancelar</button></span>`:`<button class="btn small ghost" data-a="ciso" data-w="${mon}">${isoSunday(c)?'Domingo normal':'Domingo em território isolado'}</button><button class="btn small ghost" data-a="capask" data-w="${mon}" data-k="${campoAB(mon)==='A'?'B':'A'}">Trocar para o modelo ${campoAB(mon)==='A'?'B':'A'}</button><button class="btn small ghost danger" data-a="cdel" data-w="${mon}">Apagar</button>`}</div></div>
           ${campoRowsEd(mon,c.saidas||[])}
           <label class="f">Observação na folha (opcional)<input type="text" class="cnota" data-w="${mon}" value="${esc(c.nota||'')}" placeholder="Ex.: domingo, saída única no território isolado"></label>
-          ${w.length?`<div class="warnline">${esc(w.join(' · '))}</div>`:''}</div>`}).join('')}`}
+          ${w.length?`<div class="warnline">${esc(w.join(' · '))}</div>`:''}${respResumo('campo',mon,(c.saidas||[]).filter(r=>r.dir).map(r=>({pub:r.dir,field:'saida.'+r.dia+'.'+String(r.hora||'').replace(':','h'),txt:DIAS_C[r.dia]+' às '+String(r.hora||'').replace(':','h')})))}${lastMod(c)}</div>`}).join('')}`}
   $('#v-campo').innerHTML=`<div style="display:flex;flex-direction:column;gap:14px">${seg}${body}</div><datalist id="terrList">${[...new Set([...campoTerrs(),...campoIsos()])].map(t=>`<option value="${esc(t)}">`).join('')}</datalist>`}
 Object.assign(PACTS,{
   cview:b=>{ui.campoView=b.dataset.v;ui.delAsk=null;rCampo()},
@@ -2154,8 +2427,97 @@ document.addEventListener('scroll',e=>{if(cbxCur&&!cbxCur.sheet&&!cbxCur.wrap.co
 document.addEventListener('keydown',e=>{const b=e.target;if(b.classList&&b.classList.contains('cbx')&&(e.key==='ArrowDown'||e.key==='ArrowUp'||(e.key.length===1&&/\S/.test(e.key)))){e.preventDefault();const sel=b.previousElementSibling;if(sel&&sel.tagName==='SELECT'){cbxOpen(sel,b);if(e.key.length===1){const q=cbxCur.wrap.querySelector('.cbxq');q.value=e.key;q.dispatchEvent(new Event('input'))}}}});
 new MutationObserver(()=>enhanceSelects()).observe(document.querySelector('main'),{childList:true,subtree:true});
 
+/* ================= Painel do publicador ================= */
+/* Quem entra com o nível "Publicador" vê só este painel: as próprias designações (com confirmação),
+   as programações do mês e os próprios dados. Editores e administradores com e-mail no cadastro
+   também têm "Meu painel" em Mais. */
+const painelOnly=()=>!!(window.FBX&&window.FBX.papel==='publicador');
+function myPubId(){const F=window.FBX;if(!F||!F.email)return null;if(F.pubId)return F.pubId;
+  const e=F.email.toLowerCase();return Object.keys(pubs).find(id=>String(pubs[id].email||'').toLowerCase()===e)||null}
+let resp={};               // respostas (confirmações) por id do documento
+let nomesRemote=null;      // quadro/nomes como está no banco
+const respKey=(col,id,field,pid)=>[col,id,field,pid].join('~').replace(/\//g,'_');
+const horaDe=date=>parse(date).getDay()===+cfg.diaFds?(cfg.horaFds||''):(cfg.hora||'');
+function myItems(pid,from){const out=[];const add=o=>out.push(o);
+  sortedWeeks().forEach(w=>{const d=meetDate(w);if(d<from)return;roles(w).forEach(r=>{if(r.pub===pid)add({k:'meio',col:'semanas',id:w.data,field:r.field,date:d,hora:cfg.hora,titulo:'Reunião do meio de semana',txt:r.txt})})});
+  sortedFds().forEach(f=>{if(f.data<from)return;rolesFds(f).forEach(r=>{if(r.pub===pid)add({k:'fds',col:'fimdesemana',id:f.data,field:r.field,date:f.data,hora:cfg.horaFds||'',titulo:'Reunião do fim de semana',txt:r.txt})})});
+  Object.values(avd).forEach(d0=>{const d=avNorm(d0);if(!d.data||d.data<from)return;const A=(field,txt)=>add({k:'av',col:'av',id:d.data,field,date:d.data,hora:horaDe(d.data),titulo:'Áudio/vídeo e indicadores',txt});
+    if(d.av===pid)A('av','Áudio e vídeo');if(d.palco===pid)A('palco','Palco');d.mic.forEach((x,i)=>{if(x===pid)A('mic.'+i,'Microfone volante')});d.ind.forEach((x,i)=>{if(x===pid)A('ind.'+i,'Indicador')})});
+  Object.entries(lmp).forEach(([id,s])=>{if(!s||!s.data||s.data<from||!s.grupo)return;const g=lgr[s.grupo];if(!g)return;
+    const dir=g.dirigente===pid;if(!dir&&!(g.membros||[]).some(m=>m.id===pid))return;
+    add({k:'limp',col:'limpeza',id,field:'grupo',date:s.data,hora:s.tipo==='reuniao'?'após a reunião':'',titulo:'Limpeza do Salão do Reino',txt:(s.tipo==='semanal'?'Limpeza semanal':'Limpeza após a reunião')+' · Grupo '+(g.letra||s.grupo)+(dir?' (você dirige o grupo)':'')})});
+  Object.values(cmp).forEach(c=>(c.saidas||[]).forEach(r=>{if(r.dir!==pid)return;const date=cDate(c.semana,r.dia);if(date<from)return;
+    add({k:'campo',col:'campo',id:c.semana,field:'saida.'+r.dia+'.'+String(r.hora||'').replace(':','h'),date,hora:r.hora,titulo:'Saída de campo',txt:'Dirigir: '+r.mod+(r.terr?' · '+r.terr:'')})}));
+  return out.sort((a,b)=>(a.date+(a.hora||'')).localeCompare(b.date+(b.hora||'')))}
+const KCOR={meio:'var(--tes)',fds:'var(--pub)',av:'var(--sent)',limp:'var(--min)',campo:'var(--accent)'};
+function icsFor(it){const p2=n=>String(n).padStart(2,'0');const d=it.date.replace(/-/g,'');const m=/^(\d{1,2}):(\d{2})$/.exec(it.hora||'');
+  const st=m?d+'T'+p2(m[1])+m[2]+'00':null;let en=null;if(m){const t=new Date(parse(it.date));t.setHours(+m[1]+1,+m[2]);en=iso(t).replace(/-/g,'')+'T'+p2(t.getHours())+p2(t.getMinutes())+'00'}
+  const txt=s=>String(s).replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/[,;]/g,c=>'\\'+c);
+  return['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Designar//PT-BR','BEGIN:VEVENT','UID:'+respKey(it.col,it.id,it.field,'x')+'@designar',
+    'DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z',st?'DTSTART:'+st:'DTSTART;VALUE=DATE:'+d,en?'DTEND:'+en:'',
+    'SUMMARY:'+txt(it.txt.split('\n')[0]),'DESCRIPTION:'+txt(it.titulo+(cfg.congregacao?' · Congregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):'')),'END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n')}
+function rPainel(){const v=$('#v-painel');const pid=myPubId();
+  if(!pid){v.innerHTML=`<div class="panel" style="padding:20px"><h2 style="margin:0 0 6px">Meu painel</h2><p class="muted" style="margin:0">Sua conta ainda não está ligada a um cadastro de publicador. Peça a um administrador para conferir o seu e-mail na ficha de publicador.</p></div>`;return}
+  const nome=pname(pid)||'';const V=ui.pnView||'minhas';
+  const seg=`<div class="seg pseg"><button data-a="pnview" data-v="minhas" aria-pressed="${V==='minhas'}">Minhas designações</button><button data-a="pnview" data-v="prog" aria-pressed="${V==='prog'}">Programação</button><button data-a="pnview" data-v="dados" aria-pressed="${V==='dados'}">Meus dados</button></div>`;
+  let body='';
+  if(V==='minhas'){const from=shiftDays(iso(new Date()),-1);const its=myItems(pid,from);let lastM='';
+    body=its.length?its.map((it,i)=>{const m=it.date.slice(0,7);const head=m!==lastM?`<h3 class="pmes">${cap(monthLabel(m))}</h3>`:'';lastM=m;const dt=parse(it.date);
+      const r=resp[respKey(it.col,it.id,it.field,pid)];const st=r&&r.status;
+      const acts=st==='ok'?`<span class="pst ok">Confirmado</span><button class="btn small ghost" data-a="pnresp" data-i="${i}" data-s="">Desfazer</button>`
+        :st==='nao'?`<span class="pst nao">Você avisou que não pode</span><button class="btn small ghost" data-a="pnresp" data-i="${i}" data-s="">Desfazer</button>`
+        :`<button class="btn small primary" data-a="pnresp" data-i="${i}" data-s="ok">Confirmar</button><button class="btn small" data-a="pnresp" data-i="${i}" data-s="nao">Não posso</button>`;
+      return head+`<div class="pitem"><span class="cal" aria-hidden="true"><small>${DIAS[dt.getDay()].slice(0,3).toUpperCase()}</small><b>${pad(dt.getDate())}</b></span>
+        <div class="pinfo"><small style="color:${KCOR[it.k]}">${esc(it.titulo)}${it.hora?' · '+esc(it.hora):''}</small><b>${esc(it.txt)}</b>
+        <div class="pacts">${acts}<button class="btn small ghost" data-a="pnics" data-i="${i}">Adicionar à agenda</button></div></div></div>`}).join('')
+      :`<div class="panel" style="padding:20px"><p class="muted" style="margin:0">Você não tem designações marcadas a partir de hoje. Quando alguém designar você, ela aparece aqui.</p></div>`;
+    ui.pnItems=its}
+  else if(V==='prog'){if(!ui.pnMonth)ui.pnMonth=iso(new Date()).slice(0,7);const K=ui.pnKind||'meio';
+    const kinds=[['meio','Meio de semana'],['fds','Fim de semana'],['limp','Limpeza'],['av','A/V e Indicadores'],['campo','Pregação']];
+    body=`<div class="seg seg4" style="max-width:520px">${kinds.map(([k,l])=>`<button data-a="pnkind" data-k="${k}" aria-pressed="${K===k}">${l}</button>`).join('')}</div>
+      <div class="monthnav" style="margin:14px 0 10px;justify-content:flex-start;gap:12px"><button class="btn small ghost" data-a="pnprev" aria-label="Mês anterior">‹</button><strong>${monthLabel(ui.pnMonth)}</strong><button class="btn small ghost" data-a="pnnext" aria-label="Próximo mês">›</button></div>
+      <div id="pnStage" class="pnstage"></div>`}
+  else{body=`<div class="panel" style="padding:20px;display:flex;flex-direction:column;gap:10px" id="pnDados"><p class="muted" style="margin:0">Carregando…</p></div>`}
+  v.innerHTML=`<div class="phead"><small>Meu painel</small><h2>Olá, ${esc(String(nome).split(' ')[0]||'irmão')}</h2></div>${seg}<div class="pbodyp">${body}</div>`;
+  if(V==='prog')requestAnimationFrame(pnStage);
+  if(V==='dados')pnDados(pid)}
+function pnStage(){const st=$('#pnStage');if(!st)return;const ym=ui.pnMonth,K=ui.pnKind||'meio';let sel=[];
+  if(K==='meio')sel=sortedWeeks().filter(w=>w.data.startsWith(ym));else if(K==='fds')sel=sortedFds().filter(f=>f.data.startsWith(ym));
+  else if(K==='limp'||K==='av')sel=[{data:ym+'-01',ym}];else sel=campoWeeks(ym).filter(m=>cmp[m]).map(m=>({data:cThu(m),mon:m}));
+  if(!sel.length){st.innerHTML='<p class="muted">Nada programado neste mês ainda.</p>';return}
+  layoutPages(sel,cap(monthLabel(ym)),K,st)}
+async function pnDados(pid){const box=$('#pnDados');if(!box)return;let p=pubs[pid];
+  if(painelOnly()){try{p=await window.FBX.myPubDoc()}catch(e){p=null}}
+  const I=(window.FBX&&window.FBX.pub)||{};
+  if(!p){box.innerHTML='<p class="muted" style="margin:0">Não foi possível carregar os seus dados.</p>';return}
+  const cats=(p.cats||[]).map(c=>CATNAME[c]).filter(Boolean);
+  box.innerHTML=`<h3 style="margin:0;font-size:18px">Seus dados no sistema</h3>
+    <div class="pdl"><span>Nome</span><b>${esc(p.nome||'')}</b><span>WhatsApp</span><b>${esc(p.tel||'—')}</b><span>E-mail</span><b>${esc(p.email||window.FBX.email||'')}</b><span>Pode ser designado para</span><b>${cats.length?esc(cats.join(', ')):'—'}</b></div>
+    <p class="hint" style="margin:6px 0 0">Algo errado ou quer que seus dados sejam apagados? Fale com ${esc(I.responsavel||'os anciãos da congregação')}${I.contato?' ('+esc(I.contato)+')':''}. <a href="#" data-doc="privacidade">Aviso de privacidade</a></p>`}
+Object.assign(PACTS,{
+  pnview:b=>{ui.pnView=b.dataset.v;rPainel()},
+  pnkind:b=>{ui.pnKind=b.dataset.k;rPainel()},
+  pnprev:()=>{ui.pnMonth=shiftMonth(ui.pnMonth,-1);rPainel()},pnnext:()=>{ui.pnMonth=shiftMonth(ui.pnMonth,1);rPainel()},
+  pnics:async b=>{const it=(ui.pnItems||[])[+b.dataset.i];if(!it)return;await saveFile('designacao-'+it.date+'.ics',new Blob([icsFor(it)],{type:'text/calendar'}))},
+  pnresp:async b=>{const it=(ui.pnItems||[])[+b.dataset.i];const pid=myPubId();if(!it||!pid||!window.FBX)return;const k=respKey(it.col,it.id,it.field,pid);const s=b.dataset.s;
+    try{if(!s){await window.FBX.delResposta(k);delete resp[k]}
+      else{const d={pub:pid,col:it.col,id:it.id,field:it.field,date:it.date,txt:it.txt.split('\n')[0],status:s};await window.FBX.setResposta(k,d);resp[k]=Object.assign({},d,{em:null})}
+      rPainel();toast(!s?'Resposta desfeita':s==='ok'?'Designação confirmada':'Aviso enviado aos responsáveis')}catch(e){toast('Não foi possível salvar ('+((e&&e.code)||'erro')+')')}}});
+/* resumo das confirmações dentro dos editores (meio e fim de semana) */
+function respResumo(col,id,rs){if(!window.FBX)return'';let ok=0;const nao=[];
+  rs.forEach(r=>{const x=resp[respKey(col,id,r.field,r.pub)];if(!x)return;if(x.status==='ok')ok++;else if(x.status==='nao')nao.push(tc(pname(r.pub))+' ('+r.txt.split(/[:(\n]/)[0].trim()+')')});
+  if(!ok&&!nao.length)return'';
+  return`<div class="respbox">${ok?`<span><b>${ok}</b> de ${rs.length} confirmaram</span>`:''}${nao.length?`<span class="nao">Não podem: ${esc(nao.join('; '))}</span>`:''}</div>`}
+/* mantém a lista de nomes (sem telefones) que o painel dos publicadores usa */
+function syncNomes(){const F=window.FBX;if(!F||!['admin','editor'].includes(F.papel)||!loaded.p||nomesRemote===null)return;
+  const map={};Object.entries(pubs).forEach(([id,p])=>{if(p&&p.nome)map[id]=tc(p.nome)});
+  if(JSON.stringify(map)===JSON.stringify(nomesRemote))return;clearTimeout(syncNomes.t);
+  syncNomes.t=setTimeout(()=>{nomesRemote=map;store.set('quadro','nomes',{nomes:map}).catch(()=>{nomesRemote=null})},1200)}
+
 /* ================= Aba Ajustes ================= */
+const isAdm=()=>!window.FBX||window.FBX.papel==='admin';
 function rAjustes(){
+  if(!isAdm()){$('#v-ajustes').innerHTML=`<div class="panel settings"><div class="full"><h3 style="margin:0 0 6px;font-size:16px">Ajustes</h3><p class="muted" style="margin:0;font-size:14.5px">Só administradores mudam os ajustes gerais (dia e horário das reuniões, nome da congregação, mensagem do WhatsApp), a lista de acesso e as cópias de segurança.</p></div><div class="full" id="accBox"></div></div>`;drawAcc();return}
   const mis=misaligned(),nm2=mis.ws.length+mis.fs.length;
   $('#v-ajustes').innerHTML=`<div class="panel settings">
     ${nm2?`<div class="full drawres short" style="display:flex;flex-direction:column;gap:8px"><span>${mis.ws.length?`${mis.ws.length} semana${mis.ws.length>1?'s':''} do meio de semana (${mis.ws.slice(0,4).map(w=>br(w.data).slice(0,5)).join(', ')}${mis.ws.length>4?'…':''}) não ${mis.ws.length>1?'estão':'está'} em ${DIAS[cfg.dia]}. `:''}${mis.fs.length?`${mis.fs.length} reuni${mis.fs.length>1?'ões':'ão'} de fim de semana (${mis.fs.slice(0,4).map(f=>br(f.data).slice(0,5)).join(', ')}${mis.fs.length>4?'…':''}) não ${mis.fs.length>1?'estão':'está'} em ${DIAS[cfg.diaFds]}. `:''}Só datas de hoje em diante entram aqui; os nomes e a programação continuam iguais.</span>
@@ -2174,35 +2536,75 @@ function rAjustes(){
       <button class="btn" data-a="exportjson">Baixar cópia de segurança</button>
       <label class="btn" style="cursor:pointer">Restaurar cópia<input type="file" id="c-import" accept="application/json,.json" hidden></label>
       <span class="hint">A cópia guarda publicadores, semanas e ajustes em um arquivo .json.</span>
-    </div>${window.FBX&&window.FBX.email?'<div class="full" id="accBox"></div>':''}</div>`;
-  if(window.FBX&&window.FBX.email)drawAcc();
+    </div>${window.FBX&&window.FBX.email?`<div class="full accbox"><h3 style="margin:0 0 4px;font-size:16px">Aviso de privacidade (LGPD)</h3><p class="hint" style="margin:0 0 10px">Aparecem no aviso de privacidade e na página Sobre, inclusive na tela de login: é com quem os publicadores falam para ver, corrigir ou apagar os próprios dados.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px"><label class="f">Responsável pelos dados<input type="text" id="c-resp" value="${esc((window.FBX.pub||{}).responsavel||'')}" placeholder="Ex.: Corpo de anciãos da Congregação Jorrinho"></label>
+      <label class="f">Contato para pedidos<input type="text" id="c-cont" value="${esc((window.FBX.pub||{}).contato||'')}" placeholder="E-mail ou telefone"></label></div>
+      <div style="margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;font-size:13.5px"><a href="#" data-doc="privacidade">Ver aviso de privacidade</a><a href="#" data-doc="termos">Ver termo de uso</a></div></div>
+      <div class="full" id="accBox"></div><div class="full" id="actBox"></div>`:''}</div>`;
+  if(window.FBX&&window.FBX.email){drawAcc();drawAct()}
 }
+/* ===== Registro de atividade (administradores) ===== */
+const COLN={semanas:'Meio de semana',fimdesemana:'Fim de semana',publicadores:'Publicador',eventos:'Tipo de semana',limpezaGrupos:'Grupo de limpeza',limpeza:'Escala de limpeza',estoque:'Item de higiene e limpeza',av:'A/V e Indicadores',campo:'Saídas de campo',config:'Ajustes'};
+const tsDate=t=>t&&(t.seconds!=null?new Date(t.seconds*1000):t.toDate?t.toDate():null);
+const tsLabel=t=>{const d=tsDate(t);return d?pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes()):''};
+const who=(e,n)=>esc(n||String(e||'').split('@')[0]);
+function actItem(c,id){if(c==='publicadores')return pubs[id]?tc(pubs[id].nome):id;if(c==='config')return'';if(/^\d{4}-\d\d-\d\d/.test(id))return c==='campo'?campoLabel(id):br(id.slice(0,10))+(id.length>10?' ('+id.slice(11)+')':'');if(c==='estoque'&&stk[id])return stk[id].nome;return id}
+function drawAct(){const box=$('#actBox');if(!box||!window.FBX)return;
+  if(!ui.actSub){ui.actSub=true;window.FBX.recent(l=>{ui.act=l;drawAct()},()=>{ui.act=[]})}
+  const l=ui.act;
+  box.innerHTML=`<div class="accbox"><h3 style="margin:0 0 4px;font-size:16px">Atividade recente</h3><p class="hint" style="margin:0 0 8px">As últimas alterações feitas no sistema, com quem fez e quando.</p>
+    ${l==null?'<div class="muted" style="font-size:14px">Carregando…</div>':l.length?`<div class="actlist">${l.map(a=>`<div class="actrow"><span class="muted">${tsLabel(a.em)}</span><span><b>${who(a.por,a.nome)}</b> ${a.acao==='restaurou'?'restaurou uma cópia de segurança':(a.acao==='excluiu'?'excluiu ':'alterou ')+esc(COLN[a.col]||a.col)+(actItem(a.col,a.id)?' · '+esc(actItem(a.col,a.id)):'')}</span></div>`).join('')}</div>`:'<div class="muted" style="font-size:14px">Nenhuma alteração registrada ainda.</div>'}</div>`}
+/* "última alteração" dentro dos editores */
+function lastMod(d){if(!window.FBX||!d||!d._por)return'';return`<div class="lastmod">Última alteração: <b>${who(d._por,d._nome)}</b>${d._em?' · '+tsLabel(d._em):''}</div>`}
+/* ===== Lembrete de cópia de segurança (administradores, a cada 30 dias) ===== */
+function bkCheck(){const box=$('#bkBox');if(!box)return;if(!window.FBX||!isAdm()||!loaded.c){box.hidden=true;return}
+  let snooze=0;try{snooze=+localStorage.getItem('vmc-bk-adiar')||0}catch(e){}
+  const last=cfg.ultimoBackup;const dias=last?Math.floor((Date.now()-parse(last).getTime())/864e5):null;
+  if((dias!=null&&dias<30)||Date.now()<snooze){box.hidden=true;return}
+  box.innerHTML=`<span>${dias==null?'Ainda não há cópia de segurança dos dados.':'Faz '+dias+' dias desde a última cópia de segurança.'} Baixe uma e guarde com você: se algo for apagado por engano, é com ela que se recupera.</span><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small primary" data-a="exportjson">Baixar cópia agora</button><button class="btn small ghost" data-a="bkadiar">Lembrar daqui a 7 dias</button></span>`;box.hidden=false}
+Object.assign(PACTS,{bkadiar:()=>{try{localStorage.setItem('vmc-bk-adiar',String(Date.now()+7*864e5))}catch(e){}bkCheck()}});
 /* ===== Acesso (só na versão hospedada com Firebase) ===== */
-const PAPEIS={admin:'Administrador',editor:'Pode editar',leitor:'Só visualizar'};
+const PAPEIS={admin:'Administrador',editor:'Pode editar',leitor:'Só visualizar',publicador:'Publicador (só o painel)'};
 function drawAcc(){const box=$('#accBox');if(!box)return;const F=window.FBX;const adm=F.papel==='admin';
-  if(adm&&!ui.accSub){ui.accSub=true;F.listAccess(l=>{ui.acc=l;drawAcc()},()=>{ui.acc=null})}
-  const list=(ui.acc||[]).slice().sort((a,b)=>a.email.localeCompare(b.email));
+  if(adm&&!ui.accSub){ui.accSub=true;F.listAccess(l=>{ui.acc=l;drawAcc()},()=>{ui.acc=null});if(F.listAceites)F.listAceites(m=>{ui.aceites=m;drawAcc()},()=>{})}
+  const AC=ui.aceites||{};const accInfo=e=>{const a=AC[e];if(!a)return'<small class="muted">ainda não entrou</small>';return`<small class="muted">${a.ultimo?'último acesso '+tsLabel(a.ultimo):''}${a.em?' · aceitou o termo em '+tsLabel(a.em).slice(0,10):''}</small>`};
+  const all=(ui.acc||[]).slice().sort((a,b)=>a.email.localeCompare(b.email));const list=all.filter(a=>a.papel!=='publicador');const pubAcc=all.filter(a=>a.papel==='publicador');
+  const known=new Set(all.map(a=>a.email));const pend=Object.entries(pubs).filter(([id,p])=>p.email&&p.ativo!==false&&!known.has(String(p.email).toLowerCase())&&String(p.email).toLowerCase()!==F.owner);
+  const pubOpts=cur=>'<option value="">— sem ligação —</option>'+Object.keys(pubs).sort((a,b)=>pname(a).localeCompare(pname(b),'pt')).map(id=>`<option value="${id}" ${id===cur?'selected':''}>${esc(tc(pname(id)))}</option>`).join('');
+  const lig=a=>a.pub&&pubs[a.pub]?' · <span class="muted">'+esc(tc(pname(a.pub)))+'</span>':'';
   box.innerHTML=`<div class="accbox"><h3 style="margin:0 0 4px;font-size:16px">Acesso ao sistema</h3>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px">Conectado como <b>${esc(F.email)}</b><span class="abtag">${esc(PAPEIS[F.papel]||F.papel)}</span><button class="btn small ghost" data-a="fbout">Sair</button></div>
-    ${adm?`<p class="hint" style="margin:10px 0 6px">Só entram no sistema os e-mails Google desta lista. Quem "pode editar" muda as designações; quem "só visualiza" vê tudo, mas não consegue salvar alterações. Administradores também mexem nesta lista.</p>
-    <div class="acclist">${F.owner?`<div class="accrow"><span>${esc(F.owner)}</span><span class="muted" style="font-size:13px">Administrador principal (fixo)</span><span></span></div>`:''}
-    ${list.filter(a=>a.email!==F.owner).map(a=>`<div class="accrow"><span>${esc(a.email)}</span><select class="accp" data-e="${esc(a.email)}" aria-label="Permissão de ${esc(a.email)}">${Object.entries(PAPEIS).map(([k,v])=>`<option value="${k}" ${a.papel===k?'selected':''}>${v}</option>`).join('')}</select>
+    ${adm?`<p class="hint" style="margin:10px 0 6px">Só entram no sistema os e-mails desta lista (conta Google ou link no e-mail). Quem "pode editar" muda as designações; quem "só visualiza" vê tudo, mas não consegue salvar alterações. Administradores também mexem nesta lista.</p>
+    <div class="acclist">${F.owner?`<div class="accrow"><span>${esc(F.owner)}<br>${accInfo(F.owner)}</span><span class="muted" style="font-size:13px">Administrador principal (fixo)</span><span></span></div>`:''}
+    ${list.filter(a=>a.email!==F.owner).map(a=>`<div class="accrow"><span>${esc(a.email)}${lig(a)}<br>${accInfo(a.email)}</span><select class="accp" data-e="${esc(a.email)}" aria-label="Permissão de ${esc(a.email)}">${Object.entries(PAPEIS).map(([k,v])=>`<option value="${k}" ${a.papel===k?'selected':''}>${v}</option>`).join('')}</select>
       ${ui.delAsk==='acc'+a.email?`<span class="confirm"><button class="btn small danger" data-a="accdelok" data-e="${esc(a.email)}">Remover</button><button class="btn small" data-a="accno">Não</button></span>`:`<button class="btn small ghost danger" data-a="accdel" data-e="${esc(a.email)}">Remover</button>`}</div>`).join('')}
     ${ui.acc&&!list.filter(a=>a.email!==F.owner).length?'<div class="muted" style="font-size:14px;padding:6px 0">Ninguém além de você ainda.</div>':''}</div>
-    <div class="accadd"><input type="email" id="accEmail" placeholder="email@gmail.com" autocomplete="off" aria-label="E-mail Google"><select id="accPapel" aria-label="Permissão">${Object.entries(PAPEIS).map(([k,v])=>`<option value="${k}" ${k==='editor'?'selected':''}>${v}</option>`).join('')}</select><button class="btn small primary" data-a="accadd">Dar acesso</button></div>`:''}
+    <div class="accadd"><input type="email" id="accEmail" placeholder="email@gmail.com" autocomplete="off" aria-label="E-mail"><select id="accPapel" aria-label="Permissão">${Object.entries(PAPEIS).map(([k,v])=>`<option value="${k}" ${k==='editor'?'selected':''}>${v}</option>`).join('')}</select><select id="accPub" aria-label="Ligar ao publicador">${pubOpts('')}</select><button class="btn small primary" data-a="accadd">Dar acesso</button></div>
+    <p class="hint" style="margin:6px 0 0">"Ligar ao publicador" mostra as designações daquela pessoa em "Meu painel". Para o nível Publicador, é obrigatório.</p>
+    <h3 style="margin:22px 0 4px;font-size:16px">Painel dos publicadores</h3>
+    <p class="hint" style="margin:0 0 8px">Publicadores com acesso veem só as próprias designações, as programações do mês e os próprios dados. Não veem telefones nem dados de outros.</p>
+    ${pend.length?`<div class="drawres" style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span>${pend.length} publicador${pend.length>1?'es têm':' tem'} e-mail no cadastro e ainda não ${pend.length>1?'têm':'tem'} acesso ao painel.</span><button class="btn small primary" data-a="accbulk">Liberar o painel para ${pend.length>1?'todos':'ele'}</button></div>`:''}
+    <div class="acclist">${pubAcc.map(a=>`<div class="accrow"><span>${a.pub&&pubs[a.pub]?'<b>'+esc(tc(pname(a.pub)))+'</b> · ':''}${esc(a.email)}<br>${a.pub?accInfo(a.email):'<small style="color:var(--err)">sem ligação com um publicador</small>'}</span><select class="accpub" data-e="${esc(a.email)}" aria-label="Publicador ligado a ${esc(a.email)}">${pubOpts(a.pub||'')}</select>
+      ${ui.delAsk==='acc'+a.email?`<span class="confirm"><button class="btn small danger" data-a="accdelok" data-e="${esc(a.email)}">Remover</button><button class="btn small" data-a="accno">Não</button></span>`:`<button class="btn small ghost danger" data-a="accdel" data-e="${esc(a.email)}">Remover</button>`}</div>`).join('')||'<div class="muted" style="font-size:14px;padding:6px 0">Nenhum publicador com acesso ainda. Cadastre o e-mail na ficha de cada publicador (aba Publicadores) e use o botão acima.</div>'}</div>`:''}
   </div>`}
 Object.assign(PACTS,{
   fbout:()=>window.FBX.signOut(),
   accadd:async()=>{const e=($('#accEmail').value||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){toast('Escreva um e-mail válido');return}
-    try{await window.FBX.setAccess(e,$('#accPapel').value);toast('Acesso liberado para '+e)}catch(err){toast('Não foi possível salvar ('+((err&&err.code)||'erro')+')')}},
+    const pa=$('#accPapel').value,pu=$('#accPub').value;if(pa==='publicador'&&!pu){toast('Escolha qual publicador é essa pessoa');return}
+    try{await window.FBX.setAccess(e,pa,pu||null);toast('Acesso liberado para '+e)}catch(err){toast('Não foi possível salvar ('+((err&&err.code)||'erro')+')')}},
+  accbulk:async b=>{b.disabled=true;const known=new Set((ui.acc||[]).map(a=>a.email));let n=0;
+    for(const [id,p] of Object.entries(pubs)){const e=String(p.email||'').toLowerCase();if(!e||p.ativo===false||known.has(e)||e===window.FBX.owner)continue;try{await window.FBX.setAccess(e,'publicador',id);n++}catch(err){}}
+    toast(n+' publicador'+(n===1?' liberado':'es liberados'))},
   accdel:b=>{ui.delAsk='acc'+b.dataset.e;drawAcc()},accno:()=>{ui.delAsk=null;drawAcc()},
   accdelok:async b=>{ui.delAsk=null;try{await window.FBX.delAccess(b.dataset.e);toast('Acesso removido')}catch(err){toast('Não foi possível remover');drawAcc()}}});
+document.addEventListener('change',async e=>{const t=e.target;if(!t.classList||!t.classList.contains('accpub'))return;try{await window.FBX.setAccess(t.dataset.e,'publicador',t.value||null);toast('Ligação alterada')}catch(err){toast('Não foi possível alterar')}});
 document.addEventListener('change',async e=>{const t=e.target;if(!t.classList||!t.classList.contains('accp'))return;try{await window.FBX.setAccess(t.dataset.e,t.value);toast('Permissão alterada')}catch(err){toast('Não foi possível alterar')}});
 document.addEventListener('input',e=>{const id=e.target.id;const map={'c-cong':'congregacao','c-dia':'dia','c-hora':'hora','c-papel':'papel','c-msg':'mensagem','c-int':'intervaloMeses','c-diafds':'diaFds','c-horafds':'horaFds','c-dialimp':'diaLimpeza'};
+  if((id==='c-resp'||id==='c-cont'||id==='c-cong')&&window.FBX&&window.FBX.setPublic){clearTimeout(rAjustes.pt);rAjustes.pt=setTimeout(()=>{const d={congregacao:cfg.congregacao||''};const r=$('#c-resp'),c=$('#c-cont');if(r)d.responsavel=r.value.trim();if(c)d.contato=c.value.trim();window.FBX.setPublic(d).then(()=>setStatus('Tudo salvo')).catch(()=>setStatus('Não foi possível salvar o aviso de privacidade','error'))},800)}
   if(map[id]){cfg[map[id]]=(id==='c-dia'||id==='c-int'||id==='c-diafds'||id==='c-dialimp')?+e.target.value:e.target.value;if(id==='c-dia'||id==='c-diafds')setTimeout(rAjustes,0);queueSave('config','geral',cfg);$('#hName').textContent=cfg.congregacao?'Congregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):'';}});
-async function exportJson(){const blob=new Blob([JSON.stringify({publicadores:pubs,semanas:weeks,fimdesemana:fds,eventos:evs,limpezaGrupos:lgr,limpeza:lmp,estoque:stk,av:avd,campo:cmp,config:cfg},null,1)],{type:'application/json'});await saveFile('designacoes-vmc-'+iso(new Date())+'.json',blob)}
-document.addEventListener('change',e=>{if(e.target.id!=='c-import')return;const f=e.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=async()=>{try{const d=JSON.parse(r.result);let n=0;
+async function exportJson(){const blob=new Blob([JSON.stringify({publicadores:pubs,semanas:weeks,fimdesemana:fds,eventos:evs,limpezaGrupos:lgr,limpeza:lmp,estoque:stk,av:avd,campo:cmp,config:cfg},null,1)],{type:'application/json'});const ok=await saveFile('designacoes-vmc-'+iso(new Date())+'.json',blob);if(ok&&window.FBX&&isAdm()){cfg.ultimoBackup=iso(new Date());queueSave('config','geral',cfg);bkCheck()}}
+document.addEventListener('change',e=>{if(e.target.id!=='c-import')return;if(!isAdm()){toast('Só administradores restauram cópias');return}const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=async()=>{if(window.FBX)window.FBX.quiet=true;try{const d=JSON.parse(r.result);let n=0;
     for(const[id,p]of Object.entries(d.publicadores||{})){pubs[id]=p;await store.set('publicadores',id,p);n++}
     for(const[id,w]of Object.entries(d.semanas||{})){weeks[id]=norm(w);await store.set('semanas',id,weeks[id]);n++}
     for(const[id,f]of Object.entries(d.fimdesemana||{})){fds[id]=normF(f);await store.set('fimdesemana',id,fds[id]);n++}
@@ -2213,7 +2615,7 @@ document.addEventListener('change',e=>{if(e.target.id!=='c-import')return;const 
     for(const[id,v]of Object.entries(d.av||{})){avd[id]=v;await store.set('av',id,v);n++}
     for(const[id,v]of Object.entries(d.campo||{})){cmp[id]=v;await store.set('campo',id,v);n++}
     if(d.config){cfg=Object.assign({},DEF_CFG,d.config);await store.set('config','geral',cfg)}
-    buildHist();toast(n+' registros restaurados');rAjustes()}catch(err){toast('Arquivo inválido')}};r.readAsText(f)});
+    buildHist();toast(n+' registros restaurados');if(window.FBX){window.FBX.quiet=false;window.FBX.log('restaurou','config','copia')}rAjustes()}catch(err){if(window.FBX)window.FBX.quiet=false;toast('Arquivo inválido')}};r.readAsText(f)});
 
 document.body.insertAdjacentHTML('beforeend','<datalist id="cantList">'+CANTICOS.map((t,i)=>'<option value="'+esc((i+1)+' - '+t)+'">').join('')+'</datalist>');
 /* ao sair do campo, só o número vira número + título */
