@@ -57,6 +57,7 @@ function contaInit(){const F=window.FBX;if(!F||!F.email||$('#contaBtn'))return;
   $('#temaBtn').insertAdjacentHTML('afterend',`<div class="conta"><button class="contabtn" id="contaBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Sua conta: ${esc(F.email)}">${esc(ini)}</button>
     <div class="contamenu" id="contaMenu" hidden><div class="contaq"><b>${esc(nome)}</b><span>${esc(F.email)}</span><span class="abtag" style="align-self:flex-start;margin-top:4px">${esc(PAPEIS[F.papel]||F.papel)}</span></div>
     ${ehApp()?'':'<button type="button" class="contaitem" data-a="instmenu">Instalar como aplicativo</button>'}
+    ${avisoLigado()?'<button type="button" class="contaitem" data-a="avisomenu">Avisos no celular</button>':''}
     <button type="button" class="contaitem" data-doc="privacidade">Aviso de privacidade</button>
     <button type="button" class="contaitem sair" data-a="fbout">Sair da conta</button></div></div>`)}
 /* nome mostrado: o da conta Google ou, se não houver (entrada por e-mail), o do cadastro de publicador */

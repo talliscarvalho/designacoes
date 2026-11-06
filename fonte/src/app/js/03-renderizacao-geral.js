@@ -3,14 +3,14 @@ let renderQueued=false;
 /* só redesenha a tela quando os dados mudaram de verdade (o Firebase também avisa quando só confirma o que já estava no aparelho) */
 let lastSig='';
 function dataSig(){try{return JSON.stringify([pubs,weeks,fds,evs,lgr,lmp,stk,avd,cmp,cfg,typeof resp==='undefined'?0:resp,loaded])}catch(e){return String(Math.random())}}
-function changed(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;const sg=dataSig();if(sg===lastSig){syncNomes();return}lastSig=sg;buildHist();renderAll(true);bkCheck();syncNomes();copiaAuto()})}
+function changed(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;const sg=dataSig();if(sg===lastSig){syncNomes();syncAgenda();return}lastSig=sg;buildHist();renderAll(true);bkCheck();syncNomes();syncAgenda();copiaAuto()})}
 function renderAll(fromData){
   $('#hName').textContent=cfg.congregacao&&cfg.congregacao!=='Congregação'?'Congregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):'';
   if(painelOnly())ui.tab='painel';
   drawNav();contaSync();
   ['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio','confirmacoes'].forEach(t=>$('#v-'+t).hidden=t!==ui.tab);
   const v=$('#v-'+ui.tab);
-  lembreteS89();pedidoBox();instalarBox();
+  lembreteS89();pedidoBox();instalarBox();avisoBox();
   if(fromData&&v.contains(document.activeElement)&&document.activeElement.matches('input,textarea,select'))return; // não atrapalha quem está digitando
   ({semanas:rSemanas,fimdesemana:rFds,limpeza:rLimpeza,av:rAV,campo:rCampo,publicadores:rPubs,imprimir:rPrint,whatsapp:rWa,ajustes:rAjustes,painel:rPainel,pubimport:rPubImport,equilibrio:rEquilibrio,confirmacoes:rConfirm})[ui.tab]();
 }

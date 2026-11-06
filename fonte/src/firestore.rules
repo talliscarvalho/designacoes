@@ -47,7 +47,7 @@ service cloud.firestore {
         ['congregacao', 'dia', 'hora', 'diaFds', 'horaFds', 'diaLimpeza', 'mensagem', 'intervaloMeses', 'papel', 'ultimoBackup']);
     }
     function reservada(c) {
-      return c in ['acesso', 'registro', 'config', 'aceites', 'publico', 'quadro', 'respostas', 'copias', 'erros', 'pedidos'];
+      return c in ['acesso', 'registro', 'config', 'aceites', 'publico', 'quadro', 'respostas', 'copias', 'erros', 'pedidos', 'avisos'];
     }
     // Só estas coleções de dados existem; qualquer outro nome é recusado (evita criar "pastas" estranhas no banco)
     function dados(c) {
@@ -109,6 +109,17 @@ service cloud.firestore {
                             && request.resource.data.ultimo == request.time
                             && request.resource.data.get('nome', '') is string && request.resource.data.get('nome', '').size() <= 120
                             && request.resource.data.vezes is int && request.resource.data.vezes <= 100000;
+    }
+
+    // Avisos no celular: cada aparelho que ativou os avisos (o código do aparelho é o nome do registro).
+    // A pessoa grava e apaga só o próprio; administradores consultam. Quem envia é a tarefa do GitHub (fora destas regras).
+    match /avisos/{id} {
+      allow read, delete: if admin() || (conectado() && resource.data.quem == email());
+      allow create, update: if (dono() || naLista()) && id.size() < 400
+                            && request.resource.data.keys().hasOnly(['quem', 'token', 'em', 'aparelho'])
+                            && request.resource.data.quem == email() && request.resource.data.token == id
+                            && request.resource.data.em == request.time
+                            && request.resource.data.get('aparelho', '') is string && request.resource.data.get('aparelho', '').size() <= 200;
     }
 
     // Cópias automáticas de segurança (uma por semana): só administradores guardam, consultam e apagam

@@ -11,5 +11,6 @@ window.DESIGNAR_CONFIG={
     appId:"1:565921295019:web:77c633172ac8581e71e5ee"
   },
   dono:"talliscarvalhoo@gmail.com",      // administrador principal (fixo)
-  whatsapp:"5575992799894"               // WhatsApp do "Fale com o desenvolvedor" e da "Ajuda" (com DDI e DDD)
+  whatsapp:"5575992799894",              // WhatsApp do "Fale com o desenvolvedor" e da "Ajuda" (com DDI e DDD)
+  vapid:""                               // avisos no celular: chave pública "Web Push" (Firebase › Configurações › Cloud Messaging). Vazio = desligado
 };

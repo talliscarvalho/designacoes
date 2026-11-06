@@ -61,7 +61,7 @@ Object.assign(PACTS,{
 
 /* ----- Diagnóstico: confere o site publicado (arquivos, versão, banco, PDF e planilhas) ----- */
 const ARQS=['config.js','manifest.webmanifest','sw.js','icon-180.png','icon-192.png','icon-512.png','icon-maskable-512.png','404.html',
-  'lib/firebase-app-compat.js','lib/firebase-auth-compat.js','lib/firebase-firestore-compat.js','lib/jspdf.umd.min.js','lib/jszip.min.js','lib/xlsx.full.min.js','lib/pdfjs/pdf.min.js','lib/pdfjs/pdf.worker.min.js'];
+  'lib/firebase-app-compat.js','lib/firebase-auth-compat.js','lib/firebase-firestore-compat.js','lib/firebase-messaging-compat.js','lib/jspdf.umd.min.js','lib/jszip.min.js','lib/xlsx.full.min.js','lib/pdfjs/pdf.min.js','lib/pdfjs/pdf.worker.min.js'];
 async function versaoPublicada(){try{const r=await fetch('versao.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;return(await r.json()).versao||null}catch(e){return null}}
 async function diagnostico(){const out=[];const add=(ok,t,d)=>out.push({ok,t,d});const F=window.FBX;
   const pub=await versaoPublicada();

@@ -28,6 +28,17 @@ O site é estático (GitHub Pages) e os dados ficam no Firebase (Firestore), pro
 8. **Primeira entrada:** entre com o e-mail do `dono`, preencha Mais › Ajustes (nome da congregação, dias e horários) e libere os demais e-mails em Ajustes › Acesso ao sistema.
 9. **Segurança:** no Google Cloud Console › Credenciais, restrinja a chave da API aos endereços do site.
 
+## Avisos no celular (opcional)
+
+Lembretes das designações uma semana antes e na véspera, e aviso de pedidos de acesso para os administradores. Gratuito (Firebase Cloud Messaging + GitHub Actions).
+
+1. **Chave pública:** Firebase › Configurações do projeto › Cloud Messaging › Certificados push da Web › Gerar par de chaves. Copie a chave para `vapid` no `config.js`.
+2. **Chave do servidor:** Firebase › Configurações do projeto › Contas de serviço › Gerar nova chave privada. No GitHub, em Settings › Secrets and variables › Actions › New repository secret, crie `FIREBASE_SERVICE_ACCOUNT` e cole o conteúdo inteiro do arquivo. Não guarde esse arquivo em outro lugar.
+3. **Regras:** publique o `firestore.rules` atualizado.
+4. **Teste:** no GitHub, aba Actions › Avisos das designações › Run workflow (com "teste" marcado). Quem é administrador e ativou os avisos recebe uma notificação.
+
+Cada pessoa ativa em **menu da conta › Avisos no celular**. No iPhone, só funciona com o aplicativo na tela de início (iOS 16.4+). O GitHub pausa tarefas agendadas de repositórios sem nenhuma alteração por 60 dias; se isso acontecer, reative em Actions.
+
 ## Cópias de segurança
 
 - **Automáticas:** uma por semana, guardadas no próprio Firebase quando um administrador entra (ficam as 8 mais recentes). Em Ajustes › Cópias guardadas no servidor dá para baixar ou restaurar.

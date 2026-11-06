@@ -14,7 +14,7 @@ os.makedirs('saida/site/lib/pdfjs',exist_ok=True)
 open('saida/designacoes-vmc.html','w').write(app)
 # bibliotecas no próprio site
 L='../libs/node_modules/'
-LIBS={'firebase-app-compat.js':L+'firebase/firebase-app-compat.js','firebase-auth-compat.js':L+'firebase/firebase-auth-compat.js','firebase-firestore-compat.js':L+'firebase/firebase-firestore-compat.js',
+LIBS={'firebase-app-compat.js':L+'firebase/firebase-app-compat.js','firebase-auth-compat.js':L+'firebase/firebase-auth-compat.js','firebase-firestore-compat.js':L+'firebase/firebase-firestore-compat.js','firebase-messaging-compat.js':L+'firebase/firebase-messaging-compat.js',
   'jspdf.umd.min.js':L+'jspdf/dist/jspdf.umd.min.js','jszip.min.js':L+'jszip/dist/jszip.min.js','xlsx.full.min.js':L+'xlsx/dist/xlsx.full.min.js',
   'pdfjs/pdf.min.js':L+'pdfjs-dist/build/pdf.min.js','pdfjs/pdf.worker.min.js':L+'pdfjs-dist/build/pdf.worker.min.js'}
 for k,v in LIBS.items():shutil.copyfile(v,'saida/site/lib/'+k)

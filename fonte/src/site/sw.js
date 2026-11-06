@@ -12,3 +12,10 @@ self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;c
   /* bibliotecas e fontes: usa a cópia e atualiza por trás */
   if(ESTATICO.test(u)||(u.startsWith(self.location.origin)&&/\.(png|webmanifest|js)$/.test(u))){
     e.respondWith(caches.open(CACHE).then(c=>c.match(r).then(m=>{const f=fetch(r).then(res=>{if(res&&(res.ok||res.type==='opaque'))c.put(r,res.clone());return res}).catch(()=>m);return m||f})))}});
+/* avisos das designações (enviados pela tarefa diária do GitHub pelo Firebase Cloud Messaging) */
+self.addEventListener('push',e=>{let j={};try{j=e.data?e.data.json():{}}catch(x){j={data:{corpo:e.data?e.data.text():''}}}
+  const d=j.data||{},n=j.notification||{};const t=d.titulo||n.title||'Designar';
+  e.waitUntil(self.registration.showNotification(t,{body:d.corpo||n.body||'',icon:'icon-192.png',tag:d.tag||undefined,renotify:!!d.tag,data:{url:d.url||'./'}}))});
+self.addEventListener('notificationclick',e=>{e.notification.close();const alvo=new URL((e.notification.data&&e.notification.data.url)||'./',self.registration.scope).href;
+  e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(cs=>{const c=cs.find(x=>x.url.startsWith(self.registration.scope));
+    if(c){return c.focus().then(w=>w&&w.navigate?w.navigate(alvo).catch(()=>w):w)}return self.clients.openWindow(alvo)}))});
