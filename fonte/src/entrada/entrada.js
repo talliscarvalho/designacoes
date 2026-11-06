@@ -7,7 +7,7 @@
   const FIREBASE_CONFIG=CFG.firebase;
   const OWNER=String(CFG.dono||'').trim().toLowerCase();
   const APP="Designar", VERSAO="%%VERSAO%%", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
-  const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,suporte:CFG.suporte||'',pub:{}};
+  const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,whatsapp:CFG.whatsapp||'',pub:{}};
   const t=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let resolveReady,rejectReady;const readyP=new Promise((r,j)=>{resolveReady=r;rejectReady=j});
   readyP.catch(()=>{}); /* o sistema trata a falha em init(); evita aviso de promessa sem tratamento */
@@ -58,9 +58,10 @@
   document.addEventListener('keydown',e=>{const o=document.getElementById('fbdoc');if(e.key==='Escape'&&o&&!o.hidden)o.hidden=true});
 
   const LOCKUP=`<div class="fblock"><span class="fbmark"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="%%MARCA%%"/></svg></span></div>`;
-  const LINKS=`<nav class="fblinks" aria-label="Documentos"><a href="#" data-doc="privacidade">Privacidade</a><a href="#" data-doc="termos">Termo de uso</a><a href="#" data-doc="sobre">Sobre</a><a href="#" class="fbhelp">Ajuda</a></nav>`;
+  const LINKS=`<nav class="fblinks" aria-label="Documentos"><a href="#" data-doc="privacidade">Privacidade</a><a href="#" data-doc="termos">Termo de uso</a><a href="#" data-doc="sobre">Sobre</a><a href="#" class="fbhelp" target="_blank" rel="noopener noreferrer">Ajuda</a></nav>`;
   /* "Ajuda": e-mail ao desenvolvedor com assunto e roteiro preenchidos */
-  const helpMail=()=>{const m=CFG.suporte||['tallisdocarmo','gmail.com'].join('@');const b=`Olá!\n\nEscreva aqui a sua dúvida ou descreva o problema ao entrar no sistema:\n\n\n\n— Para ajudar no atendimento (pode manter) —\nVersão: ${VERSAO}\nTela: entrada\nAparelho: ${navigator.userAgent.replace(/\s*\([^)]*\)\s*/,' ').slice(0,160)}`;return 'mailto:'+m+'?subject='+encodeURIComponent('Sistema de designações · ajuda para entrar')+'&body='+encodeURIComponent(b)};
+  const helpMail=()=>{const n=String(CFG.whatsapp||'5575992799894').replace(/\D/g,'');const ap=/iPhone|iPad/.test(navigator.userAgent)?'iPhone/iPad':/Android/.test(navigator.userAgent)?'Android':/Windows/.test(navigator.userAgent)?'Windows':/Mac/.test(navigator.userAgent)?'Mac':'outro';
+    return 'https://wa.me/'+n+'?text='+encodeURIComponent('Olá! Preciso de ajuda para entrar no sistema de designações.\n\n(conte o que aconteceu)\n\n— Versão '+VERSAO+' · '+ap)};
   document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.fbhelp');if(a)a.href=helpMail()},true);
   if(!window.firebase||!FIREBASE_CONFIG||!FIREBASE_CONFIG.apiKey){const fail=()=>{gate('falha');const b=document.getElementById('fbRetry');if(b)b.onclick=()=>location.reload()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fail);else fail();rejectReady({code:'sem-firebase'});return}
   firebase.initializeApp(FIREBASE_CONFIG);

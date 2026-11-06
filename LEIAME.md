@@ -9,7 +9,7 @@ O site é estático (GitHub Pages) e os dados ficam no Firebase (Firestore), pro
 | Arquivo | Para que serve |
 | --- | --- |
 | `index.html` | O sistema inteiro (gerado; não edite à mão) |
-| `config.js` | Dados desta instalação: projeto Firebase, administrador principal e e-mail de suporte |
+| `config.js` | Dados desta instalação: projeto Firebase, administrador principal e WhatsApp de suporte |
 | `lib/` | Bibliotecas (Firebase, PDF, planilhas), servidas pelo próprio site |
 | `sw.js`, `manifest.webmanifest`, `icon-*.png` | Aplicativo instalável e uso sem internet |
 | `versao.json` | Versão publicada (o sistema avisa quando há uma mais nova) |
@@ -22,7 +22,7 @@ O site é estático (GitHub Pages) e os dados ficam no Firebase (Firestore), pro
 2. **Firestore:** crie o banco (modo de produção, região `southamerica-east1`).
 3. **Login:** em Authentication › Método de login, ative **Google** (e, se quiser, **E-mail/senha** com **Link do e-mail**).
 4. **Domínios autorizados:** em Authentication › Configurações, inclua o endereço do site (ex.: `usuario.github.io`) e remova `localhost`.
-5. **config.js:** troque `firebase`, `dono` (e-mail do administrador principal) e `suporte`.
+5. **config.js:** troque `firebase`, `dono` (e-mail do administrador principal) e `whatsapp` (contato de suporte, com DDI e DDD).
 6. **firestore.rules:** troque o e-mail na função `dono()` (marcada com "TROQUE AQUI") pelo mesmo de `dono`, cole as regras em Firestore › Regras e publique.
 7. **GitHub Pages:** envie todos os arquivos do site para um repositório e ative Pages (branch `main`, pasta raiz).
 8. **Primeira entrada:** entre com o e-mail do `dono`, preencha Mais › Ajustes (nome da congregação, dias e horários) e libere os demais e-mails em Ajustes › Acesso ao sistema.
