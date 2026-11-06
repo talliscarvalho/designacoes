@@ -18,7 +18,7 @@ async function init(){
   /* versão hospedada (GitHub Pages + Firebase): espera o login e usa o Firestore */
   if(!db&&window.FBX){setStatus('Aguardando login…');try{db=await window.FBX.ready()}catch(e){showBanner('Não foi possível conectar ao banco de dados ('+((e&&e.code)||'erro')+'). Recarregue a página.');setStatus('Sem conexão','error');return}
     if(window.FBX.papel==='leitor')showBanner('Você tem acesso só para visualizar. Alterações feitas aqui não são salvas.');
-    contaInit();acessoInit();copiasInit();
+    contaInit();acessoInit();copiasInit();pedidosInit();
 }
   rodape();
   /* aqui no Claude é só a versão de testes: os dados oficiais ficam no site */

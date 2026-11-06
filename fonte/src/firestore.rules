@@ -47,7 +47,7 @@ service cloud.firestore {
         ['congregacao', 'dia', 'hora', 'diaFds', 'horaFds', 'diaLimpeza', 'mensagem', 'intervaloMeses', 'papel', 'ultimoBackup']);
     }
     function reservada(c) {
-      return c in ['acesso', 'registro', 'config', 'aceites', 'publico', 'quadro', 'respostas', 'copias', 'erros'];
+      return c in ['acesso', 'registro', 'config', 'aceites', 'publico', 'quadro', 'respostas', 'copias', 'erros', 'pedidos'];
     }
     // Só estas coleções de dados existem; qualquer outro nome é recusado (evita criar "pastas" estranhas no banco)
     function dados(c) {
@@ -99,6 +99,16 @@ service cloud.firestore {
     match /publico/{id} {
       allow read: if true;
       allow write: if admin() && assinado();
+    }
+
+    // Pedidos de acesso: quem entrou e ainda não está na lista registra o próprio pedido; só administradores leem e apagam
+    match /pedidos/{id} {
+      allow read, delete: if admin();
+      allow create, update: if conectado() && id == email() && !naLista()
+                            && request.resource.data.keys().hasOnly(['nome', 'ultimo', 'vezes'])
+                            && request.resource.data.ultimo == request.time
+                            && request.resource.data.get('nome', '') is string && request.resource.data.get('nome', '').size() <= 120
+                            && request.resource.data.vezes is int && request.resource.data.vezes <= 100000;
     }
 
     // Cópias automáticas de segurança (uma por semana): só administradores guardam, consultam e apagam

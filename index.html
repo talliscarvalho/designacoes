@@ -35,7 +35,7 @@
   const CFG=window.DESIGNAR_CONFIG||{};
   const FIREBASE_CONFIG=CFG.firebase;
   const OWNER=String(CFG.dono||'').trim().toLowerCase();
-  const APP="Designar", VERSAO="2026.11.06-1013", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
+  const APP="Designar", VERSAO="2026.11.06-1036", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
   const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,whatsapp:CFG.whatsapp||'',pub:{}};
   const t=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let resolveReady,rejectReady;const readyP=new Promise((r,j)=>{resolveReady=r;rejectReady=j});
@@ -124,7 +124,7 @@
       link:H('Confira seu e-mail',`Enviamos um link de acesso para <b>${t(msg)}</b>.`)+`<p class="fbnote">Abra o e-mail <b>neste mesmo aparelho</b> e toque no link. Se não chegar em alguns minutos, veja a caixa de spam.</p><button class="fbbtn" id="fbBack">Usar outro e-mail</button>`,
       confirmar:H('Confirme o e-mail','Para terminar a entrada, digite o e-mail para o qual o link foi enviado.')+`<form id="fbConfForm" class="fbmail"><label for="fbConf" class="fblab">E-mail</label><input type="email" id="fbConf" required maxlength="254" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="nome@exemplo.com"><button class="fbbtn fbprim" type="submit">Entrar</button></form>`,
       espera:`<div class="fbwait" role="status"><span class="fbspin" aria-hidden="true"></span><p>${t(msg||'Conectando…')}</p></div>`,
-      negado:H('Acesso ainda não liberado',`A conta <b>${t(String(msg||'').startsWith('+')?fmtTelBR(msg):msg)}</b> ainda não tem acesso ao sistema.`)+`<p class="fbnote">Peça a um administrador para incluir ${String(msg||'').startsWith('+')?'este celular':'este e-mail'} em Ajustes › Acesso ao sistema. Depois, recarregue a página.</p><button class="fbbtn" id="fbOut">Entrar com outra conta</button>`,
+      negado:H('Acesso ainda não liberado',`A conta <b>${t(String(msg||'').startsWith('+')?fmtTelBR(msg):msg)}</b> ainda não tem acesso ao sistema.`)+`<p class="fbnote">Seu pedido de acesso foi enviado aos administradores. Assim que ${String(msg||'').startsWith('+')?'este celular':'este e-mail'} for liberado, é só recarregar a página.</p>${CFG.whatsapp?`<a class="fbbtn fbprim" id="fbAvisar" target="_blank" rel="noopener noreferrer" href="https://wa.me/${String(CFG.whatsapp).replace(/\D/g,'')}?text=${encodeURIComponent('Olá! Pedi acesso ao sistema de designações com '+(String(msg||'').startsWith('+')?'o celular '+fmtTelBR(msg):'o e-mail '+msg)+'. Pode liberar, por favor?')}">Avisar pelo WhatsApp</a>`:''}<button class="fbbtn fbsec" id="fbOut">Entrar com outra conta</button>`,
       erro:H('Não foi possível entrar',t(msg))+`<button class="fbbtn" id="fbLogin">Tentar de novo</button>`,
       falha:H('Não foi possível carregar','Verifique a internet e tente de novo.')+`<p class="fbnote">Se continuar, desative bloqueadores de anúncios ou extensões de privacidade para este site, ou abra em outro navegador.</p><button class="fbbtn" id="fbRetry">Tentar de novo</button>`
     }[kind]||'';
@@ -195,7 +195,10 @@
     try{const d=await fs.doc('acesso/'+email).get();lido=true;if(d.exists){const x=d.data()||{};if(email!==OWNER)papel=x.papel||'leitor';pubId=x.pub||null}}catch(e){}
     /* sem internet: usa o último acesso conferido neste aparelho */
     const cc=cacheGet(email);if(!lido&&cc){papel=papel||cc.papel;pubId=cc.pubId||null}
-    if(!papel){gate('negado',email);return}
+    if(!papel){
+      /* registra o pedido de acesso para os administradores verem (e serem avisados) */
+      if(lido)fs.doc('pedidos/'+email).set({nome:String(u.displayName||'').slice(0,120),ultimo:ts(),vezes:firebase.firestore.FieldValue.increment(1)},{merge:true}).catch(()=>{});
+      gate('negado',email);return}
     FBX.email=email;FBX.papel=papel;FBX.pubId=pubId;FBX.nome=u.displayName||'';
     if(papel==='publicador'&&!pubId){gate('erro','Seu acesso ainda não foi ligado a um cadastro de publicador. Peça a um administrador para fazer a ligação em Ajustes › Acesso ao sistema.');return}
     let ok=false,lidoA=false;try{const a=await fs.doc('aceites/'+email).get();lidoA=true;ok=a.exists&&((a.data()||{}).versao||0)>=TERMOS_V}catch(e){}
@@ -215,6 +218,7 @@
   FBX.erro=d=>fs.collection('erros').add(Object.assign({},d,{por:FBX.email,em:ts()}));
   FBX.erros={listar:(cb,err)=>fs.collection('erros').orderBy('em','desc').limit(30).onSnapshot(s=>cb(s.docs.map(d=>Object.assign({id:d.id},d.data()))),err),apagar:id=>fs.doc('erros/'+id).delete()};
   FBX.ping=()=>fs.doc('publico/info').get({source:'server'});
+  FBX.pedidos={listar:(cb,err)=>fs.collection('pedidos').onSnapshot(s=>cb(s.docs.map(d=>Object.assign({id:d.id},d.data()))),err),apagar:id=>fs.doc('pedidos/'+id).delete()};
   FBX.listAccess=(cb,err)=>fs.collection('acesso').onSnapshot(s=>cb(s.docs.map(d=>Object.assign({email:d.id},d.data()))),err);
   FBX.listAceites=(cb,err)=>fs.collection('aceites').onSnapshot(s=>{const m={};s.docs.forEach(d=>m[d.id]=d.data());cb(m)},err);
   FBX.setAccess=(email,papel,pub)=>{const d={papel,por:FBX.email,em:new Date().toISOString()};if(pub!==undefined)d.pub=pub||null;return fs.doc('acesso/'+email.toLowerCase()).set(d,{merge:true})};
@@ -252,6 +256,7 @@
 #fbgate .fbor{display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--muted,#5F6368);font-size:13px;white-space:nowrap}
 #fbgate .fbor::before,#fbgate .fbor::after{content:"";flex:1;height:1px;background:var(--line,#DAD8D3)}
 #fbgate .fbmail{display:flex;flex-direction:column;gap:8px}
+a.fbbtn{text-decoration:none;box-sizing:border-box}
 #fbgate .fbcod{font-size:22px!important;letter-spacing:.35em;text-align:center;font-variant-numeric:tabular-nums}
 #fbgate .fblab{font-size:13.5px;font-weight:600}
 #fbgate .fbmail input{border:1px solid var(--line-b,#C9C6BF);border-radius:10px;padding:12px 14px;font-size:16px;background:var(--surface,#fff);color:var(--fg,#1b1b1b);font-family:inherit;min-height:48px}
@@ -584,6 +589,10 @@ select[data-cbx]{display:none!important}
 .cbxnone{padding:12px;color:var(--muted);font-size:14px}
 .orh{display:flex;flex-direction:column;gap:6px}
 .lastmod{font-size:12.5px;color:var(--muted);margin:-2px 0 8px}
+.pedlist{margin:12px 0 4px;padding:12px 14px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;background:var(--surface-2)}
+.pedrow{display:grid;grid-template-columns:minmax(0,1fr) 170px 190px auto;gap:8px 10px;align-items:center;padding:8px 0;border-top:1px solid var(--line-2);font-size:14px}
+.pedrow:first-of-type{border-top:0}.pedbtns{display:flex;gap:6px}
+@media (max-width:760px){.pedrow{grid-template-columns:1fr 1fr}.pedrow>span:first-child{grid-column:1/-1}.pedbtns{grid-column:1/-1}}
 .s89box{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}.s89box[hidden]{display:none}
 .s89av{display:flex;gap:10px 16px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--min);border-radius:6px;padding:10px 14px;font-size:14px}
 .s89av.urg{border-left-color:var(--ev);background:color-mix(in srgb,var(--ev) 6%,var(--surface))}
@@ -874,6 +883,7 @@ select[data-cbx]{display:none!important}
   <nav class="subtabs" id="subtabs" aria-label="Seções"></nav>
   <div id="banner" class="banner" hidden></div>
   <div id="bkBox" class="banner bkbox" hidden></div>
+  <div id="pedBox" class="banner bkbox" role="status" hidden></div>
   <div id="s89Box" class="s89box" role="status" hidden></div>
   <section id="v-semanas"></section>
   <section id="v-fimdesemana" hidden></section>
@@ -1013,7 +1023,7 @@ async function init(){
   /* versão hospedada (GitHub Pages + Firebase): espera o login e usa o Firestore */
   if(!db&&window.FBX){setStatus('Aguardando login…');try{db=await window.FBX.ready()}catch(e){showBanner('Não foi possível conectar ao banco de dados ('+((e&&e.code)||'erro')+'). Recarregue a página.');setStatus('Sem conexão','error');return}
     if(window.FBX.papel==='leitor')showBanner('Você tem acesso só para visualizar. Alterações feitas aqui não são salvas.');
-    contaInit();acessoInit();copiasInit();
+    contaInit();acessoInit();copiasInit();pedidosInit();
 }
   rodape();
   /* aqui no Claude é só a versão de testes: os dados oficiais ficam no site */
@@ -1073,7 +1083,7 @@ function renderAll(fromData){
   drawNav();contaSync();
   ['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio','confirmacoes'].forEach(t=>$('#v-'+t).hidden=t!==ui.tab);
   const v=$('#v-'+ui.tab);
-  lembreteS89();
+  lembreteS89();pedidoBox();
   if(fromData&&v.contains(document.activeElement)&&document.activeElement.matches('input,textarea,select'))return; // não atrapalha quem está digitando
   ({semanas:rSemanas,fimdesemana:rFds,limpeza:rLimpeza,av:rAV,campo:rCampo,publicadores:rPubs,imprimir:rPrint,whatsapp:rWa,ajustes:rAjustes,painel:rPainel,pubimport:rPubImport,equilibrio:rEquilibrio,confirmacoes:rConfirm})[ui.tab]();
 }
@@ -3030,7 +3040,8 @@ function drawAcc(){const box=$('#accBox');if(!box)return;const F=window.FBX;cons
   const lig=a=>a.pub&&pubs[a.pub]?' · <span class="muted">'+esc(tc(pname(a.pub)))+'</span>':'';
   box.innerHTML=`<div class="accbox"><h3 style="margin:0 0 4px;font-size:16px">Acesso ao sistema</h3>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px">Conectado como <b>${esc(F.email)}</b><span class="abtag">${esc(PAPEIS[F.papel]||F.papel)}</span><button class="btn small ghost" data-a="fbout">Sair</button></div>
-    ${adm?`<p class="hint" style="margin:10px 0 6px">Só entram no sistema os e-mails desta lista (conta Google ou link no e-mail). Quem "pode editar" muda as designações; quem "só visualiza" vê tudo, mas não consegue salvar alterações. Administradores também mexem nesta lista.</p>
+    ${adm?pedidosHTML():''}
+    ${adm?`<p class="hint" style="margin:10px 0 6px">Só entram no sistema os e-mails e celulares desta lista (conta Google, link no e-mail ou código por SMS). Quem "pode editar" muda as designações; quem "só visualiza" vê tudo, mas não consegue salvar alterações. Administradores também mexem nesta lista.</p>
     <div class="acclist">${F.owner?`<div class="accrow"><span>${esc(idLbl(F.owner))}<br>${accInfo(F.owner)}</span><span class="muted" style="font-size:13px">Administrador principal (fixo)</span><span></span></div>`:''}
     ${list.filter(a=>a.email!==F.owner).map(a=>`<div class="accrow"><span>${esc(idLbl(a.email))}${lig(a)}<br>${accInfo(a.email)}</span><select class="accp" data-e="${esc(a.email)}" aria-label="Permissão de ${esc(a.email)}">${Object.entries(PAPEIS).map(([k,v])=>`<option value="${k}" ${a.papel===k?'selected':''}>${v}</option>`).join('')}</select>
       ${ui.delAsk==='acc'+a.email?`<span class="confirm"><button class="btn small danger" data-a="accdelok" data-e="${esc(a.email)}">Remover</button><button class="btn small" data-a="accno">Não</button></span>`:`<button class="btn small ghost danger" data-a="accdel" data-e="${esc(a.email)}">Remover</button>`}</div>`).join('')}
@@ -3207,6 +3218,35 @@ function lembreteS89(){const box=$('#s89Box');if(!box)return;
 Object.assign(PACTS,{
   s89ir:b=>{ui.waKind='meio';ui.waWeek=b.dataset.w},
   s89adiar:b=>{try{localStorage.setItem('vmc-s89-adiar-'+b.dataset.w,String(Date.now()+864e5))}catch(e){}lembreteS89()}});
+
+/* ================= Pedidos de acesso: quem tentou entrar e ainda não está na lista ================= */
+let pedidos=null;const pedVistos=new Set();
+function pedidosInit(){const F=window.FBX;if(ui.pedSub||!F||F.papel!=='admin'||!F.pedidos)return;ui.pedSub=true;
+  F.pedidos.listar(l=>{const novos=pedidos?l.filter(p=>!pedVistos.has(p.id)):[];l.forEach(p=>pedVistos.add(p.id));pedidos=l.sort((a,b)=>((tsDate(b.ultimo)||0)-(tsDate(a.ultimo)||0)));
+    novos.forEach(avisarPedido);pedidosMudou()},()=>{pedidos=[]})}
+function pedidosMudou(){pedidoBox();document.title=(pedidos&&pedidos.length?'('+pedidos.length+') ':'')+'Designar';if(ui.tab==='ajustes')drawAcc()}
+/* com a permissão do aparelho, mostra uma notificação mesmo com o site em segundo plano (enquanto estiver aberto) */
+function avisarPedido(p){try{if(!('Notification' in window)||Notification.permission!=='granted')return;
+  new Notification('Pedido de acesso ao sistema',{body:(p.nome?p.nome+' · ':'')+idLbl(p.id)+' quer entrar.',tag:'pedido-'+p.id})}catch(e){}}
+/* sugere o publicador do cadastro com o mesmo e-mail ou celular */
+function pedidoPub(id){return Object.keys(pubs).find(k=>idDoPub(pubs[k])===id)||Object.keys(pubs).find(k=>pubs[k].tel&&telE164(pubs[k].tel)===id)||''}
+function pedidoBox(){const box=$('#pedBox');if(!box)return;const l=pedidos||[];
+  if(!l.length||!window.FBX||window.FBX.papel!=='admin'||ui.tab==='ajustes'||painelOnly()){box.hidden=true;return}
+  box.innerHTML=`<span><b>${l.length===1?'1 pedido de acesso':l.length+' pedidos de acesso'}</b> aguardando: ${esc(l.slice(0,3).map(p=>p.nome||idLbl(p.id)).join(', '))}${l.length>3?'…':''}</span><a class="btn small primary" href="#ajustes" data-a="pedver">Ver pedidos</a>`;box.hidden=false}
+function pedidosHTML(){const l=pedidos||[];if(!l.length)return'';
+  const notif='Notification' in window&&Notification.permission==='default'?`<button class="btn small ghost" data-a="pednotif">Avisar neste aparelho quando chegar um pedido</button>`:'';
+  return`<div class="pedlist" id="pedidos"><h3 style="margin:0 0 4px;font-size:16px">Pedidos de acesso</h3><p class="hint" style="margin:0 0 8px">Pessoas que tentaram entrar e ainda não estão na lista. Libere ou recuse.</p>
+    ${l.map(p=>{const pu=pedidoPub(p.id);const pap=pu?'publicador':'leitor';return`<div class="pedrow"><span><b>${esc(p.nome||'(sem nome)')}</b> · ${esc(idLbl(p.id))}<br><small class="muted">${p.ultimo?'tentou entrar em '+tsLabel(p.ultimo):''}${p.vezes>1?' · '+p.vezes+' tentativas':''}${pu?' · parece ser '+esc(tc(pname(pu))):''}</small></span>
+      <select class="pedpap" data-id="${esc(p.id)}" aria-label="Permissão">${Object.entries(PAPEIS).map(([k,v])=>`<option value="${k}" ${k===pap?'selected':''}>${v}</option>`).join('')}</select>
+      <select class="pedpub" data-id="${esc(p.id)}" aria-label="Ligar ao publicador"><option value="">— sem ligação —</option>${Object.keys(pubs).sort((a,b)=>pname(a).localeCompare(pname(b),'pt')).map(k=>`<option value="${esc(k)}" ${k===pu?'selected':''}>${esc(tc(pname(k)))}</option>`).join('')}</select>
+      <span class="pedbtns"><button class="btn small primary" data-a="pedok" data-id="${esc(p.id)}">Liberar</button><button class="btn small ghost danger" data-a="pedno" data-id="${esc(p.id)}">Recusar</button></span></div>`}).join('')}${notif?`<div style="margin-top:8px">${notif}</div>`:''}</div>`}
+Object.assign(PACTS,{
+  pedver:()=>{setTimeout(()=>{const e=$('#pedidos');if(e)e.scrollIntoView({behavior:'smooth',block:'start'})},300)},
+  pedok:async b=>{const id=b.dataset.id;const row=b.closest('.pedrow');const pa=row.querySelector('.pedpap').value,pu=row.querySelector('.pedpub').value;
+    if(pa==='publicador'&&!pu){toast('Escolha qual publicador é essa pessoa');return}
+    b.disabled=true;try{await window.FBX.setAccess(id,pa,pu||null);await window.FBX.pedidos.apagar(id);toast('Acesso liberado para '+idLbl(id))}catch(e){b.disabled=false;toast('Não foi possível liberar ('+((e&&e.code)||'erro')+')')}},
+  pedno:async b=>{try{await window.FBX.pedidos.apagar(b.dataset.id);toast('Pedido recusado')}catch(e){toast('Não foi possível recusar')}},
+  pednotif:async()=>{try{const r=await Notification.requestPermission();toast(r==='granted'?'Pronto: este aparelho vai avisar quando chegar um pedido':'O aparelho não permitiu as notificações');drawAcc()}catch(e){}}});
 
 /* ================= Início: roda depois que todas as partes foram carregadas ================= */
 route();init();

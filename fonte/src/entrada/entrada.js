@@ -95,7 +95,7 @@
       link:H('Confira seu e-mail',`Enviamos um link de acesso para <b>${t(msg)}</b>.`)+`<p class="fbnote">Abra o e-mail <b>neste mesmo aparelho</b> e toque no link. Se não chegar em alguns minutos, veja a caixa de spam.</p><button class="fbbtn" id="fbBack">Usar outro e-mail</button>`,
       confirmar:H('Confirme o e-mail','Para terminar a entrada, digite o e-mail para o qual o link foi enviado.')+`<form id="fbConfForm" class="fbmail"><label for="fbConf" class="fblab">E-mail</label><input type="email" id="fbConf" required maxlength="254" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="nome@exemplo.com"><button class="fbbtn fbprim" type="submit">Entrar</button></form>`,
       espera:`<div class="fbwait" role="status"><span class="fbspin" aria-hidden="true"></span><p>${t(msg||'Conectando…')}</p></div>`,
-      negado:H('Acesso ainda não liberado',`A conta <b>${t(String(msg||'').startsWith('+')?fmtTelBR(msg):msg)}</b> ainda não tem acesso ao sistema.`)+`<p class="fbnote">Peça a um administrador para incluir ${String(msg||'').startsWith('+')?'este celular':'este e-mail'} em Ajustes › Acesso ao sistema. Depois, recarregue a página.</p><button class="fbbtn" id="fbOut">Entrar com outra conta</button>`,
+      negado:H('Acesso ainda não liberado',`A conta <b>${t(String(msg||'').startsWith('+')?fmtTelBR(msg):msg)}</b> ainda não tem acesso ao sistema.`)+`<p class="fbnote">Seu pedido de acesso foi enviado aos administradores. Assim que ${String(msg||'').startsWith('+')?'este celular':'este e-mail'} for liberado, é só recarregar a página.</p>${CFG.whatsapp?`<a class="fbbtn fbprim" id="fbAvisar" target="_blank" rel="noopener noreferrer" href="https://wa.me/${String(CFG.whatsapp).replace(/\D/g,'')}?text=${encodeURIComponent('Olá! Pedi acesso ao sistema de designações com '+(String(msg||'').startsWith('+')?'o celular '+fmtTelBR(msg):'o e-mail '+msg)+'. Pode liberar, por favor?')}">Avisar pelo WhatsApp</a>`:''}<button class="fbbtn fbsec" id="fbOut">Entrar com outra conta</button>`,
       erro:H('Não foi possível entrar',t(msg))+`<button class="fbbtn" id="fbLogin">Tentar de novo</button>`,
       falha:H('Não foi possível carregar','Verifique a internet e tente de novo.')+`<p class="fbnote">Se continuar, desative bloqueadores de anúncios ou extensões de privacidade para este site, ou abra em outro navegador.</p><button class="fbbtn" id="fbRetry">Tentar de novo</button>`
     }[kind]||'';
@@ -166,7 +166,10 @@
     try{const d=await fs.doc('acesso/'+email).get();lido=true;if(d.exists){const x=d.data()||{};if(email!==OWNER)papel=x.papel||'leitor';pubId=x.pub||null}}catch(e){}
     /* sem internet: usa o último acesso conferido neste aparelho */
     const cc=cacheGet(email);if(!lido&&cc){papel=papel||cc.papel;pubId=cc.pubId||null}
-    if(!papel){gate('negado',email);return}
+    if(!papel){
+      /* registra o pedido de acesso para os administradores verem (e serem avisados) */
+      if(lido)fs.doc('pedidos/'+email).set({nome:String(u.displayName||'').slice(0,120),ultimo:ts(),vezes:firebase.firestore.FieldValue.increment(1)},{merge:true}).catch(()=>{});
+      gate('negado',email);return}
     FBX.email=email;FBX.papel=papel;FBX.pubId=pubId;FBX.nome=u.displayName||'';
     if(papel==='publicador'&&!pubId){gate('erro','Seu acesso ainda não foi ligado a um cadastro de publicador. Peça a um administrador para fazer a ligação em Ajustes › Acesso ao sistema.');return}
     let ok=false,lidoA=false;try{const a=await fs.doc('aceites/'+email).get();lidoA=true;ok=a.exists&&((a.data()||{}).versao||0)>=TERMOS_V}catch(e){}
@@ -186,6 +189,7 @@
   FBX.erro=d=>fs.collection('erros').add(Object.assign({},d,{por:FBX.email,em:ts()}));
   FBX.erros={listar:(cb,err)=>fs.collection('erros').orderBy('em','desc').limit(30).onSnapshot(s=>cb(s.docs.map(d=>Object.assign({id:d.id},d.data()))),err),apagar:id=>fs.doc('erros/'+id).delete()};
   FBX.ping=()=>fs.doc('publico/info').get({source:'server'});
+  FBX.pedidos={listar:(cb,err)=>fs.collection('pedidos').onSnapshot(s=>cb(s.docs.map(d=>Object.assign({id:d.id},d.data()))),err),apagar:id=>fs.doc('pedidos/'+id).delete()};
   FBX.listAccess=(cb,err)=>fs.collection('acesso').onSnapshot(s=>cb(s.docs.map(d=>Object.assign({email:d.id},d.data()))),err);
   FBX.listAceites=(cb,err)=>fs.collection('aceites').onSnapshot(s=>{const m={};s.docs.forEach(d=>m[d.id]=d.data());cb(m)},err);
   FBX.setAccess=(email,papel,pub)=>{const d={papel,por:FBX.email,em:new Date().toISOString()};if(pub!==undefined)d.pub=pub||null;return fs.doc('acesso/'+email.toLowerCase()).set(d,{merge:true})};

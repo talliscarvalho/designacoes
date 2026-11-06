@@ -23,6 +23,7 @@
 #fbgate .fbor{display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--muted,#5F6368);font-size:13px;white-space:nowrap}
 #fbgate .fbor::before,#fbgate .fbor::after{content:"";flex:1;height:1px;background:var(--line,#DAD8D3)}
 #fbgate .fbmail{display:flex;flex-direction:column;gap:8px}
+a.fbbtn{text-decoration:none;box-sizing:border-box}
 #fbgate .fbcod{font-size:22px!important;letter-spacing:.35em;text-align:center;font-variant-numeric:tabular-nums}
 #fbgate .fblab{font-size:13.5px;font-weight:600}
 #fbgate .fbmail input{border:1px solid var(--line-b,#C9C6BF);border-radius:10px;padding:12px 14px;font-size:16px;background:var(--surface,#fff);color:var(--fg,#1b1b1b);font-family:inherit;min-height:48px}

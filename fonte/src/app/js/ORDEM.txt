@@ -25,4 +25,5 @@
 25-aba-ajustes.js
 26-cuidados-do-sistema.js
 27-lembrete-s89.js
+28-pedidos-de-acesso.js
 99-inicio.js
