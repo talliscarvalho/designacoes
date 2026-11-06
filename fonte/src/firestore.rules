@@ -2,18 +2,21 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Conectado com conta Google, link no e-mail (e-mail verificado) ou celular confirmado por SMS
+    // Conectado com conta Google, link no e-mail (e-mail verificado)
+    // ou celular confirmado por SMS
     function conectado() {
       return request.auth != null
         && ((request.auth.token.get('email', null) != null && request.auth.token.get('email_verified', false) == true)
             || request.auth.token.get('phone_number', null) != null);
     }
-    // Identificação de quem está conectado: o e-mail ou, para quem entrou pelo celular, o número (+55DDDNÚMERO)
+    // Identificacao de quem esta conectado: o e-mail ou, para quem
+    // entrou pelo celular, o numero (+55DDDNUMERO)
     function email() {
       return request.auth.token.get('email', null) != null ? request.auth.token.email.lower() : request.auth.token.phone_number;
     }
     // Administrador principal (fixo)
-    // >>> TROQUE AQUI ao instalar em outra congregação: o mesmo e-mail de "dono" do config.js <<<
+    // >>> TROQUE AQUI ao instalar em outra congregacao: o mesmo e-mail
+    // de "dono" do config.js <<<
     function dono() {
       return conectado() && email() == 'talliscarvalhoo@gmail.com';
     }
@@ -23,25 +26,27 @@ service cloud.firestore {
     function papel() {
       return get(/databases/$(database)/documents/acesso/$(email())).data.papel;
     }
-    // Só usa o sistema quem aceitou o termo de uso
+    // So usa o sistema quem aceitou o termo de uso
     function aceitou() {
       return exists(/databases/$(database)/documents/aceites/$(email()));
     }
     function admin()  { return (dono() || (naLista() && papel() == 'admin')) && aceitou(); }
     function editor() { return admin() || (naLista() && papel() == 'editor' && aceitou()); }
     function leitor() { return editor() || (naLista() && papel() == 'leitor' && aceitou()); }
-    // Publicador: vê só o próprio painel (designações, programações e os próprios dados)
+    // Publicador: ve so o proprio painel (designacoes, programacoes e
+    // os proprios dados)
     function publicador() { return naLista() && papel() == 'publicador' && aceitou(); }
     function meuPub() { return get(/databases/$(database)/documents/acesso/$(email())).data.pub; }
     function programacao(c) {
       return c in ['semanas', 'fimdesemana', 'eventos', 'limpeza', 'limpezaGrupos', 'av', 'campo'];
     }
 
-    // Toda gravação precisa dizer quem alterou e levar a hora do servidor
+    // Toda gravacao precisa dizer quem alterou e levar a hora do
+    // servidor
     function assinado() {
       return request.resource.data._por == email() && request.resource.data._em == request.time;
     }
-    // Ajustes gerais que só administradores podem mudar
+    // Ajustes gerais que so administradores podem mudar
     function mudaAjusteProtegido() {
       return request.resource.data.diff(resource.data).affectedKeys().hasAny(
         ['congregacao', 'dia', 'hora', 'diaFds', 'horaFds', 'diaLimpeza', 'mensagem', 'intervaloMeses', 'papel', 'ultimoBackup']);
@@ -49,22 +54,26 @@ service cloud.firestore {
     function reservada(c) {
       return c in ['acesso', 'registro', 'config', 'aceites', 'publico', 'quadro', 'respostas', 'copias', 'erros', 'pedidos', 'avisos'];
     }
-    // Só estas coleções de dados existem; qualquer outro nome é recusado (evita criar "pastas" estranhas no banco)
+    // So estas colecoes de dados existem; qualquer outro nome e
+    // recusado (evita criar "pastas" estranhas no banco)
     function dados(c) {
       return c in ['publicadores', 'semanas', 'fimdesemana', 'eventos', 'limpeza', 'limpezaGrupos', 'estoque', 'av', 'campo'];
     }
-    // Limite de tamanho por registro (nenhum registro legítimo chega perto disso)
+    // Limite de tamanho por registro (nenhum registro legitimo chega
+    // perto disso)
     function tamanhoOk() {
       return request.resource.data.size() < 400;
     }
 
-    // Lista de quem pode entrar: cada um lê o próprio registro; só administradores mudam a lista
+    // Lista de quem pode entrar: cada um le o proprio registro; so
+    // administradores mudam a lista
     match /acesso/{mail} {
       allow read: if admin() || (conectado() && mail == email());
       allow write: if admin() && mail == mail.lower();
     }
 
-    // Aceite do termo de uso e último acesso: cada pessoa grava só o próprio; administradores consultam
+    // Aceite do termo de uso e ultimo acesso: cada pessoa grava so o
+    // proprio; administradores consultam
     match /aceites/{mail} {
       allow read: if admin() || (conectado() && mail == email());
       allow create: if conectado() && mail == email() && (dono() || naLista())
@@ -76,13 +85,15 @@ service cloud.firestore {
       allow delete: if admin();
     }
 
-    // Lista de nomes (sem telefones) usada pelo painel dos publicadores; mantida pelos editores
+    // Lista de nomes (sem telefones) usada pelo painel dos
+    // publicadores; mantida pelos editores
     match /quadro/{id} {
       allow read: if leitor() || publicador();
       allow write: if editor() && assinado();
     }
 
-    // Confirmações das designações: o publicador responde só pelas próprias; equipe vê todas
+    // Confirmacoes das designacoes: o publicador responde so pelas
+    // proprias; equipe ve todas
     match /respostas/{id} {
       allow read: if leitor() || (publicador() && resource.data.pub == meuPub());
       allow create, update: if request.resource.data.por == email() && request.resource.data.em == request.time
@@ -90,18 +101,21 @@ service cloud.firestore {
       allow delete: if editor() || (publicador() && resource.data.pub == meuPub());
     }
 
-    // O publicador pode ler a própria ficha (para conferir os seus dados)
+    // O publicador pode ler a propria ficha (para conferir os seus
+    // dados)
     match /publicadores/{id} {
       allow read: if publicador() && id == meuPub();
     }
 
-    // Responsável e contato do aviso de privacidade: qualquer pessoa lê (aparece na tela de login)
+    // Responsavel e contato do aviso de privacidade: qualquer pessoa
+    // le (aparece na tela de login)
     match /publico/{id} {
       allow read: if true;
       allow write: if admin() && assinado();
     }
 
-    // Pedidos de acesso: quem entrou e ainda não está na lista registra o próprio pedido; só administradores leem e apagam
+    // Pedidos de acesso: quem entrou e ainda nao esta na lista
+    // registra o proprio pedido; so administradores leem e apagam
     match /pedidos/{id} {
       allow read, delete: if admin();
       allow create, update: if conectado() && id == email() && !naLista()
@@ -111,8 +125,10 @@ service cloud.firestore {
                             && request.resource.data.vezes is int && request.resource.data.vezes <= 100000;
     }
 
-    // Avisos no celular: cada aparelho que ativou os avisos (o código do aparelho é o nome do registro).
-    // A pessoa grava e apaga só o próprio; administradores consultam. Quem envia é a tarefa do GitHub (fora destas regras).
+    // Avisos no celular: cada aparelho que ativou os avisos (o codigo
+    // do aparelho e o nome do registro).
+    // A pessoa grava e apaga so o proprio; administradores consultam.
+    // Quem envia e a tarefa do GitHub (fora destas regras).
     match /avisos/{id} {
       allow read, delete: if admin() || (conectado() && resource.data.quem == email());
       allow create, update: if (dono() || naLista()) && id.size() < 400
@@ -122,14 +138,16 @@ service cloud.firestore {
                             && request.resource.data.get('aparelho', '') is string && request.resource.data.get('aparelho', '').size() <= 200;
     }
 
-    // Cópias automáticas de segurança (uma por semana): só administradores guardam, consultam e apagam
+    // Copias automaticas de seguranca (uma por semana): so
+    // administradores guardam, consultam e apagam
     match /copias/{id} {
       allow read, delete: if admin();
       allow create, update: if admin() && request.resource.data.por == email() && request.resource.data.em == request.time
                             && request.resource.data.dados is string && request.resource.data.dados.size() < 1000000;
     }
 
-    // Erros que aconteceram nos aparelhos: quem está na lista registra (em seu nome); só administradores leem e apagam
+    // Erros que aconteceram nos aparelhos: quem esta na lista registra
+    // (em seu nome); so administradores leem e apagam
     match /erros/{id} {
       allow read, delete: if admin();
       allow create: if (dono() || naLista()) && request.resource.data.por == email() && request.resource.data.em == request.time
@@ -139,14 +157,16 @@ service cloud.firestore {
       allow update: if false;
     }
 
-    // Registro de atividade: qualquer editor acrescenta (em seu próprio nome); só administradores leem; ninguém altera ou apaga
+    // Registro de atividade: qualquer editor acrescenta (em seu
+    // proprio nome); so administradores leem; ninguem altera ou apaga
     match /registro/{id} {
       allow read: if admin();
       allow create: if editor() && request.resource.data.por == email() && request.resource.data.em == request.time;
       allow update, delete: if false;
     }
 
-    // Ajustes: administradores mudam tudo; editores só o que é do dia a dia (modelos de campo, ordem da limpeza, modelo da folha)
+    // Ajustes: administradores mudam tudo; editores so o que e do dia
+    // a dia (modelos de campo, ordem da limpeza, modelo da folha)
     match /config/{id} {
       allow read: if leitor() || publicador();
       allow create: if admin() && assinado();
@@ -154,7 +174,8 @@ service cloud.firestore {
       allow delete: if admin();
     }
 
-    // Demais dados (publicadores, semanas, fim de semana, limpeza, itens, A/V, campo)
+    // Demais dados (publicadores, semanas, fim de semana, limpeza,
+    // itens, A/V, campo)
     match /{colecao}/{id} {
       allow read: if dados(colecao) && (leitor() || (publicador() && programacao(colecao)));
       allow create, update: if dados(colecao) && editor() && assinado() && tamanhoOk();
