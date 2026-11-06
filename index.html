@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Designar</title>
 <meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.googleusercontent.com https://www.gstatic.com https://www.google.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://apis.google.com https://fonts.googleapis.com https://fonts.gstatic.com; frame-src https://jorrinho.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.googleusercontent.com https://www.gstatic.com https://www.google.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://apis.google.com https://fonts.googleapis.com https://fonts.gstatic.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <script>/* impede que o site seja aberto dentro de outra página (golpe de "clique falso") */if(window.top!==window.self){document.documentElement.style.display='none';try{window.top.location=window.self.location.href}catch(e){}}</script>
 <meta name="theme-color" content="#2F5249">
@@ -15,11 +15,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Designar">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232F5249'/%3E%3Cpath fill='white' transform='translate(4 4) scale(1)' d='M3 6.4c2.6-1.1 5.6-1 8 .7v11.2c-2.4-1.6-5.4-1.7-8-.6zM21 6.4c-2.6-1.1-5.6-1-8 .7v11.2c2.4-1.6 5.4-1.7 8-.6z'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232F5249'/%3E%3Cpath fill='white' transform='translate%284 4%29' d='M3 6.4c2.6-1.1 5.6-1 8 .7v11.2c-2.4-1.6-5.4-1.7-8-.6zM21 6.4c-2.6-1.1-5.6-1-8 .7v11.2c2.4-1.6 5.4-1.7 8-.6z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@1,300&display=swap">
 <style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+<script src="config.js"></script>
 </head>
 <body>
 <script src="lib/firebase-app-compat.js"></script>
@@ -30,17 +31,12 @@
    e dados públicos do aviso de privacidade ("publico/info"). O administrador principal também está fixo nas regras. */
 (function(){try{const t=localStorage.getItem('vmc-tema');if(t==='claro')document.documentElement.dataset.theme='light';else if(t==='escuro')document.documentElement.dataset.theme='dark'}catch(e){}})();
 (function(){
-  const FIREBASE_CONFIG={
-    apiKey:"AIzaSyDdYSL5n_QKqgPAZQAdyhsGx9O1EriutU8",
-    authDomain:"jorrinho.firebaseapp.com",
-    projectId:"jorrinho",
-    storageBucket:"jorrinho.firebasestorage.app",
-    messagingSenderId:"565921295019",
-    appId:"1:565921295019:web:77c633172ac8581e71e5ee"
-  };
-  const OWNER="talliscarvalhoo@gmail.com";
-  const APP="Designar", VERSAO="2026.11.05", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
-  const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,pub:{}};
+  /* dados desta instalação: ficam no arquivo config.js (veja o LEIAME para usar em outra congregação) */
+  const CFG=window.DESIGNAR_CONFIG||{};
+  const FIREBASE_CONFIG=CFG.firebase;
+  const OWNER=String(CFG.dono||'').trim().toLowerCase();
+  const APP="Designar", VERSAO="2026.11.06-0055", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
+  const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,suporte:CFG.suporte||'',pub:{}};
   const t=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let resolveReady,rejectReady;const readyP=new Promise((r,j)=>{resolveReady=r;rejectReady=j});
   readyP.catch(()=>{}); /* o sistema trata a falha em init(); evita aviso de promessa sem tratamento */
@@ -93,9 +89,9 @@
   const LOCKUP=`<div class="fblock"><span class="fbmark"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 6.4c2.6-1.1 5.6-1 8 .7v11.2c-2.4-1.6-5.4-1.7-8-.6zM21 6.4c-2.6-1.1-5.6-1-8 .7v11.2c2.4-1.6 5.4-1.7 8-.6z"/></svg></span></div>`;
   const LINKS=`<nav class="fblinks" aria-label="Documentos"><a href="#" data-doc="privacidade">Privacidade</a><a href="#" data-doc="termos">Termo de uso</a><a href="#" data-doc="sobre">Sobre</a><a href="#" class="fbhelp">Ajuda</a></nav>`;
   /* "Ajuda": e-mail ao desenvolvedor com assunto e roteiro preenchidos */
-  const helpMail=()=>{const m=['tallisdocarmo','gmail.com'].join('@');const b=`Olá!\n\nEscreva aqui a sua dúvida ou descreva o problema ao entrar no sistema:\n\n\n\n— Para ajudar no atendimento (pode manter) —\nVersão: ${VERSAO}\nTela: entrada\nAparelho: ${navigator.userAgent.replace(/\s*\([^)]*\)\s*/,' ').slice(0,160)}`;return 'mailto:'+m+'?subject='+encodeURIComponent('Sistema de designações · ajuda para entrar')+'&body='+encodeURIComponent(b)};
+  const helpMail=()=>{const m=CFG.suporte||['tallisdocarmo','gmail.com'].join('@');const b=`Olá!\n\nEscreva aqui a sua dúvida ou descreva o problema ao entrar no sistema:\n\n\n\n— Para ajudar no atendimento (pode manter) —\nVersão: ${VERSAO}\nTela: entrada\nAparelho: ${navigator.userAgent.replace(/\s*\([^)]*\)\s*/,' ').slice(0,160)}`;return 'mailto:'+m+'?subject='+encodeURIComponent('Sistema de designações · ajuda para entrar')+'&body='+encodeURIComponent(b)};
   document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.fbhelp');if(a)a.href=helpMail()},true);
-  if(!window.firebase){const fail=()=>{gate('falha');const b=document.getElementById('fbRetry');if(b)b.onclick=()=>location.reload()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fail);else fail();rejectReady({code:'sem-firebase'});return}
+  if(!window.firebase||!FIREBASE_CONFIG||!FIREBASE_CONFIG.apiKey){const fail=()=>{gate('falha');const b=document.getElementById('fbRetry');if(b)b.onclick=()=>location.reload()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fail);else fail();rejectReady({code:'sem-firebase'});return}
   firebase.initializeApp(FIREBASE_CONFIG);
   const auth=firebase.auth(),fs=firebase.firestore();
   auth.languageCode='pt';
@@ -129,8 +125,8 @@
       falha:H('Não foi possível carregar','Verifique a internet e tente de novo.')+`<p class="fbnote">Se continuar, desative bloqueadores de anúncios ou extensões de privacidade para este site, ou abra em outro navegador.</p><button class="fbbtn" id="fbRetry">Tentar de novo</button>`
     }[kind]||'';
     g.innerHTML=`<div class="fbshell">
-      <aside class="fbside">${LOCKUP}<p class="fbtag">As designações da congregação, num só lugar.</p>
-        <figure class="fbverse"><blockquote>Cada um com seu dom, tudo em seu lugar.</blockquote><figcaption>Inspirado em 1 Pedro 4:10</figcaption></figure></aside>
+      <aside class="fbside"><div class="fbsidein">${LOCKUP}<p class="fbtag">Gerencie o quadro de anúncios <br class="fbbr">da sua congregação em um só lugar.</p><p class="fbabout">O ${APP.toUpperCase()} é um apoio digital ao quadro de anúncios da congregação. Ele organiza as designações e faz com que cada publicador fique sabendo, a tempo, do que lhe cabe.</p></div>
+        <figure class="fbverse"><blockquote>Mas que todas as coisas ocorram com decência e ordem.</blockquote><figcaption>1 Cor. 14:40.</figcaption></figure></aside>
       <main class="fbmain"><div class="fbpanel">${body}</div>${LINKS}</main></div>`;
     g.hidden=false;
     const lb=document.getElementById('fbLogin');if(lb)lb.onclick=login;
@@ -191,6 +187,12 @@
   FBX.quiet=false;
   FBX.log=(acao,col,id)=>{if(FBX.quiet)return Promise.resolve();return fs.collection('registro').add({acao,col,id:String(id),por:FBX.email,nome:FBX.nome||'',em:ts()}).catch(()=>{})};
   FBX.recent=(cb,err)=>fs.collection('registro').orderBy('em','desc').limit(40).onSnapshot(s=>cb(s.docs.map(d=>d.data())),err);
+  /* cópias automáticas, registro de erros e teste de conexão (veja "Cuidados do sistema") */
+  FBX.copias={listar:(cb,err)=>fs.collection('copias').orderBy('em','desc').limit(12).onSnapshot(s=>cb(s.docs.map(d=>Object.assign({id:d.id},d.data()))),err),
+    salvar:(id,dados,n,auto)=>fs.doc('copias/'+id).set({dados,n,auto:!!auto,por:FBX.email,em:ts()}),apagar:id=>fs.doc('copias/'+id).delete()};
+  FBX.erro=d=>fs.collection('erros').add(Object.assign({},d,{por:FBX.email,em:ts()}));
+  FBX.erros={listar:(cb,err)=>fs.collection('erros').orderBy('em','desc').limit(30).onSnapshot(s=>cb(s.docs.map(d=>Object.assign({id:d.id},d.data()))),err),apagar:id=>fs.doc('erros/'+id).delete()};
+  FBX.ping=()=>fs.doc('publico/info').get({source:'server'});
   FBX.listAccess=(cb,err)=>fs.collection('acesso').onSnapshot(s=>cb(s.docs.map(d=>Object.assign({email:d.id},d.data()))),err);
   FBX.listAceites=(cb,err)=>fs.collection('aceites').onSnapshot(s=>{const m={};s.docs.forEach(d=>m[d.id]=d.data());cb(m)},err);
   FBX.setAccess=(email,papel,pub)=>{const d={papel,por:FBX.email,em:new Date().toISOString()};if(pub!==undefined)d.pub=pub||null;return fs.doc('acesso/'+email.toLowerCase()).set(d,{merge:true})};
@@ -208,14 +210,17 @@
 /* entrada: à esquerda a marca, à direita o formulário; no celular, a marca fica em cima */
 .fbshell{min-height:100%;display:grid;grid-template-columns:minmax(320px,5fr) 6fr}
 .fbside{--ink:#F3F6F4;background:#24443C;background-image:radial-gradient(120% 90% at 0% 0%,rgba(255,255,255,.07),transparent 60%);color:var(--ink);padding:56px 56px 48px;display:flex;flex-direction:column;justify-content:center;gap:18px;position:relative}
-.fbside .fbverse{position:absolute;left:56px;right:56px;bottom:44px;margin:0}
-.fbverse blockquote{margin:0;font-family:"Open Sans",var(--f-ui,sans-serif);font-style:italic;font-weight:300;font-size:19px;line-height:1.4;opacity:.92}
-.fbverse figcaption{margin-top:6px;font-size:12.5px;letter-spacing:.04em;opacity:.65}
+.fbsidein{width:100%;max-width:420px;display:flex;flex-direction:column;gap:16px}
+.fbsidein .fblock{align-self:center;margin-bottom:6px}
+.fbside .fbverse{position:absolute;left:56px;right:56px;bottom:30px;margin:0;text-align:center}
+.fbverse blockquote{margin:0;font-style:italic;font-size:14.5px;line-height:1.45;opacity:.95}
+.fbverse figcaption{margin-top:10px;font-size:14px;font-weight:700;letter-spacing:.02em}
 .fblock{--lh:56px;display:inline-flex;align-items:center;gap:calc(var(--lh)*.3)}
 .fbmark{width:var(--lh);height:var(--lh);border-radius:calc(var(--lh)*.26);display:grid;place-items:center;flex:none;background:var(--ink);color:#24443C}
 .fbmark svg{width:62%;height:62%;display:block}
 .fbword{font-family:"Open Sans",var(--f-ui,sans-serif);font-style:italic;font-weight:300;font-size:calc(var(--lh)*.92);line-height:1;letter-spacing:-.005em;transform:translateY(-.06em);padding-right:.08em}
-.fbtag{margin:4px 0 0;font-size:22px;font-weight:600;letter-spacing:-.01em;line-height:1.35;max-width:22ch}
+.fbtag{margin:0;font-family:var(--f-cond,"Roboto Condensed",sans-serif);font-size:27px;font-weight:600;letter-spacing:-.005em;line-height:1.2}
+.fbabout{margin:0;font-size:17px;font-weight:400;line-height:1.35;letter-spacing:.01em;opacity:.92}
 .fbmain{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px 28px;gap:28px}
 .fbpanel{width:100%;max-width:380px}
 #fbgate .fbh{font-size:26px;font-weight:600;letter-spacing:-.015em;margin:0 0 6px;line-height:1.2}
@@ -241,10 +246,10 @@
 @media (max-width:860px){
   .fbshell{grid-template-columns:1fr;grid-template-rows:auto auto;align-content:center;padding-bottom:4vh}
   .fbside{background:none!important;border:0!important;color:var(--fg,#1b1b1b);padding:44px 24px 4px;align-items:center;text-align:center;gap:10px}
-  .fbside .fbverse{display:none}
+  .fbside .fbverse,.fbabout{display:none}
   .fbmark{background:var(--accent,#2F5249)!important;color:var(--accent-fg,#fff)!important}
   .fblock{--lh:48px}
-  .fbtag{font-size:17px;max-width:24ch}
+  .fbtag{font-size:21px;max-width:24ch;text-wrap:balance}.fbbr{display:none}.fbsidein{align-items:center;gap:12px}
   .fbmain{justify-content:flex-start;padding:28px 20px 24px}
   .fbpanel{background:var(--surface,#fff);border:1px solid var(--line,#DAD8D3);border-radius:16px;padding:26px 22px}
   #fbgate .fbh{font-size:22px}
@@ -376,6 +381,18 @@ nav.bnav:empty,nav.areas:empty{display:none!important}
   .appfoot{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))!important}
 }
 main{padding-block:22px 60px}
+.cprow{grid-template-columns:minmax(0,1fr) auto!important}
+.diaglist{display:flex;flex-direction:column;gap:8px}
+.diagrow{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.diagic{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;flex:none;font-weight:700;font-size:13px;color:#fff}
+.diagrow.ok .diagic{background:var(--ok)}.diagrow.falha .diagic{background:var(--ev)}
+.diagrow small{color:var(--muted);font-size:13px}
+.novaver{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:70;display:flex;gap:12px;align-items:center;background:var(--fg);color:var(--bg);padding:10px 12px 10px 16px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.25);font-size:14px;max-width:calc(100% - 32px)}
+@media (max-width:720px){.novaver{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+.acchip{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.acchip.ativo{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}.acchip.convidado{background:var(--warn-bg);color:var(--fg)}.acchip.sem{background:var(--surface-2);color:var(--muted)}
+.testbar{background:#7A4B00;color:#fff;font-size:13.5px;line-height:1.4;padding:8px 16px;text-align:center}
+.testbar a{color:#fff;font-weight:700;text-decoration:underline;text-underline-offset:2px}
 .banner{background:var(--warn-bg);color:var(--fg);padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:14px}
 
 .btn{border:1px solid var(--line-b);background:var(--surface);padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--fg);font-size:14px}
@@ -586,6 +603,23 @@ select[data-cbx]{display:none!important}
 #v-painel a{color:var(--accent)}
 .pdl{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr);gap:8px 16px;font-size:14.5px}.pdl span{color:var(--muted)}.pdl b{font-weight:600;word-break:break-word}
 @media (max-width:520px){.pdl{grid-template-columns:1fr;gap:2px}.pdl b{margin-bottom:8px}.phead h2{font-size:28px}}
+.cfbar{display:flex;gap:10px 16px;flex-wrap:wrap;align-items:center}
+.cfres{display:flex;gap:6px 20px;flex-wrap:wrap;font-size:14px}.cf-nao-t{color:var(--ev)}
+.cfg{padding:0;overflow:hidden}
+.cfh{display:flex;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.cfh .dblock{width:44px;flex:none;text-align:center;border:1px solid var(--line-b);border-radius:6px;padding:3px 0;line-height:1.05}
+.cfh .dblock small{display:block;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--muted)}.cfh .dblock b{font-family:var(--f-cond);font-size:19px}
+.cflist{display:flex;flex-direction:column}
+.cfrow{display:grid;grid-template-columns:minmax(0,1fr) auto 84px;gap:6px 14px;align-items:center;padding:9px 16px;border-bottom:1px solid var(--line-2)}
+.cfrow:last-child{border-bottom:0}
+.cfn{display:flex;flex-direction:column;min-width:0}.cfn .hint{font-size:13px}
+.cfst{font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.cf-ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.cf-nao{background:color-mix(in srgb,var(--ev) 14%,transparent);color:var(--ev)}
+.cf-pend{background:var(--warn-bg);color:var(--fg)}
+.cf-sem{background:var(--surface-2);color:var(--muted)}
+.cfa{text-align:right}
+@media (max-width:560px){.cfrow{grid-template-columns:minmax(0,1fr) auto;padding:9px 12px}.cfa{grid-column:1/-1;text-align:left}.cfa:empty{display:none}.cfh{padding:10px 12px}}
 .respbox{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:13.5px;margin:-4px 0 0}.respbox .nao{color:var(--ev);font-weight:600}
 .pzoom{zoom:var(--pz,1)}
 .phead{flex-direction:row!important;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
@@ -796,6 +830,7 @@ select[data-cbx]{display:none!important}
 @media (prefers-reduced-motion:no-preference){.wk,.btn{transition:background .15s}}
 </style>
 
+<div id="testbar" class="testbar" role="note" hidden></div>
 <header class="app">
   <div class="wrap top">
     <div class="brand"><span class="logo"><span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="#fff" d="M3 6.4c2.6-1.1 5.6-1 8 .7v11.2c-2.4-1.6-5.4-1.7-8-.6zM21 6.4c-2.6-1.1-5.6-1-8 .7v11.2c2.4-1.6 5.4-1.7 8-.6z"/></svg></span></span><h1 id="hName">Congregação</h1></div>
@@ -821,12 +856,14 @@ select[data-cbx]{display:none!important}
   <section id="v-painel" hidden></section>
   <section id="v-pubimport" hidden></section>
   <section id="v-equilibrio" hidden></section>
+  <section id="v-confirmacoes" hidden></section>
 </main>
 <div id="toast" class="toast" hidden></div>
 <nav class="bnav" id="bnav" aria-label="Áreas"></nav>
 
 <script>
 /* ================= Dados e constantes ================= */
+const SITE_OFICIAL='https://talliscarvalho.github.io/designacoes/';
 const CATS=[['presidente','Presidente'],['oracao','Oração'],['tesouros','Tesouros (discurso)'],['joias','Joias Espirituais'],['leitura','Leitura da Bíblia'],['ministerio','Ministério (estudante/ajudante)'],['discurso','Discurso de estudante'],['vida','Nossa Vida Cristã'],['dirigente','Dirigente do Estudo'],['leitor','Leitor do Estudo'],['av','Áudio e vídeo'],['presidenteFds','Presidente (fim de semana)'],['orador','Orador de discurso público'],['dirigenteSentinela','Dirigente de A Sentinela'],['leitorSentinela','Leitor de A Sentinela'],['campo','Dirigente de campo']];
 const CATNAME=Object.fromEntries(CATS);
 const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
@@ -945,9 +982,11 @@ async function init(){
   /* versão hospedada (GitHub Pages + Firebase): espera o login e usa o Firestore */
   if(!db&&window.FBX){setStatus('Aguardando login…');try{db=await window.FBX.ready()}catch(e){showBanner('Não foi possível conectar ao banco de dados ('+((e&&e.code)||'erro')+'). Recarregue a página.');setStatus('Sem conexão','error');return}
     if(window.FBX.papel==='leitor')showBanner('Você tem acesso só para visualizar. Alterações feitas aqui não são salvas.');
-    contaInit();
+    contaInit();acessoInit();copiasInit();
 }
   rodape();
+  /* aqui no Claude é só a versão de testes: os dados oficiais ficam no site */
+  if(db&&!window.FBX){const tb=$('#testbar');tb.innerHTML=`<b>Versão de testes.</b> Os dados oficiais ficam no site <a href="${SITE_OFICIAL}" target="_blank" rel="noopener noreferrer">${SITE_OFICIAL.replace(/^https:\/\//,'').replace(/\/$/,'')}</a>. O que for alterado aqui não aparece lá.`;tb.hidden=false}
   if(db){mode='db';
     store={set:(c,id,d)=>db.collection(c).doc(id).set(d),del:(c,id)=>db.collection(c).doc(id).delete()};
     /* versão hospedada: cada gravação leva quem alterou e quando (conferido pelas regras) e entra no registro de atividade */
@@ -959,21 +998,23 @@ async function init(){
     const done=()=>{if(loaded.p&&loaded.w&&loaded.c){clearTimeout(tm);hideBanner();setStatus('Tudo salvo')}};
     const err=e=>{clearTimeout(tm);showBanner('A conexão com os dados foi interrompida ('+(e.code||'erro')+'). Recarregue a página.')};
     const PO=painelOnly();
+    /* no site, pede também o aviso de quando o servidor confirma a cópia do aparelho (senão o "carregando" nunca termina) */
+    const OPT=window.FBX?[{includeMetadataChanges:true}]:[];
     if(window.FBX){
-      db.doc('quadro/nomes').onSnapshot(s=>{const m=limpa((s.exists&&s.data().nomes)||{});nomesRemote=m;if(PO){pubs={};Object.entries(m).forEach(([id,n])=>pubs[id]={nome:n});loaded.p=true;done()}changed()},err);
+      db.doc('quadro/nomes').onSnapshot(...OPT,s=>{const m=limpa((s.exists&&s.data().nomes)||{});nomesRemote=m;if(PO){pubs={};Object.entries(m).forEach(([id,n])=>pubs[id]={nome:n});loaded.p=true;done()}changed()},err);
       const rq=PO?db.collection('respostas').where('pub','==',window.FBX.pubId||'-'):db.collection('respostas');
-      rq.onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>n[d.id]=sane(d.data()));resp=n;changed()},()=>{});
+      rq.onSnapshot(...OPT,s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>n[d.id]=sane(d.data()));resp=n;changed()},()=>{});
     }
-    if(!PO)db.collection('publicadores').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('publicadores',d.id)&&pubs[d.id]?pubs[d.id]:sane(d.data())});pubs=n;if(!s.metadata.fromCache||!navigator.onLine)loaded.p=true;done();changed()},err);
-    db.collection('semanas').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('semanas',d.id)&&weeks[d.id]?weeks[d.id]:norm(sane(d.data()))});weeks=n;if(!s.metadata.fromCache||!navigator.onLine)loaded.w=true;done();changed()},err);
-    db.collection('fimdesemana').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('fimdesemana',d.id)&&fds[d.id]?fds[d.id]:normF(sane(d.data()))});fds=n;if(!s.metadata.fromCache||!navigator.onLine)loaded.f=true;changed()},err);
-    db.collection('limpezaGrupos').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('limpezaGrupos',d.id)&&lgr[d.id]?lgr[d.id]:sane(d.data())});lgr=n;changed()},err);
-    db.collection('campo').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('campo',d.id)&&cmp[d.id]?cmp[d.id]:sane(d.data())});cmp=n;changed()},err);
-    db.collection('av').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('av',d.id)&&avd[d.id]?avd[d.id]:sane(d.data())});avd=n;changed()},err);
-    if(!PO)db.collection('estoque').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('estoque',d.id)&&stk[d.id]?stk[d.id]:sane(d.data())});stk=n;changed()},err);
-    db.collection('limpeza').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('limpeza',d.id)&&lmp[d.id]?lmp[d.id]:sane(d.data())});lmp=n;changed()},err);
-    db.collection('eventos').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('eventos',d.id)&&evs[d.id]?evs[d.id]:sane(d.data())});evs=n;if(!s.metadata.fromCache||!navigator.onLine)loaded.e=true;changed()},err);
-    db.doc('config/geral').onSnapshot(s=>{if(!isLocalPending('config','geral'))cfg=Object.assign({},DEF_CFG,s.exists?sane(s.data()):{});if(!s.metadata.fromCache||!navigator.onLine)loaded.c=true;done();changed()},err);
+    if(!PO)db.collection('publicadores').onSnapshot(...OPT,s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('publicadores',d.id)&&pubs[d.id]?pubs[d.id]:sane(d.data())});pubs=n;if(!s.metadata.fromCache||!navigator.onLine)loaded.p=true;done();changed()},err);
+    db.collection('semanas').onSnapshot(...OPT,s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('semanas',d.id)&&weeks[d.id]?weeks[d.id]:norm(sane(d.data()))});weeks=n;if(!s.metadata.fromCache||!navigator.onLine)loaded.w=true;done();changed()},err);
+    db.collection('fimdesemana').onSnapshot(...OPT,s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('fimdesemana',d.id)&&fds[d.id]?fds[d.id]:normF(sane(d.data()))});fds=n;if(!s.metadata.fromCache||!navigator.onLine)loaded.f=true;changed()},err);
+    db.collection('limpezaGrupos').onSnapshot(...OPT,s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('limpezaGrupos',d.id)&&lgr[d.id]?lgr[d.id]:sane(d.data())});lgr=n;changed()},err);
+    db.collection('campo').onSnapshot(...OPT,s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('campo',d.id)&&cmp[d.id]?cmp[d.id]:sane(d.data())});cmp=n;changed()},err);
+    db.collection('av').onSnapshot(...OPT,s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('av',d.id)&&avd[d.id]?avd[d.id]:sane(d.data())});avd=n;changed()},err);
+    if(!PO)db.collection('estoque').onSnapshot(...OPT,s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('estoque',d.id)&&stk[d.id]?stk[d.id]:sane(d.data())});stk=n;changed()},err);
+    db.collection('limpeza').onSnapshot(...OPT,s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('limpeza',d.id)&&lmp[d.id]?lmp[d.id]:sane(d.data())});lmp=n;changed()},err);
+    db.collection('eventos').onSnapshot(...OPT,s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('eventos',d.id)&&evs[d.id]?evs[d.id]:sane(d.data())});evs=n;if(!s.metadata.fromCache||!navigator.onLine)loaded.e=true;changed()},err);
+    db.doc('config/geral').onSnapshot(...OPT,s=>{if(!isLocalPending('config','geral'))cfg=Object.assign({},DEF_CFG,s.exists?sane(s.data()):{});if(!s.metadata.fromCache||!navigator.onLine)loaded.c=true;done();changed()},err);
   }else{mode='local';
     const d=limpa(lsRead());if(d){pubs=d.publicadores||{};weeks={};Object.entries(d.semanas||{}).forEach(([k,v])=>weeks[k]=norm(v));cfg=Object.assign({},DEF_CFG,d.config||{});fds={};Object.entries(d.fimdesemana||{}).forEach(([k,v])=>fds[k]=normF(v));evs=d.eventos||{};lgr=d.limpezaGrupos||{};lmp=d.limpeza||{};stk=d.estoque||{};avd=d.av||{};cmp=d.campo||{}}
     store={set:async(c,id,data)=>{if(c==='publicadores')pubs[id]=data;else if(c==='semanas')weeks[id]=data;else if(c==='fimdesemana')fds[id]=data;else if(c==='eventos')evs[id]=data;else if(c==='limpezaGrupos')lgr[id]=data;else if(c==='limpeza')lmp[id]=data;else if(c==='estoque')stk[id]=data;else if(c==='av')avd[id]=data;else if(c==='campo')cmp[id]=data;else cfg=data;lsWrite()},
@@ -991,15 +1032,18 @@ function hideBanner(){$('#banner').hidden=true}
 
 /* ================= Renderização geral ================= */
 let renderQueued=false;
-function changed(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;buildHist();renderAll(true);bkCheck();syncNomes()})}
+/* só redesenha a tela quando os dados mudaram de verdade (o Firebase também avisa quando só confirma o que já estava no aparelho) */
+let lastSig='';
+function dataSig(){try{return JSON.stringify([pubs,weeks,fds,evs,lgr,lmp,stk,avd,cmp,cfg,typeof resp==='undefined'?0:resp,loaded])}catch(e){return String(Math.random())}}
+function changed(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;const sg=dataSig();if(sg===lastSig){syncNomes();return}lastSig=sg;buildHist();renderAll(true);bkCheck();syncNomes();copiaAuto()})}
 function renderAll(fromData){
   $('#hName').textContent=cfg.congregacao&&cfg.congregacao!=='Congregação'?'Congregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):'';
   if(painelOnly())ui.tab='painel';
   drawNav();contaSync();
-  ['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio'].forEach(t=>$('#v-'+t).hidden=t!==ui.tab);
+  ['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio','confirmacoes'].forEach(t=>$('#v-'+t).hidden=t!==ui.tab);
   const v=$('#v-'+ui.tab);
   if(fromData&&v.contains(document.activeElement)&&document.activeElement.matches('input,textarea,select'))return; // não atrapalha quem está digitando
-  ({semanas:rSemanas,fimdesemana:rFds,limpeza:rLimpeza,av:rAV,campo:rCampo,publicadores:rPubs,imprimir:rPrint,whatsapp:rWa,ajustes:rAjustes,painel:rPainel,pubimport:rPubImport,equilibrio:rEquilibrio})[ui.tab]();
+  ({semanas:rSemanas,fimdesemana:rFds,limpeza:rLimpeza,av:rAV,campo:rCampo,publicadores:rPubs,imprimir:rPrint,whatsapp:rWa,ajustes:rAjustes,painel:rPainel,pubimport:rPubImport,equilibrio:rEquilibrio,confirmacoes:rConfirm})[ui.tab]();
 }
 /* Tema: segue o sistema (automático) ou fica fixo em claro/escuro; a escolha fica guardada neste aparelho */
 const TEMAS=['auto','claro','escuro'];
@@ -1022,7 +1066,7 @@ const NAVI={cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const AREAS=[{k:'reunioes',l:'Reuniões',i:'cal',t:[['semanas','Meio de semana'],['fimdesemana','Fim de semana']]},
   {k:'limpeza',l:'Limpeza',i:'casa',t:[['limpeza','Limpeza e itens'],['av','A/V e Indicadores']]},
   {k:'pregacao',l:'Pregação',i:'pin',t:[['campo','Saídas de campo']]},
-  {k:'publicadores',l:'Publicadores',i:'gente',t:[['publicadores','Publicadores'],['equilibrio','Equilíbrio'],['pubimport','Importar e exportar']]},
+  {k:'publicadores',l:'Publicadores',i:'gente',t:[['publicadores','Publicadores'],['confirmacoes','Confirmações'],['equilibrio','Equilíbrio'],['pubimport','Importar e exportar']]},
   {k:'imprimir',l:'Imprimir',i:'print',t:[['imprimir','Imprimir / PDF']]},
   {k:'mais',l:'Mais',i:'mais',t:[['whatsapp','WhatsApp'],['ajustes','Ajustes']]}];
 function navAreas(){if(painelOnly())return[];if(!myPubId())return AREAS;return AREAS.map(a=>a.k==='mais'?Object.assign({},a,{t:[['painel','Meu painel'],...a.t]}):a)}
@@ -1031,7 +1075,7 @@ function drawNav(){const AR=navAreas();const cur=AR.find(a=>a.t.some(x=>x[0]===u
   $('#areas').innerHTML=AR.map(a=>`<a href="${href(a)}" aria-current="${a===cur?'page':'false'}">${a.l}</a>`).join('');
   $('#bnav').innerHTML=AR.map(a=>`<a href="${href(a)}" aria-current="${a===cur?'page':'false'}">${NAVI[a.i]}${a.l}</a>`).join('');
   $('#subtabs').innerHTML=cur.t.length>1?cur.t.map(([k,l])=>`<a href="#${k}" aria-current="${k===ui.tab?'page':'false'}">${l}</a>`).join(''):''}
-function route(){ui.delAsk=null;const h=location.hash.slice(1);ui.tab=['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio'].includes(h)?h:'semanas';renderAll()}
+function route(){ui.delAsk=null;const h=location.hash.slice(1);ui.tab=['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio','confirmacoes'].includes(h)?h:'semanas';renderAll()}
 window.addEventListener('hashchange',route);
 
 /* cabeçalho da folha e item da lista de semanas (bloco de calendário + situação) */
@@ -1381,7 +1425,7 @@ function rPubs(){
       <button class="btn primary" data-a="pnew">+ Novo publicador</button>
     </div>
     <div class="panel tablewrap"><table class="pubs ptab"><thead><tr><th>Nome</th><th>WhatsApp</th><th>Pode fazer</th><th>Última parte</th></tr></thead><tbody>
-      ${rows.length?rows.map(([id,p])=>{const l=(hist[id]||[]).filter(d=>d<=today).pop();return`<tr data-a="pedit" data-id="${esc(id)}" class="${id===ui.pub?'sel':''}"><td><b>${esc(p.nome)}</b>${p.ativo===false?' <span class="tag">inativo</span>':''}<div class="muted" style="font-size:12.5px">${[p.sexo==='F'?'Irmã':'Irmão',...(p.privilegios||[]).map(k=>PRIVNAME[k]||esc(k))].join(' · ')}</div></td><td style="font-variant-numeric:tabular-nums;white-space:nowrap">${p.tel?esc(fmtTel(p.tel)):'<span class="muted">—</span>'}</td><td><div class="tags">${(p.cats||[]).map(c=>`<span class="tag">${esc(CATNAME[c]||c)}</span>`).join('')}</div></td><td data-l="Última parte" style="white-space:nowrap;font-variant-numeric:tabular-nums">${l?br(l):'<span class="muted">—</span>'}</td></tr>`}).join('')
+      ${rows.length?rows.map(([id,p])=>{const l=(hist[id]||[]).filter(d=>d<=today).pop();return`<tr data-a="pedit" data-id="${esc(id)}" class="${id===ui.pub?'sel':''}"><td><b>${esc(p.nome)}</b>${p.ativo===false?' <span class="tag">inativo</span>':''}${(a=>a?` <span class="acchip ${a}">${{ativo:'painel ativo',convidado:'convidado',sem:'sem acesso'}[a]}</span>`:'')(acessoDe(id))}<div class="muted" style="font-size:12.5px">${[p.sexo==='F'?'Irmã':'Irmão',...(p.privilegios||[]).map(k=>PRIVNAME[k]||esc(k))].join(' · ')}</div></td><td style="font-variant-numeric:tabular-nums;white-space:nowrap">${p.tel?esc(fmtTel(p.tel)):'<span class="muted">—</span>'}</td><td><div class="tags">${(p.cats||[]).map(c=>`<span class="tag">${esc(CATNAME[c]||c)}</span>`).join('')}</div></td><td data-l="Última parte" style="white-space:nowrap;font-variant-numeric:tabular-nums">${l?br(l):'<span class="muted">—</span>'}</td></tr>`}).join('')
       :`<tr><td colspan="4" class="muted" style="padding:18px">${total?'Ninguém encontrado com esse filtro.':(mode==='db'&&!loaded.p?'Carregando publicadores…':'Nenhum publicador cadastrado. Use o formulário ao lado para adicionar o primeiro.')}</td></tr>`}
     </tbody></table></div>
     <p class="hint">${total} publicadores cadastrados. Clique em um nome para editar.</p>
@@ -1432,8 +1476,39 @@ document.addEventListener('change',e=>{if(e.target.id==='pc'){ui.pubCat=e.target
 function fmtTel(t){const d=String(t).replace(/\D/g,'').replace(/^55(?=\d{10,11}$)/,'');if(d.length===11)return`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;if(d.length===10)return`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;return t}
 function waNumber(t){let d=String(t||'').replace(/\D/g,'').replace(/^0+/,'');if(!d)return'';if(d.length<=11)d='55'+d;return d}
 
+/* ================= Confirmações: quem confirmou, quem não pode e quem ainda não respondeu ================= */
+function confItens(dias){const hoje=iso(new Date()),ate=shiftDays(hoje,dias);const out=[];
+  Object.keys(pubs).forEach(pid=>{if(!pubs[pid]||pubs[pid].ativo===false)return;
+    myItems(pid,hoje).forEach(it=>{if(it.date>ate)return;const r=resp[respKey(it.col,it.id,it.field,pid)];
+      const ac=acessoDe(pid);out.push(Object.assign({},it,{pid,st:r&&r.status==='ok'?'ok':r&&r.status==='nao'?'nao':ac==='sem'?'sem':'pend',ac,em:r&&r.em}))})});
+  return out.sort((a,b)=>(a.date+(a.hora||'')+a.titulo).localeCompare(b.date+(b.hora||'')+b.titulo)||pname(a.pid).localeCompare(pname(b.pid),'pt'))}
+const CF_TXT={ok:'Confirmou',nao:'Não pode',pend:'Sem resposta',sem:'Sem acesso ao painel'};
+function confLembrete(it){const p=pubs[it.pid]||{};const n=waNumber(p.tel);if(!n)return'';const d=parse(it.date);
+  const msg=`Olá, ${tc(pname(it.pid)).split(' ')[0]}! Lembrete da sua designação: ${it.txt.split('\n')[0]} — ${DIAS[d.getDay()]}, ${d.getDate()}/${d.getMonth()+1}${it.hora&&/\d/.test(it.hora)?' às '+it.hora:''}.\n\nPor favor, confirme no seu painel (ou responda aqui).`;
+  return`<a class="btn small" target="_blank" rel="noopener noreferrer" href="https://wa.me/${esc(n)}?text=${encodeURIComponent(msg)}">Lembrar</a>`}
+function rConfirm(){const v=$('#v-confirmacoes');
+  if(!window.FBX){v.innerHTML=`<div class="panel" style="padding:20px;max-width:760px"><h2 style="margin:0 0 6px">Confirmações</h2><p class="muted" style="margin:0">As confirmações chegam pelo painel dos publicadores, que funciona na versão hospedada do sistema (site).</p></div>`;return}
+  const D=ui.cfDias||30,F=ui.cfFiltro||'todas',T=ui.cfTipo||'reun';const TIPOS={reun:['meio','fds'],campo:['campo'],av:['av'],limp:['limp'],tudo:null};
+  const all=confItens(D).filter(i=>!TIPOS[T]||TIPOS[T].includes(i.k));
+  const n={ok:0,nao:0,pend:0,sem:0};all.forEach(i=>n[i.st]++);
+  const lista=all.filter(i=>F==='todas'||i.st===F);
+  const grupos=[];lista.forEach(i=>{const k=i.date+'|'+i.titulo;let g=grupos[grupos.length-1];if(!g||g.k!==k){g={k,date:i.date,titulo:i.titulo,hora:i.hora,itens:[]};grupos.push(g)}g.itens.push(i)});
+  v.innerHTML=`<div style="display:flex;flex-direction:column;gap:14px;max-width:960px">
+   <div class="panel" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+    <div><h2 style="margin:0">Confirmações</h2><p class="hint" style="margin:4px 0 0">Respostas dadas pelos publicadores no painel. Quem está “sem acesso ao painel” não tem como responder: para esses, use “Lembrar” pelo WhatsApp.${window.FBX&&window.FBX.papel!=='admin'?' (Só administradores veem quem tem acesso.)':''}</p></div>
+    <div class="eqf"><label class="f">Período<select id="cf-dias">${[[30,'Próximos 30 dias'],[60,'Próximos 60 dias'],[120,'Próximos 120 dias']].map(([k,l])=>`<option value="${k}" ${k===D?'selected':''}>${l}</option>`).join('')}</select></label>
+      <label class="f">Designações<select id="cf-tipo">${[['reun','Reuniões (meio e fim de semana)'],['campo','Saídas de campo'],['av','A/V e indicadores'],['limp','Limpeza'],['tudo','Todas']].map(([k,l])=>`<option value="${k}" ${k===T?'selected':''}>${l}</option>`).join('')}</select></label>
+      <label class="f">Mostrar<select id="cf-filtro">${[['todas','Todas ('+all.length+')'],['pend','Sem resposta ('+n.pend+')'],['nao','Não podem ('+n.nao+')'],['ok','Confirmadas ('+n.ok+')'],...(n.sem?[['sem','Sem acesso ao painel ('+n.sem+')']]:[])].map(([k,l])=>`<option value="${k}" ${k===F?'selected':''}>${l}</option>`).join('')}</select></label></div>
+    <div class="cfres"><span><b>${n.ok}</b> confirmaram</span><span class="cf-nao-t"><b>${n.nao}</b> não podem</span><span><b>${n.pend}</b> sem resposta</span>${n.sem?`<span class="muted"><b>${n.sem}</b> sem acesso ao painel</span>`:''}</div>
+   </div>
+   ${grupos.length?grupos.map(g=>{const d=parse(g.date);return`<div class="panel cfg"><div class="cfh"><div class="dblock"><small>${DIAS[d.getDay()].slice(0,3).toUpperCase()}</small><b>${String(d.getDate()).padStart(2,'0')}</b></div><div><b>${esc(g.titulo)}</b><div class="hint">${d.getDate()} de ${MESES[d.getMonth()]}${g.hora&&/\d/.test(g.hora)?' · '+esc(g.hora):''}</div></div></div>
+     <div class="cflist">${g.itens.map(i=>`<div class="cfrow"><span class="cfn"><b>${esc(tc(pname(i.pid)))}</b><span class="hint">${esc(i.txt.split('\n')[0])}${i.ac==='convidado'?' · convidado, ainda não entrou':''}</span></span><span class="cfst cf-${i.st}">${CF_TXT[i.st]}</span><span class="cfa">${i.st!=='ok'?confLembrete(i):''}</span></div>`).join('')}</div></div>`}).join('')
+   :`<div class="panel" style="padding:20px"><p class="muted" style="margin:0">${all.length?'Nenhuma designação com esse filtro.':'Nenhuma designação nesse período.'}</p></div>`}
+  </div>`}
+document.addEventListener('change',e=>{const id=e.target.id;if(id==='cf-dias')ui.cfDias=+e.target.value;else if(id==='cf-tipo')ui.cfTipo=e.target.value;else if(id==='cf-filtro')ui.cfFiltro=e.target.value;else return;rConfirm()});
+
 /* ================= Rodapé: contato do desenvolvedor e links úteis ================= */
-const DEV={mail:['tallisdocarmo','gmail.com'].join('@')};
+const DEV={mail:(window.DESIGNAR_CONFIG&&window.DESIGNAR_CONFIG.suporte)||['tallisdocarmo','gmail.com'].join('@')};
 const LINKS_UTEIS=[['JW.ORG','https://www.jw.org/pt/'],['JW Hub','https://hub.jw.org/'],['Biblioteca On-line','https://wol.jw.org/pt/']];
 const EXT_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
 /* o e-mail sai com assunto e um roteiro já preenchidos; as informações técnicas ajudam a encontrar o erro */
@@ -1443,7 +1518,7 @@ function devMailto(){const F=window.FBX||{};const ua=navigator.userAgent.replace
 function rodape(){if(document.querySelector('footer.appfoot'))return;setTimeout(()=>{const h=$('#hName'),f=document.querySelector('.appfoot .fcong');if(h&&f){const sync=()=>{f.textContent=h.textContent};sync();new MutationObserver(sync).observe(h,{childList:true,characterData:true,subtree:true})}},0);const F=window.FBX;
   const logo=document.querySelector('header.app .logo');
   document.body.insertAdjacentHTML('beforeend',`<footer class="appfoot"><div class="wrap ftop">
-    <div class="fcol fbrandcol">${logo?`<span class="fhead"><span class="logo sm">${logo.innerHTML}</span><b class="fcong"></b></span>`:''}<p>As designações da congregação, num só lugar.</p>${F?`<p>Versão ${esc(F.versao||'')}</p>`:''}</div>
+    <div class="fcol fbrandcol">${logo?`<span class="fhead"><span class="logo sm">${logo.innerHTML}</span><b class="fcong"></b></span>`:''}${F?`<p>Versão ${esc(F.versao||'')}</p>`:''}</div>
     <div class="fcol flinks"><h2>Links úteis</h2>${LINKS_UTEIS.map(([t,u])=>`<a href="${u}" target="_blank" rel="noopener noreferrer">${t}${EXT_IC}</a>`).join('')}</div>
     <div class="fcol"><h2>Suporte</h2><p>Dúvidas, sugestões ou encontrou um erro? <a class="footmail" href="#">Fale com o desenvolvedor</a>.</p></div>
   </div><div class="wrap fbot">${F?`<nav aria-label="Documentos"><a href="#" data-doc="sobre">Sobre</a><a href="#" data-doc="privacidade">Aviso de privacidade</a><a href="#" data-doc="termos">Termo de uso</a></nav>`:''}</div></footer>`);
@@ -2855,13 +2930,14 @@ function rAjustes(){
     <div class="full" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       <button class="btn" data-a="exportjson">Baixar cópia de segurança</button>
       <label class="btn" style="cursor:pointer">Restaurar cópia<input type="file" id="c-import" accept="application/json,.json" hidden></label>
-      <span class="hint">A cópia guarda publicadores, semanas e ajustes em um arquivo .json.</span>
+      <label class="hint" style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="c-import-subst"> Substituir tudo (apaga o que não estiver na cópia)</label>
+      <span class="hint" style="flex-basis:100%">A cópia guarda publicadores, semanas, fim de semana, limpeza, itens, A/V, campo e ajustes em um arquivo .json.</span>
     </div>${window.FBX&&window.FBX.email?`<div class="full accbox"><h3 style="margin:0 0 4px;font-size:16px">Aviso de privacidade (LGPD)</h3><p class="hint" style="margin:0 0 10px">Aparecem no aviso de privacidade e na página Sobre, inclusive na tela de login: é com quem os publicadores falam para ver, corrigir ou apagar os próprios dados.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px"><label class="f">Responsável pelos dados<input type="text" id="c-resp" value="${esc((window.FBX.pub||{}).responsavel||'')}" placeholder="Ex.: Corpo de anciãos da Congregação Jorrinho"></label>
       <label class="f">Contato para pedidos<input type="text" id="c-cont" value="${esc((window.FBX.pub||{}).contato||'')}" placeholder="E-mail ou telefone"></label></div>
       <div style="margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;font-size:13.5px"><a href="#" data-doc="privacidade">Ver aviso de privacidade</a><a href="#" data-doc="termos">Ver termo de uso</a></div></div>
-      <div class="full" id="accBox"></div><div class="full" id="actBox"></div>`:''}</div>`;
-  if(window.FBX&&window.FBX.email){drawAcc();drawAct()}
+      <div class="full" id="copiasBox"></div><div class="full" id="accBox"></div><div class="full" id="diagBox"></div><div class="full" id="errBox"></div><div class="full" id="actBox"></div>`:''}</div>`;
+  if(window.FBX&&window.FBX.email){drawAcc();drawAct();drawCopias();drawDiag();drawErros()}
 }
 /* ===== Registro de atividade (administradores) ===== */
 const COLN={semanas:'Meio de semana',fimdesemana:'Fim de semana',publicadores:'Publicador',eventos:'Tipo de semana',limpezaGrupos:'Grupo de limpeza',limpeza:'Escala de limpeza',estoque:'Item de higiene e limpeza',av:'A/V e Indicadores',campo:'Saídas de campo',config:'Ajustes'};
@@ -2881,6 +2957,9 @@ function bkCheck(){const box=$('#bkBox');if(!box)return;if(!window.FBX||!isAdm()
   let snooze=0;try{snooze=+localStorage.getItem('vmc-bk-adiar')||0}catch(e){}
   const last=cfg.ultimoBackup;const dias=last?Math.floor((Date.now()-parse(last).getTime())/864e5):null;
   if((dias!=null&&dias<30)||Date.now()<snooze){box.hidden=true;return}
+  /* com cópias automáticas recentes no servidor, o lembrete de baixar só aparece a cada 60 dias */
+  if(typeof copias!=='undefined'&&copias===null){box.hidden=true;return} // espera saber se há cópias no servidor
+  const ult=typeof copias!=='undefined'&&copias&&copias[0];if(ult&&Date.now()-parse(ult.id.slice(0,10)).getTime()<8*864e5&&(dias==null||dias<60)){box.hidden=true;return}
   box.innerHTML=`<span>${dias==null?'Ainda não há cópia de segurança dos dados.':'Faz '+dias+' dias desde a última cópia de segurança.'} Baixe uma e guarde com você: se algo for apagado por engano, é com ela que se recupera.</span><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small primary" data-a="exportjson">Baixar cópia agora</button><button class="btn small ghost" data-a="bkadiar">Lembrar daqui a 7 dias</button></span>`;box.hidden=false}
 Object.assign(PACTS,{bkadiar:()=>{try{localStorage.setItem('vmc-bk-adiar',String(Date.now()+7*864e5))}catch(e){}bkCheck()}});
 /* ===== Conta no topo: quem está conectado e botão Sair (versão hospedada) ===== */
@@ -2901,7 +2980,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){const m=$('#contaMe
 /* ===== Acesso (só na versão hospedada com Firebase) ===== */
 const PAPEIS={admin:'Administrador',editor:'Pode editar',leitor:'Só visualizar',publicador:'Publicador (só o painel)'};
 function drawAcc(){const box=$('#accBox');if(!box)return;const F=window.FBX;const adm=F.papel==='admin';
-  if(adm&&!ui.accSub){ui.accSub=true;F.listAccess(l=>{ui.acc=l;drawAcc()},()=>{ui.acc=null});if(F.listAceites)F.listAceites(m=>{ui.aceites=m;drawAcc()},()=>{})}
+  if(adm)acessoInit();
   const AC=ui.aceites||{};const accInfo=e=>{const a=AC[e];if(!a)return'<small class="muted">ainda não entrou</small>';return`<small class="muted">${a.ultimo?'último acesso '+tsLabel(a.ultimo):''}${a.em?' · aceitou o termo em '+tsLabel(a.em).slice(0,10):''}</small>`};
   const all=(ui.acc||[]).slice().sort((a,b)=>a.email.localeCompare(b.email));const list=all.filter(a=>a.papel!=='publicador');const pubAcc=all.filter(a=>a.papel==='publicador');
   const known=new Set(all.map(a=>a.email));const pend=Object.entries(pubs).filter(([id,p])=>p.email&&p.ativo!==false&&!known.has(String(p.email).toLowerCase())&&String(p.email).toLowerCase()!==F.owner);
@@ -2938,8 +3017,11 @@ document.addEventListener('input',e=>{const id=e.target.id;const map={'c-cong':'
   if((id==='c-resp'||id==='c-cont'||id==='c-cong')&&window.FBX&&window.FBX.setPublic){clearTimeout(rAjustes.pt);rAjustes.pt=setTimeout(()=>{const d={congregacao:cfg.congregacao||''};const r=$('#c-resp'),c=$('#c-cont');if(r)d.responsavel=r.value.trim();if(c)d.contato=c.value.trim();window.FBX.setPublic(d).then(()=>setStatus('Tudo salvo')).catch(()=>setStatus('Não foi possível salvar o aviso de privacidade','error'))},800)}
   if(map[id]){cfg[map[id]]=(id==='c-dia'||id==='c-int'||id==='c-diafds'||id==='c-dialimp')?+e.target.value:e.target.value;if(id==='c-dia'||id==='c-diafds')setTimeout(rAjustes,0);queueSave('config','geral',cfg);$('#hName').textContent=cfg.congregacao?'Congregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):'';}});
 async function exportJson(){const blob=new Blob([JSON.stringify({publicadores:pubs,semanas:weeks,fimdesemana:fds,eventos:evs,limpezaGrupos:lgr,limpeza:lmp,estoque:stk,av:avd,campo:cmp,config:cfg},null,1)],{type:'application/json'});const ok=await saveFile('designacoes-vmc-'+iso(new Date())+'.json',blob);if(ok&&window.FBX&&isAdm()){cfg.ultimoBackup=iso(new Date());queueSave('config','geral',cfg);bkCheck()}}
-document.addEventListener('change',e=>{if(e.target.id!=='c-import')return;if(!isAdm()){toast('Só administradores restauram cópias');return}const f=e.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=async()=>{if(window.FBX)window.FBX.quiet=true;try{const d=JSON.parse(r.result);let n=0;
+/* restaura uma cópia (arquivo ou cópia guardada no servidor); com "subst", apaga o que não estiver na cópia */
+async function restaurarDados(d,subst){if(window.FBX)window.FBX.quiet=true;let n=0,del=0;
+  try{
+    if(subst){const M={publicadores:pubs,semanas:weeks,fimdesemana:fds,eventos:evs,limpezaGrupos:lgr,limpeza:lmp,estoque:stk,av:avd,campo:cmp};
+      for(const[c,m]of Object.entries(M)){if(!d[c])continue;for(const id of Object.keys(m)){if(!(id in d[c])){delete m[id];await store.del(c,id);del++}}}}
     for(const[id,p]of Object.entries(d.publicadores||{})){pubs[id]=p;await store.set('publicadores',id,p);n++}
     for(const[id,w]of Object.entries(d.semanas||{})){weeks[id]=norm(w);await store.set('semanas',id,weeks[id]);n++}
     for(const[id,f]of Object.entries(d.fimdesemana||{})){fds[id]=normF(f);await store.set('fimdesemana',id,fds[id]);n++}
@@ -2949,13 +3031,112 @@ document.addEventListener('change',e=>{if(e.target.id!=='c-import')return;if(!is
     for(const[id,v]of Object.entries(d.estoque||{})){stk[id]=v;await store.set('estoque',id,v);n++}
     for(const[id,v]of Object.entries(d.av||{})){avd[id]=v;await store.set('av',id,v);n++}
     for(const[id,v]of Object.entries(d.campo||{})){cmp[id]=v;await store.set('campo',id,v);n++}
-    if(d.config){cfg=Object.assign({},DEF_CFG,d.config);await store.set('config','geral',cfg)}
-    buildHist();toast(n+' registros restaurados');if(window.FBX){window.FBX.quiet=false;window.FBX.log('restaurou','config','copia')}rAjustes()}catch(err){if(window.FBX)window.FBX.quiet=false;toast('Arquivo inválido')}};r.readAsText(f)});
+    if(d.config){const ub=cfg.ultimoBackup;cfg=Object.assign({},DEF_CFG,d.config);if(ub)cfg.ultimoBackup=ub;await store.set('config','geral',cfg)}
+  }finally{if(window.FBX)window.FBX.quiet=false}
+  buildHist();if(window.FBX)window.FBX.log('restaurou','config','copia');return{n,del}}
+document.addEventListener('change',e=>{if(e.target.id!=='c-import')return;if(!isAdm()){toast('Só administradores restauram cópias');return}const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  const subst=!!($('#c-import-subst')||{}).checked;
+  if(subst&&!confirm('Substituir tudo: o que estiver no sistema e não estiver na cópia será apagado (publicadores, semanas, fim de semana, limpeza, itens, A/V e campo). Continuar?')){e.target.value='';return}
+  r.onload=async()=>{let d;try{d=JSON.parse(r.result)}catch(err){toast('Arquivo inválido');e.target.value='';return}
+    try{const x=await restaurarDados(d,subst);toast(x.n+' registros restaurados'+(x.del?', '+x.del+' removidos':''))}catch(err){toast('Não foi possível restaurar tudo ('+((err&&err.code)||'erro')+')')}
+    e.target.value='';rAjustes()};r.readAsText(f)});
 
 document.body.insertAdjacentHTML('beforeend','<datalist id="cantList">'+CANTICOS.map((t,i)=>'<option value="'+esc((i+1)+' - '+t)+'">').join('')+'</datalist>');
 /* ao sair do campo, só o número vira número + título */
 document.addEventListener('change',e=>{const t=e.target;if(!t.matches||!t.matches('[list=cantList]'))return;const v=cant(t.value);if(v!==t.value){t.value=v;t.dispatchEvent(new Event('input',{bubbles:true}))}});
 route();init();
+/* ================= Cuidados do sistema: cópias automáticas, quem tem acesso, erros nos aparelhos e diagnóstico ================= */
+
+/* ----- Lista de acesso (só administradores conseguem ler): usada em Ajustes, Confirmações e Publicadores ----- */
+function acessoInit(){const F=window.FBX;if(ui.accSub||!F||F.papel!=='admin'||!F.listAccess)return;ui.accSub=true;
+  F.listAccess(l=>{ui.acc=l;acessoMudou()},()=>{ui.acc=null});
+  if(F.listAceites)F.listAceites(m=>{ui.aceites=m;acessoMudou()},()=>{})}
+function acessoMudou(){if(ui.tab==='ajustes')drawAcc();else if(['confirmacoes','publicadores'].includes(ui.tab))renderAll(true)}
+/* situação de cada publicador no painel: 'ativo' (já entrou), 'convidado' (tem acesso, ainda não entrou), 'sem' (sem acesso); null = não dá para saber */
+function acessoDe(pid){const F=window.FBX;if(!F||F.papel!=='admin'||!ui.acc)return null;
+  const a=ui.acc.find(x=>x.pub===pid)||(F.owner&&F.pubId===pid?{email:F.owner}:null);if(!a)return'sem';
+  return(ui.aceites||{})[a.email]?'ativo':'convidado'}
+
+/* ----- Cópias automáticas no servidor: uma por semana, guardando as 8 mais recentes ----- */
+const dadosAtuais=()=>({publicadores:pubs,semanas:weeks,fimdesemana:fds,eventos:evs,limpezaGrupos:lgr,limpeza:lmp,estoque:stk,av:avd,campo:cmp,config:cfg});
+const contaRegs=d=>['publicadores','semanas','fimdesemana','eventos','limpezaGrupos','limpeza','estoque','av','campo'].reduce((a,k)=>a+Object.keys(d[k]||{}).length,0);
+let copias=null;
+function copiasInit(){const F=window.FBX;if(ui.copSub||!F||!F.copias||F.papel!=='admin')return;ui.copSub=true;
+  F.copias.listar(l=>{copias=l;copiaAuto();bkCheck();if(ui.tab==='ajustes')drawCopias()},()=>{copias=[];bkCheck()})}
+async function copiaAuto(){const F=window.FBX;if(!copias||copiaAuto.feito||!F||F.papel!=='admin')return;
+  if(!(loaded.p&&loaded.w&&loaded.c&&loaded.f&&loaded.e))return; // só com todos os dados do servidor
+  const ult=copias[0];const dias=ult?Math.floor((Date.now()-parse(ult.id.slice(0,10)).getTime())/864e5):999;
+  copiaAuto.feito=true;if(dias<7)return;
+  await guardarCopia(true)}
+async function guardarCopia(auto){const F=window.FBX;const d=dadosAtuais();const n=contaRegs(d);
+  if(n<5){if(!auto)toast('Não há dados suficientes para guardar');return false} // nunca guarda uma cópia vazia por cima das boas
+  const id=iso(new Date())+(auto?'':'-'+pad(new Date().getHours())+pad(new Date().getMinutes()));
+  try{await F.copias.salvar(id,JSON.stringify(d),n,!!auto);
+    const velhas=(copias||[]).filter(c=>c.id!==id).slice(7);for(const c of velhas){try{await F.copias.apagar(c.id)}catch(e){}}
+    if(!auto)toast('Cópia guardada');return true}catch(e){if(!auto)toast('Não foi possível guardar a cópia ('+((e&&e.code)||'erro')+')');return false}}
+function drawCopias(){const box=$('#copiasBox');if(!box)return;const F=window.FBX;if(!F||F.papel!=='admin'||!F.copias){box.innerHTML='';return}
+  copiasInit();const l=copias;
+  box.innerHTML=`<div class="accbox"><h3 style="margin:0 0 4px;font-size:16px">Cópias guardadas no servidor</h3>
+    <p class="hint" style="margin:0 0 10px">Uma cópia de tudo é guardada sozinha toda semana, quando um administrador entra. Ficam as 8 mais recentes. Para recuperar algo apagado por engano, use "Restaurar".</p>
+    ${l==null?'<div class="muted" style="font-size:14px">Carregando…</div>':l.length?`<div class="acclist">${l.map(c=>`<div class="accrow cprow"><span><b>${br(c.id.slice(0,10))}</b>${c.id.length>10?' '+esc(c.id.slice(11,13)+':'+c.id.slice(13,15)):''}<br><small class="muted">${esc(String(c.n||'?'))} registros · ${c.auto?'automática':'guardada por '+who(c.por)}</small></span>
+      ${ui.delAsk==='cop'+c.id?`<span class="confirm"><button class="btn small danger" data-a="coprestok" data-id="${esc(c.id)}">Restaurar esta cópia</button><button class="btn small" data-a="accno">Não</button></span>`:`<span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn small" data-a="copbaixar" data-id="${esc(c.id)}">Baixar</button><button class="btn small" data-a="coprest" data-id="${esc(c.id)}">Restaurar</button></span>`}</div>`).join('')}</div>`:'<div class="muted" style="font-size:14px">Nenhuma cópia ainda. A primeira é guardada assim que os dados terminam de carregar.</div>'}
+    <div style="margin-top:10px"><button class="btn small" data-a="copagora">Guardar uma cópia agora</button></div></div>`}
+Object.assign(PACTS,{
+  copagora:async()=>{await guardarCopia(false)},
+  copbaixar:async b=>{const c=(copias||[]).find(x=>x.id===b.dataset.id);if(!c)return;await saveFile('designacoes-copia-'+c.id+'.json',new Blob([c.dados],{type:'application/json'}))},
+  coprest:b=>{ui.delAsk='cop'+b.dataset.id;drawCopias()},
+  coprestok:async b=>{const c=(copias||[]).find(x=>x.id===b.dataset.id);ui.delAsk=null;if(!c)return;
+    await guardarCopia(false); // antes, guarda o estado atual (para poder desfazer)
+    try{const x=await restaurarDados(JSON.parse(c.dados),true);toast('Cópia de '+br(c.id.slice(0,10))+' restaurada ('+x.n+' registros)')}catch(e){toast('Não foi possível restaurar ('+((e&&e.code)||'erro')+')')}
+    rAjustes()}});
+
+/* ----- Erros nos aparelhos: quando algo falha no celular de alguém, fica um aviso que só administradores veem ----- */
+let errN=0;const errVistos=new Set();
+function regErro(msg,pilha,onde){const F=window.FBX;if(!F||!F.erro||!F.email||errN>=5)return;const k=String(msg||'').slice(0,200);if(!k||errVistos.has(k))return;errVistos.add(k);errN++;
+  F.erro({msg:k,pilha:String(pilha||'').slice(0,1900),onde:String(onde||'').slice(0,200),versao:String(F.versao||''),tela:String(location.hash||'#').slice(0,40),aparelho:navigator.userAgent.slice(0,300)}).catch(()=>{})}
+window.addEventListener('error',e=>{if(e.filename&&!e.filename.startsWith(location.origin))return;regErro(e.message,e.error&&e.error.stack,(e.filename||'').split('/').pop()+':'+(e.lineno||''))});
+window.addEventListener('unhandledrejection',e=>{const r=e.reason||{};if(r&&r.code==='permission-denied')return;regErro(r.message||String(r),r.stack,'promessa')});
+function drawErros(){const box=$('#errBox');if(!box)return;const F=window.FBX;if(!F||F.papel!=='admin'||!F.erros){box.innerHTML='';return}
+  if(!ui.errSub){ui.errSub=true;F.erros.listar(l=>{ui.erros=l;if(ui.tab==='ajustes')drawErros()},()=>{ui.erros=[]})}
+  const l=ui.erros;const disp=u=>/iPhone|iPad/.test(u)?'iPhone/iPad':/Android/.test(u)?'Android':/Windows/.test(u)?'Windows':/Mac/.test(u)?'Mac':'outro';
+  box.innerHTML=`<div class="accbox"><h3 style="margin:0 0 4px;font-size:16px">Erros nos aparelhos</h3><p class="hint" style="margin:0 0 8px">Falhas que aconteceram enquanto alguém usava o sistema. Se aparecer algo aqui, envie ao desenvolvedor pelo link do rodapé.</p>
+    ${l==null?'<div class="muted" style="font-size:14px">Carregando…</div>':l.length?`<div class="actlist">${l.map(x=>`<div class="actrow"><span class="muted">${tsLabel(x.em)}</span><span><b>${who(x.por)}</b> · ${esc(disp(x.aparelho||''))} · ${esc(x.tela||'')} · v${esc(x.versao||'?')}<br><span style="font-family:ui-monospace,monospace;font-size:12.5px;word-break:break-word">${esc(x.msg)}</span></span></div>`).join('')}</div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" data-a="errcopiar">Copiar para enviar</button><button class="btn small ghost" data-a="errlimpar">Limpar a lista</button></div>`:'<div class="muted" style="font-size:14px">Nenhum erro registrado.</div>'}</div>`}
+Object.assign(PACTS,{
+  errcopiar:()=>copyText((ui.erros||[]).map(x=>[tsLabel(x.em),x.por,x.tela,'v'+x.versao,x.onde,x.msg,x.aparelho,(x.pilha||'').split('\n').slice(0,4).join(' | ')].join(' · ')).join('\n')),
+  errlimpar:async()=>{for(const x of ui.erros||[]){try{await window.FBX.erros.apagar(x.id)}catch(e){}}toast('Lista limpa')}});
+
+/* ----- Diagnóstico: confere o site publicado (arquivos, versão, banco, PDF e planilhas) ----- */
+const ARQS=['config.js','manifest.webmanifest','sw.js','icon-180.png','icon-192.png','icon-512.png','icon-maskable-512.png','404.html',
+  'lib/firebase-app-compat.js','lib/firebase-auth-compat.js','lib/firebase-firestore-compat.js','lib/jspdf.umd.min.js','lib/jszip.min.js','lib/xlsx.full.min.js','lib/pdfjs/pdf.min.js','lib/pdfjs/pdf.worker.min.js'];
+async function versaoPublicada(){try{const r=await fetch('versao.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;return(await r.json()).versao||null}catch(e){return null}}
+async function diagnostico(){const out=[];const add=(ok,t,d)=>out.push({ok,t,d});const F=window.FBX;
+  const pub=await versaoPublicada();
+  if(!pub)add(false,'Versão','Não encontrei o arquivo versao.json no site. Envie todos os arquivos da última versão.');
+  else if(pub!==F.versao)add(false,'Versão',`Este aparelho está com a versão ${F.versao}, e a publicada é ${pub}. Recarregue a página.`);
+  else add(true,'Versão',`Atualizada (${pub}).`);
+  const falta=[];await Promise.all(ARQS.map(async a=>{try{const r=await fetch(a+'?t='+Date.now(),{method:'HEAD',cache:'no-store'});if(!r.ok)falta.push(a)}catch(e){falta.push(a)}}));
+  add(!falta.length,'Arquivos do site',falta.length?'Faltam no GitHub: '+falta.join(', ')+'.':`Todos os ${ARQS.length} arquivos estão no lugar.`);
+  try{await F.ping();add(true,'Banco de dados','Conectado ao Firebase.')}catch(e){add(false,'Banco de dados','Sem resposta do Firebase ('+((e&&e.code)||'erro')+'). Verifique a internet.')}
+  add(loaded.p&&loaded.w&&loaded.c,'Dados carregados',loaded.p&&loaded.w&&loaded.c?`${Object.keys(pubs).length} publicadores e ${Object.keys(weeks).length} semanas.`:'Os dados ainda não terminaram de carregar.');
+  add(!!window.jspdf,'Gerar PDF',window.jspdf?'Gerador de PDF carregado.':'O gerador de PDF não carregou (lib/jspdf.umd.min.js).');
+  try{await ensurePdfjs();add(true,'Ler apostila em PDF','Leitor de PDF funcionando.')}catch(e){add(false,'Ler apostila em PDF','O leitor de PDF não carregou.')}
+  try{await loadScript(XLSX_URL);add(!!window.XLSX,'Planilhas (Excel)','Leitor de planilhas funcionando.')}catch(e){add(false,'Planilhas (Excel)','O leitor de planilhas não carregou.')}
+  const sw='serviceWorker' in navigator&&location.protocol==='https:';let swOk=false;if(sw){try{swOk=!!(await navigator.serviceWorker.getRegistration())}catch(e){}}
+  add(swOk||!sw,'Aplicativo e uso sem internet',swOk?'Instalável e com cópia no aparelho.':sw?'Ainda não ativado neste aparelho. Recarregue a página uma vez.':'Disponível só no endereço https do site.');
+  return out}
+function drawDiag(){const box=$('#diagBox');if(!box)return;const F=window.FBX;if(!F||F.papel!=='admin'||!F.ping){box.innerHTML='';return}
+  const r=ui.diag;box.innerHTML=`<div class="accbox"><h3 style="margin:0 0 4px;font-size:16px">Conferir o site</h3><p class="hint" style="margin:0 0 10px">Use depois de cada publicação no GitHub: confere se todos os arquivos estão lá, se a versão é a mais nova e se banco, PDF e planilhas funcionam neste aparelho.</p>
+    ${r==='rodando'?'<div class="muted" style="font-size:14px">Conferindo…</div>':Array.isArray(r)?`<div class="diaglist">${r.map(x=>`<div class="diagrow ${x.ok?'ok':'falha'}"><span class="diagic" aria-hidden="true">${x.ok?'✓':'!'}</span><span><b>${esc(x.t)}</b><br><small>${esc(x.d)}</small></span></div>`).join('')}</div>`:''}
+    <div style="margin-top:10px"><button class="btn small" data-a="diagrodar">${Array.isArray(r)?'Conferir de novo':'Conferir agora'}</button></div></div>`}
+Object.assign(PACTS,{diagrodar:async()=>{ui.diag='rodando';drawDiag();try{ui.diag=await diagnostico()}catch(e){ui.diag=[{ok:false,t:'Diagnóstico',d:'Não foi possível concluir ('+e.message+').'}]}drawDiag()}});
+
+/* ----- Aviso de versão nova publicada (site): confere ao abrir e a cada 30 minutos ----- */
+async function checarVersaoNova(){const F=window.FBX;if(!F||!F.versao||location.protocol!=='https:')return;const v=await versaoPublicada();
+  if(v&&v!==F.versao&&!$('#novaVersao')){document.body.insertAdjacentHTML('beforeend',`<div id="novaVersao" class="novaver" role="status"><span>Há uma versão nova do sistema.</span><button class="btn small primary" data-a="recarregar">Atualizar agora</button></div>`)}}
+Object.assign(PACTS,{recarregar:()=>location.reload()});
+setTimeout(checarVersaoNova,8000);setInterval(checarVersaoNova,30*60*1000);
+
 </script>
 
 </body>

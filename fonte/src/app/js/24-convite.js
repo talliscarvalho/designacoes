@@ -1,0 +1,4 @@
+/* ================= Convite pelo WhatsApp para entrar no painel ================= */
+function conviteMsg(email,pid){const p=pubs[pid]||{};const nome=tc(String(p.nome||'').split(' ')[0]||'');const url=location.origin+location.pathname;
+  const google=/@(gmail|googlemail)\.com$/i.test(email);
+  return`Olá${nome?', '+nome:''}!\n\nAgora você pode ver as suas designações da congregação pelo celular:\n${url}\n\nComo entrar:\n1. Abra o link.\n2. ${google?`Toque em "Entrar com Google" e escolha a conta ${email}.`:`Digite o seu e-mail (${email}) e toque em "Receber link de acesso". Abra o e-mail que chegar e toque no link, no mesmo celular.`}\n3. Leia e aceite o termo de uso.\n\nDica: depois de entrar, use "Adicionar à tela inicial" no menu do navegador para abrir como um aplicativo.\n${cfg.congregacao&&cfg.congregacao!=='Congregação'?'\nCongregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):''}`}

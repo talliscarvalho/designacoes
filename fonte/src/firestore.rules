@@ -1,0 +1,140 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Quem está conectado com uma conta Google verificada
+    function conectado() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    function email() {
+      return request.auth.token.email.lower();
+    }
+    // Administrador principal (fixo)
+    // >>> TROQUE AQUI ao instalar em outra congregação: o mesmo e-mail de "dono" do config.js <<<
+    function dono() {
+      return conectado() && email() == 'talliscarvalhoo@gmail.com';
+    }
+    function naLista() {
+      return conectado() && exists(/databases/$(database)/documents/acesso/$(email()));
+    }
+    function papel() {
+      return get(/databases/$(database)/documents/acesso/$(email())).data.papel;
+    }
+    // Só usa o sistema quem aceitou o termo de uso
+    function aceitou() {
+      return exists(/databases/$(database)/documents/aceites/$(email()));
+    }
+    function admin()  { return (dono() || (naLista() && papel() == 'admin')) && aceitou(); }
+    function editor() { return admin() || (naLista() && papel() == 'editor' && aceitou()); }
+    function leitor() { return editor() || (naLista() && papel() == 'leitor' && aceitou()); }
+    // Publicador: vê só o próprio painel (designações, programações e os próprios dados)
+    function publicador() { return naLista() && papel() == 'publicador' && aceitou(); }
+    function meuPub() { return get(/databases/$(database)/documents/acesso/$(email())).data.pub; }
+    function programacao(c) {
+      return c in ['semanas', 'fimdesemana', 'eventos', 'limpeza', 'limpezaGrupos', 'av', 'campo'];
+    }
+
+    // Toda gravação precisa dizer quem alterou e levar a hora do servidor
+    function assinado() {
+      return request.resource.data._por == email() && request.resource.data._em == request.time;
+    }
+    // Ajustes gerais que só administradores podem mudar
+    function mudaAjusteProtegido() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasAny(
+        ['congregacao', 'dia', 'hora', 'diaFds', 'horaFds', 'diaLimpeza', 'mensagem', 'intervaloMeses', 'papel', 'ultimoBackup']);
+    }
+    function reservada(c) {
+      return c in ['acesso', 'registro', 'config', 'aceites', 'publico', 'quadro', 'respostas', 'copias', 'erros'];
+    }
+    // Só estas coleções de dados existem; qualquer outro nome é recusado (evita criar "pastas" estranhas no banco)
+    function dados(c) {
+      return c in ['publicadores', 'semanas', 'fimdesemana', 'eventos', 'limpeza', 'limpezaGrupos', 'estoque', 'av', 'campo'];
+    }
+    // Limite de tamanho por registro (nenhum registro legítimo chega perto disso)
+    function tamanhoOk() {
+      return request.resource.data.size() < 400;
+    }
+
+    // Lista de quem pode entrar: cada um lê o próprio registro; só administradores mudam a lista
+    match /acesso/{mail} {
+      allow read: if admin() || (conectado() && mail == email());
+      allow write: if admin() && mail == mail.lower();
+    }
+
+    // Aceite do termo de uso e último acesso: cada pessoa grava só o próprio; administradores consultam
+    match /aceites/{mail} {
+      allow read: if admin() || (conectado() && mail == email());
+      allow create: if conectado() && mail == email() && (dono() || naLista())
+                    && request.resource.data.em == request.time;
+      allow update: if conectado() && mail == email() && (dono() || naLista())
+                    && (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ultimo'])
+                        || request.resource.data.em == request.time)
+                    && request.resource.data.ultimo == request.time;
+      allow delete: if admin();
+    }
+
+    // Lista de nomes (sem telefones) usada pelo painel dos publicadores; mantida pelos editores
+    match /quadro/{id} {
+      allow read: if leitor() || publicador();
+      allow write: if editor() && assinado();
+    }
+
+    // Confirmações das designações: o publicador responde só pelas próprias; equipe vê todas
+    match /respostas/{id} {
+      allow read: if leitor() || (publicador() && resource.data.pub == meuPub());
+      allow create, update: if request.resource.data.por == email() && request.resource.data.em == request.time
+                            && (editor() || (publicador() && request.resource.data.pub == meuPub()));
+      allow delete: if editor() || (publicador() && resource.data.pub == meuPub());
+    }
+
+    // O publicador pode ler a própria ficha (para conferir os seus dados)
+    match /publicadores/{id} {
+      allow read: if publicador() && id == meuPub();
+    }
+
+    // Responsável e contato do aviso de privacidade: qualquer pessoa lê (aparece na tela de login)
+    match /publico/{id} {
+      allow read: if true;
+      allow write: if admin() && assinado();
+    }
+
+    // Cópias automáticas de segurança (uma por semana): só administradores guardam, consultam e apagam
+    match /copias/{id} {
+      allow read, delete: if admin();
+      allow create, update: if admin() && request.resource.data.por == email() && request.resource.data.em == request.time
+                            && request.resource.data.dados is string && request.resource.data.dados.size() < 1000000;
+    }
+
+    // Erros que aconteceram nos aparelhos: quem está na lista registra (em seu nome); só administradores leem e apagam
+    match /erros/{id} {
+      allow read, delete: if admin();
+      allow create: if (dono() || naLista()) && request.resource.data.por == email() && request.resource.data.em == request.time
+                    && request.resource.data.keys().hasOnly(['msg', 'pilha', 'onde', 'versao', 'tela', 'aparelho', 'por', 'em'])
+                    && request.resource.data.msg is string && request.resource.data.msg.size() <= 500
+                    && request.resource.data.get('pilha', '').size() <= 2000;
+      allow update: if false;
+    }
+
+    // Registro de atividade: qualquer editor acrescenta (em seu próprio nome); só administradores leem; ninguém altera ou apaga
+    match /registro/{id} {
+      allow read: if admin();
+      allow create: if editor() && request.resource.data.por == email() && request.resource.data.em == request.time;
+      allow update, delete: if false;
+    }
+
+    // Ajustes: administradores mudam tudo; editores só o que é do dia a dia (modelos de campo, ordem da limpeza, modelo da folha)
+    match /config/{id} {
+      allow read: if leitor() || publicador();
+      allow create: if admin() && assinado();
+      allow update: if assinado() && (admin() || (editor() && !mudaAjusteProtegido()));
+      allow delete: if admin();
+    }
+
+    // Demais dados (publicadores, semanas, fim de semana, limpeza, itens, A/V, campo)
+    match /{colecao}/{id} {
+      allow read: if dados(colecao) && (leitor() || (publicador() && programacao(colecao)));
+      allow create, update: if dados(colecao) && editor() && assinado() && tamanhoOk();
+      allow delete: if dados(colecao) && editor();
+    }
+  }
+}
