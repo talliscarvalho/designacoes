@@ -133,4 +133,4 @@ document.addEventListener('change',e=>{if(e.target.id!=='c-import')return;if(!is
 document.body.insertAdjacentHTML('beforeend','<datalist id="cantList">'+CANTICOS.map((t,i)=>'<option value="'+esc((i+1)+' - '+t)+'">').join('')+'</datalist>');
 /* ao sair do campo, só o número vira número + título */
 document.addEventListener('change',e=>{const t=e.target;if(!t.matches||!t.matches('[list=cantList]'))return;const v=cant(t.value);if(v!==t.value){t.value=v;t.dispatchEvent(new Event('input',{bubbles:true}))}});
-route();init();
+/* (o início do sistema fica no fim do último arquivo: 99-inicio.js) */

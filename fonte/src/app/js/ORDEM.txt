@@ -24,3 +24,5 @@
 24-convite.js
 25-aba-ajustes.js
 26-cuidados-do-sistema.js
+27-lembrete-s89.js
+99-inicio.js

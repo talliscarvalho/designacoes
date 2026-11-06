@@ -266,6 +266,11 @@ select[data-cbx]{display:none!important}
 .cbxnone{padding:12px;color:var(--muted);font-size:14px}
 .orh{display:flex;flex-direction:column;gap:6px}
 .lastmod{font-size:12.5px;color:var(--muted);margin:-2px 0 8px}
+.s89box{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}.s89box[hidden]{display:none}
+.s89av{display:flex;gap:10px 16px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--min);border-radius:6px;padding:10px 14px;font-size:14px}
+.s89av.urg{border-left-color:var(--ev);background:color-mix(in srgb,var(--ev) 6%,var(--surface))}
+.s89txt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 320px}.s89txt span{color:var(--muted)}
+.s89act{display:flex;gap:8px;flex-wrap:wrap}
 .bkbox{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.bkbox[hidden]{display:none}
 .actlist{display:flex;flex-direction:column;max-height:360px;overflow:auto}
 .actrow{display:grid;grid-template-columns:128px minmax(0,1fr);gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px}

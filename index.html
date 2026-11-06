@@ -35,7 +35,7 @@
   const CFG=window.DESIGNAR_CONFIG||{};
   const FIREBASE_CONFIG=CFG.firebase;
   const OWNER=String(CFG.dono||'').trim().toLowerCase();
-  const APP="Designar", VERSAO="2026.11.06-0216", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
+  const APP="Designar", VERSAO="2026.11.06-0226", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
   const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,whatsapp:CFG.whatsapp||'',pub:{}};
   const t=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let resolveReady,rejectReady;const readyP=new Promise((r,j)=>{resolveReady=r;rejectReady=j});
@@ -562,6 +562,11 @@ select[data-cbx]{display:none!important}
 .cbxnone{padding:12px;color:var(--muted);font-size:14px}
 .orh{display:flex;flex-direction:column;gap:6px}
 .lastmod{font-size:12.5px;color:var(--muted);margin:-2px 0 8px}
+.s89box{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}.s89box[hidden]{display:none}
+.s89av{display:flex;gap:10px 16px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--min);border-radius:6px;padding:10px 14px;font-size:14px}
+.s89av.urg{border-left-color:var(--ev);background:color-mix(in srgb,var(--ev) 6%,var(--surface))}
+.s89txt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 320px}.s89txt span{color:var(--muted)}
+.s89act{display:flex;gap:8px;flex-wrap:wrap}
 .bkbox{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.bkbox[hidden]{display:none}
 .actlist{display:flex;flex-direction:column;max-height:360px;overflow:auto}
 .actrow{display:grid;grid-template-columns:128px minmax(0,1fr);gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px}
@@ -847,6 +852,7 @@ select[data-cbx]{display:none!important}
   <nav class="subtabs" id="subtabs" aria-label="Seções"></nav>
   <div id="banner" class="banner" hidden></div>
   <div id="bkBox" class="banner bkbox" hidden></div>
+  <div id="s89Box" class="s89box" role="status" hidden></div>
   <section id="v-semanas"></section>
   <section id="v-fimdesemana" hidden></section>
   <section id="v-limpeza" hidden></section>
@@ -1045,6 +1051,7 @@ function renderAll(fromData){
   drawNav();contaSync();
   ['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio','confirmacoes'].forEach(t=>$('#v-'+t).hidden=t!==ui.tab);
   const v=$('#v-'+ui.tab);
+  lembreteS89();
   if(fromData&&v.contains(document.activeElement)&&document.activeElement.matches('input,textarea,select'))return; // não atrapalha quem está digitando
   ({semanas:rSemanas,fimdesemana:rFds,limpeza:rLimpeza,av:rAV,campo:rCampo,publicadores:rPubs,imprimir:rPrint,whatsapp:rWa,ajustes:rAjustes,painel:rPainel,pubimport:rPubImport,equilibrio:rEquilibrio,confirmacoes:rConfirm})[ui.tab]();
 }
@@ -3047,7 +3054,7 @@ document.addEventListener('change',e=>{if(e.target.id!=='c-import')return;if(!is
 document.body.insertAdjacentHTML('beforeend','<datalist id="cantList">'+CANTICOS.map((t,i)=>'<option value="'+esc((i+1)+' - '+t)+'">').join('')+'</datalist>');
 /* ao sair do campo, só o número vira número + título */
 document.addEventListener('change',e=>{const t=e.target;if(!t.matches||!t.matches('[list=cantList]'))return;const v=cant(t.value);if(v!==t.value){t.value=v;t.dispatchEvent(new Event('input',{bubbles:true}))}});
-route();init();
+/* (o início do sistema fica no fim do último arquivo: 99-inicio.js) */
 /* ================= Cuidados do sistema: cópias automáticas, quem tem acesso, erros nos aparelhos e diagnóstico ================= */
 
 /* ----- Lista de acesso (só administradores conseguem ler): usada em Ajustes, Confirmações e Publicadores ----- */
@@ -3139,6 +3146,38 @@ async function checarVersaoNova(){const F=window.FBX;if(!F||!F.versao||location.
   if(v&&v!==F.versao&&!$('#novaVersao')){document.body.insertAdjacentHTML('beforeend',`<div id="novaVersao" class="novaver" role="status"><span>Há uma versão nova do sistema.</span><button class="btn small primary" data-a="recarregar">Atualizar agora</button></div>`)}}
 Object.assign(PACTS,{recarregar:()=>location.reload()});
 setTimeout(checarVersaoNova,8000);setInterval(checarVersaoNova,30*60*1000);
+
+/* ================= Lembrete do S-89: 3 semanas antes, avisa quem ainda não recebeu a designação de Faça Seu Melhor no Ministério ================= */
+const S89_DIAS=21;
+const podeEditarS89=()=>!window.FBX||['admin','editor'].includes(window.FBX.papel);
+/* participantes de Faça Seu Melhor no Ministério de uma semana: quem faz a parte e o ajudante */
+function s89Pendentes(w){const out={pend:[],vagas:0};
+  (w.ministerio||[]).forEach((p,i)=>{const t=partTipo(p);if(t==='presidente'||t==='consideracao')return;
+    if(!p.pub){out.vagas++;return}
+    const quem=[[p.pub,'parte']];if(!isDiscurso(p)&&p.ajudante)quem.push([p.ajudante,'ajudante']);else if(!isDiscurso(p))out.vagas++;
+    quem.forEach(([pid,papel])=>{if(!(w.enviados||{})[pid])out.pend.push({pid,papel,n:4+i,tema:temaLabel(p)})})});
+  return out}
+function s89Avisos(){const hoje=iso(new Date()),lim=shiftDays(hoje,S89_DIAS);const r=[];
+  sortedWeeks().forEach(w=>{const d=meetDate(w);if(d<hoje||d>lim||SEM_REUNIAO(evTipo(w.data)))return;
+    const x=s89Pendentes(w);if(!x.pend.length&&!x.vagas)return;
+    let adiado=0;try{adiado=+localStorage.getItem('vmc-s89-adiar-'+w.data)||0}catch(e){}if(Date.now()<adiado)return;
+    r.push({w,d,dias:Math.round((parse(d)-parse(hoje))/864e5),pend:x.pend,vagas:x.vagas})});
+  return r}
+function lembreteS89(){const box=$('#s89Box');if(!box)return;
+  if(!podeEditarS89()||painelOnly()||!['semanas','fimdesemana','imprimir','confirmacoes'].includes(ui.tab)||!loaded.w){box.hidden=true;return}
+  const av=s89Avisos();if(!av.length){box.hidden=true;return}
+  box.innerHTML=av.map(a=>{const urg=a.dias<=7;const nomes=[...new Set(a.pend.map(p=>tc(pname(p.pid))))];
+    const quando=a.dias===0?'hoje':a.dias===1?'amanhã':'em '+a.dias+' dias';
+    return`<div class="s89av ${urg?'urg':''}"><div class="s89txt"><b>S-89 · reunião de ${br(a.d)} (${quando})</b>
+      <span>${a.pend.length?`${a.pend.length} ${a.pend.length===1?'designação de Faça Seu Melhor no Ministério ainda não foi encaminhada':'designações de Faça Seu Melhor no Ministério ainda não foram encaminhadas'}: ${esc(nomes.join(', '))}.`:''}${a.vagas?` ${a.vagas===1?'Falta 1 designado':'Faltam '+a.vagas+' designados'} nas partes.`:''}</span></div>
+      <span class="s89act"><a class="btn small ${urg?'primary':''}" href="#whatsapp" data-a="s89ir" data-w="${esc(a.w.data)}">Encaminhar</a><button class="btn small ghost" data-a="s89adiar" data-w="${esc(a.w.data)}">Lembrar amanhã</button></span></div>`}).join('');
+  box.hidden=false}
+Object.assign(PACTS,{
+  s89ir:b=>{ui.waKind='meio';ui.waWeek=b.dataset.w},
+  s89adiar:b=>{try{localStorage.setItem('vmc-s89-adiar-'+b.dataset.w,String(Date.now()+864e5))}catch(e){}lembreteS89()}});
+
+/* ================= Início: roda depois que todas as partes foram carregadas ================= */
+route();init();
 
 </script>
 
