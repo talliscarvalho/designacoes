@@ -50,7 +50,7 @@ function rPainel(){const v=$('#v-painel');const pid=myPubId();
       <div id="pnStage" class="pnstage"></div>`}
   else{body=`<div class="panel" style="padding:20px;display:flex;flex-direction:column;gap:10px" id="pnDados"><p class="muted" style="margin:0">Carregando…</p></div>`}
   const fz=fonteGet();const letra=`<div class="pfonte" role="group" aria-label="Tamanho da letra"><span>Letra</span>${FONTES.map(([v,l])=>`<button data-a="fonte" data-v="${v}" aria-pressed="${v===fz}" aria-label="Letra ${v===1?'normal':v<1.2?'grande':'maior'}" style="font-size:${13*v}px">${l}</button>`).join('')}</div>`;
-  v.innerHTML=`<div class="pzoom"><div class="phead"><div><small>Meu painel</small><h2>Olá, ${esc(String(nome).split(' ')[0]||'irmão')}</h2></div>${letra}</div>${instalarCard()}${seg}<div class="pbodyp">${body}</div></div>`;
+  v.innerHTML=`<div class="pzoom"><div class="phead"><div><small>Meu painel</small><h2>Olá, ${esc(String(nome).split(' ')[0]||'irmão')}</h2></div>${letra}</div>${seg}<div class="pbodyp">${body}</div></div>`;
   if(V==='prog')requestAnimationFrame(pnStage);
   if(V==='dados')pnDados(pid)}
 function pnStage(){const st=$('#pnStage');if(!st)return;const ym=ui.pnMonth,K=ui.pnKind||'meio';let sel=[];
