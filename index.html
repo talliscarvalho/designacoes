@@ -5,14 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Designar</title>
 <meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.googleusercontent.com https://www.gstatic.com https://www.google.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://apis.google.com https://fonts.googleapis.com https://fonts.gstatic.com; frame-src https://jorrinho.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<script>/* impede que o site seja aberto dentro de outra página (golpe de "clique falso") */if(window.top!==window.self){document.documentElement.style.display='none';try{window.top.location=window.self.location.href}catch(e){}}</script>
 <meta name="theme-color" content="#2F5249">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232F5249'/%3E%3Crect x='6' y='8' width='20' height='18' rx='2.5' fill='none' stroke='white' stroke-width='2.2'/%3E%3Cpath d='M6 13h20M11 5.5v5M21 5.5v5' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M11.5 19l3 3 6-6' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Designar">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232F5249'/%3E%3Cpath fill='white' transform='translate(4 4) scale(1)' d='M3 6.4c2.6-1.1 5.6-1 8 .7v11.2c-2.4-1.6-5.4-1.7-8-.6zM21 6.4c-2.6-1.1-5.6-1-8 .7v11.2c2.4-1.6 5.4-1.7 8-.6z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@1,300&display=swap">
 <style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
 </head>
 <body>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="lib/firebase-app-compat.js"></script>
+<script src="lib/firebase-auth-compat.js"></script>
+<script src="lib/firebase-firestore-compat.js"></script>
 <script>
 /* Conexão com o Firebase: login com Google, lista de acesso ("acesso"), aceite do termo de uso ("aceites")
    e dados públicos do aviso de privacidade ("publico/info"). O administrador principal também está fixo nas regras. */
@@ -78,14 +90,22 @@
   document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('[data-doc]');if(!a)return;e.preventDefault();openDoc(a.dataset.doc)});
   document.addEventListener('keydown',e=>{const o=document.getElementById('fbdoc');if(e.key==='Escape'&&o&&!o.hidden)o.hidden=true});
 
-  const LOGO=`<div class="fblogo" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><path d="M8.5 14.5l2.3 2.3 4.7-4.7"/></svg></div>`;
-  const LINKS=`<div class="fblinks"><a href="#" data-doc="privacidade">Aviso de privacidade</a><span>·</span><a href="#" data-doc="termos">Termo de uso</a><span>·</span><a href="#" data-doc="sobre">Sobre</a></div>`;
+  const LOCKUP=`<div class="fblock"><span class="fbmark"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 6.4c2.6-1.1 5.6-1 8 .7v11.2c-2.4-1.6-5.4-1.7-8-.6zM21 6.4c-2.6-1.1-5.6-1-8 .7v11.2c2.4-1.6 5.4-1.7 8-.6z"/></svg></span></div>`;
+  const LINKS=`<nav class="fblinks" aria-label="Documentos"><a href="#" data-doc="privacidade">Privacidade</a><a href="#" data-doc="termos">Termo de uso</a><a href="#" data-doc="sobre">Sobre</a><a href="#" class="fbhelp">Ajuda</a></nav>`;
+  /* "Ajuda": e-mail ao desenvolvedor com assunto e roteiro preenchidos */
+  const helpMail=()=>{const m=['tallisdocarmo','gmail.com'].join('@');const b=`Olá!\n\nEscreva aqui a sua dúvida ou descreva o problema ao entrar no sistema:\n\n\n\n— Para ajudar no atendimento (pode manter) —\nVersão: ${VERSAO}\nTela: entrada\nAparelho: ${navigator.userAgent.replace(/\s*\([^)]*\)\s*/,' ').slice(0,160)}`;return 'mailto:'+m+'?subject='+encodeURIComponent('Sistema de designações · ajuda para entrar')+'&body='+encodeURIComponent(b)};
+  document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.fbhelp');if(a)a.href=helpMail()},true);
   if(!window.firebase){const fail=()=>{gate('falha');const b=document.getElementById('fbRetry');if(b)b.onclick=()=>location.reload()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fail);else fail();rejectReady({code:'sem-firebase'});return}
   firebase.initializeApp(FIREBASE_CONFIG);
   const auth=firebase.auth(),fs=firebase.firestore();
   auth.languageCode='pt';
   const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
+  /* guarda os dados no aparelho: abre e mostra a última versão mesmo sem internet, e envia as alterações quando a conexão voltar */
+  try{fs.enablePersistence({synchronizeTabs:true}).catch(()=>{})}catch(e){}
   const ts=()=>firebase.firestore.FieldValue.serverTimestamp();
+  if('serviceWorker' in navigator&&location.protocol==='https:')window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+  const CACHEK='vmc-acesso-cache';const cacheGet=e=>{try{const c=JSON.parse(localStorage.getItem(CACHEK)||'{}');return c.email===e?c:null}catch(x){return null}};
+  const cacheSet=d=>{try{localStorage.setItem(CACHEK,JSON.stringify(d))}catch(x){}};
   fs.doc('publico/info').get().then(d=>{if(d.exists)FBX.pub=d.data()||{}}).catch(()=>{});
 
   function gate(kind,msg){let g=document.getElementById('fbgate');
@@ -94,31 +114,32 @@
         <label class="fbchk"><input type="checkbox" id="fbAgree"><span>Li e concordo com o termo de uso e com o <a href="#" data-doc="privacidade">aviso de privacidade</a>.</span></label>
         <button class="fbbtn fbprim" id="fbAccept" disabled>Aceitar e entrar</button><button class="fbbtn fbsec" id="fbOut">Não aceito, sair</button></div>`;
       g.hidden=false;const c=document.getElementById('fbAgree'),b=document.getElementById('fbAccept');c.onchange=()=>{b.disabled=!c.checked};
-      b.onclick=async()=>{b.disabled=true;b.textContent='Salvando…';try{await fs.doc('aceites/'+FBX.email).set({versao:TERMOS_V,em:ts(),ultimo:ts(),nome:FBX.nome||''});enter()}catch(e){b.disabled=false;b.textContent='Aceitar e entrar';alertBox('Não foi possível registrar o aceite ('+(e.code||'erro')+'). Tente de novo.')}};
+      b.onclick=async()=>{b.disabled=true;b.textContent='Salvando…';try{await fs.doc('aceites/'+FBX.email).set({versao:TERMOS_V,em:ts(),ultimo:ts(),nome:FBX.nome||''});cacheSet({email:FBX.email,papel:FBX.papel,pubId:FBX.pubId,aceite:TERMOS_V});enter()}catch(e){b.disabled=false;b.textContent='Aceitar e entrar';alertBox('Não foi possível registrar o aceite ('+(e.code||'erro')+'). Tente de novo.')}};
       document.getElementById('fbOut').onclick=()=>auth.signOut();return}
-    g.innerHTML=`<div class="fbcard">${LOGO}
-      <h1 class="fbname">${APP}</h1>
-      <div class="fbpron">As designações da congregação, num só lugar</div>
-      <p class="fbslogan">Cada um com seu dom,<br>tudo em seu lugar.</p>
-      <div class="fbref">Inspirado em 1 Pedro 4:10</div>
-      ${kind==='login'?`<p>Entre com a sua conta Google ou receba um link de acesso no seu e-mail.</p><button class="fbbtn" id="fbLogin"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Entrar com Google</button>
-        <div class="fbor"><span>ou</span></div>
-        <form id="fbMailForm" class="fbmail"><label for="fbMail" class="fbsr">Seu e-mail</label><input type="email" id="fbMail" required placeholder="seu e-mail (Hotmail, Outlook, Yahoo…)" autocomplete="email"><button class="fbbtn" type="submit">Receber link de acesso</button></form>`:''}
-      ${kind==='link'?`<p>Enviamos um link de acesso para <b>${t(msg)}</b>.</p><p class="fbsmall">Abra o e-mail <b>neste mesmo aparelho</b> e toque no link. Se não chegar em alguns minutos, olhe a caixa de spam.</p><button class="fbbtn" id="fbBack">Usar outro e-mail</button>`:''}
-      ${kind==='confirmar'?`<p>Para terminar a entrada, confirme o e-mail para o qual o link foi enviado.</p><form id="fbConfForm" class="fbmail"><label for="fbConf" class="fbsr">E-mail</label><input type="email" id="fbConf" required autocomplete="email" placeholder="seu e-mail"><button class="fbbtn fbprim" type="submit">Entrar</button></form>`:''}
-      ${kind==='espera'?`<p>${t(msg||'Conectando…')}</p>`:''}
-      ${kind==='negado'?`<p>A conta <b>${t(msg)}</b> ainda não tem acesso ao sistema.</p><p class="fbsmall">Peça a um administrador para incluir este e-mail em Ajustes › Acesso ao sistema. Depois, recarregue a página.</p><button class="fbbtn" id="fbOut">Entrar com outra conta</button>`:''}
-      ${kind==='erro'?`<p>${t(msg)}</p><button class="fbbtn" id="fbLogin">Tentar de novo</button>`:''}
-      ${kind==='falha'?`<p>Não foi possível carregar o login. Verifique a internet e tente de novo.</p><p class="fbsmall">Se continuar, desative bloqueadores de anúncios ou extensões de privacidade para este site, ou abra em outro navegador.</p><button class="fbbtn" id="fbRetry">Tentar de novo</button>`:''}
-      ${LINKS}</div>`;
+    const H=(t,p)=>`<h1 class="fbh">${t}</h1>${p?`<p class="fbsub">${p}</p>`:''}`;
+    const body={
+      login:H('Entrar','Entre com o e-mail que você informou aos anciãos.')+`<button class="fbbtn" id="fbLogin"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar com Google</button>
+        <div class="fbor"><span>ou receba um link no e-mail</span></div>
+        <form id="fbMailForm" class="fbmail" novalidate><label for="fbMail" class="fblab">E-mail</label><input type="email" id="fbMail" required maxlength="254" placeholder="nome@exemplo.com" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false"><button class="fbbtn fbprim" type="submit">Enviar link de acesso</button></form>`,
+      link:H('Confira seu e-mail',`Enviamos um link de acesso para <b>${t(msg)}</b>.`)+`<p class="fbnote">Abra o e-mail <b>neste mesmo aparelho</b> e toque no link. Se não chegar em alguns minutos, veja a caixa de spam.</p><button class="fbbtn" id="fbBack">Usar outro e-mail</button>`,
+      confirmar:H('Confirme o e-mail','Para terminar a entrada, digite o e-mail para o qual o link foi enviado.')+`<form id="fbConfForm" class="fbmail"><label for="fbConf" class="fblab">E-mail</label><input type="email" id="fbConf" required maxlength="254" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="nome@exemplo.com"><button class="fbbtn fbprim" type="submit">Entrar</button></form>`,
+      espera:`<div class="fbwait" role="status"><span class="fbspin" aria-hidden="true"></span><p>${t(msg||'Conectando…')}</p></div>`,
+      negado:H('Acesso ainda não liberado',`A conta <b>${t(msg)}</b> ainda não tem acesso ao sistema.`)+`<p class="fbnote">Peça a um administrador para incluir este e-mail em Ajustes › Acesso ao sistema. Depois, recarregue a página.</p><button class="fbbtn" id="fbOut">Entrar com outra conta</button>`,
+      erro:H('Não foi possível entrar',t(msg))+`<button class="fbbtn" id="fbLogin">Tentar de novo</button>`,
+      falha:H('Não foi possível carregar','Verifique a internet e tente de novo.')+`<p class="fbnote">Se continuar, desative bloqueadores de anúncios ou extensões de privacidade para este site, ou abra em outro navegador.</p><button class="fbbtn" id="fbRetry">Tentar de novo</button>`
+    }[kind]||'';
+    g.innerHTML=`<div class="fbshell">
+      <aside class="fbside">${LOCKUP}<p class="fbtag">As designações da congregação, num só lugar.</p>
+        <figure class="fbverse"><blockquote>Cada um com seu dom, tudo em seu lugar.</blockquote><figcaption>Inspirado em 1 Pedro 4:10</figcaption></figure></aside>
+      <main class="fbmain"><div class="fbpanel">${body}</div>${LINKS}</main></div>`;
     g.hidden=false;
     const lb=document.getElementById('fbLogin');if(lb)lb.onclick=login;
-    const mf=document.getElementById('fbMailForm');if(mf)mf.onsubmit=e=>{e.preventDefault();sendLink(document.getElementById('fbMail').value)};
+    const mf=document.getElementById('fbMailForm');if(mf)mf.onsubmit=e=>{e.preventDefault();const v=document.getElementById('fbMail').value.trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){alertBox('Digite um e-mail válido, como nome@exemplo.com.');document.getElementById('fbMail').focus();return}sendLink(v)};
     const cf=document.getElementById('fbConfForm');if(cf)cf.onsubmit=e=>{e.preventDefault();finishLink(document.getElementById('fbConf').value)};
     const bk=document.getElementById('fbBack');if(bk)bk.onclick=()=>gate('login');
     const ob=document.getElementById('fbOut');if(ob)ob.onclick=()=>auth.signOut().then(()=>gate('login'));
   }
-  function alertBox(m){const g=document.querySelector('#fbgate .fbcard');if(!g)return;let a=g.querySelector('.fberr');if(!a){a=document.createElement('p');a.className='fberr';g.appendChild(a)}a.textContent=m}
+  function alertBox(m){const g=document.querySelector('#fbgate .fbpanel')||document.querySelector('#fbgate .fbcard');if(!g)return;let a=g.querySelector('.fberr');if(!a){a=document.createElement('p');a.className='fberr';a.setAttribute('role','alert');g.appendChild(a)}a.textContent=m}
   function hideGate(){const g=document.getElementById('fbgate');if(g)g.hidden=true}
   async function login(){
     gate('espera','Abrindo a janela do Google…');
@@ -152,16 +173,20 @@
     gate('espera','Verificando acesso de '+email+'…');
     let papel=null;
     if(email===OWNER)papel='admin';
-    let pubId=null;
-    try{const d=await fs.doc('acesso/'+email).get();if(d.exists){const x=d.data()||{};if(email!==OWNER)papel=x.papel||'leitor';pubId=x.pub||null}}catch(e){}
+    let pubId=null,lido=false;
+    try{const d=await fs.doc('acesso/'+email).get();lido=true;if(d.exists){const x=d.data()||{};if(email!==OWNER)papel=x.papel||'leitor';pubId=x.pub||null}}catch(e){}
+    /* sem internet: usa o último acesso conferido neste aparelho */
+    const cc=cacheGet(email);if(!lido&&cc){papel=papel||cc.papel;pubId=cc.pubId||null}
     if(!papel){gate('negado',email);return}
     FBX.email=email;FBX.papel=papel;FBX.pubId=pubId;FBX.nome=u.displayName||'';
     if(papel==='publicador'&&!pubId){gate('erro','Seu acesso ainda não foi ligado a um cadastro de publicador. Peça a um administrador para fazer a ligação em Ajustes › Acesso ao sistema.');return}
-    let ok=false;try{const a=await fs.doc('aceites/'+email).get();ok=a.exists&&((a.data()||{}).versao||0)>=TERMOS_V}catch(e){}
+    let ok=false,lidoA=false;try{const a=await fs.doc('aceites/'+email).get();lidoA=true;ok=a.exists&&((a.data()||{}).versao||0)>=TERMOS_V}catch(e){}
+    if(!lidoA&&cc&&cc.aceite>=TERMOS_V)ok=true;
+    if(ok)cacheSet({email,papel,pubId,aceite:TERMOS_V});
     if(!ok){gate('termos');return}
     enter();
   });
-  FBX.signOut=()=>auth.signOut();
+  FBX.signOut=()=>{try{localStorage.removeItem(CACHEK)}catch(e){}return auth.signOut()};
   FBX.ts=ts;
   FBX.quiet=false;
   FBX.log=(acao,col,id)=>{if(FBX.quiet)return Promise.resolve();return fs.collection('registro').add({acao,col,id:String(id),por:FBX.email,nome:FBX.nome||'',em:ts()}).catch(()=>{})};
@@ -178,32 +203,62 @@
 })();
 </script>
 <style>
-#fbgate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg,#F4F5F2);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:auto}
+#fbgate{position:fixed;inset:0;z-index:100;overflow:auto;background:var(--bg,#F2F1EE);color:var(--fg,#1b1b1b);font-family:var(--f-ui,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif);-webkit-font-smoothing:antialiased}
 #fbgate[hidden],#fbdoc[hidden]{display:none}
-#fbgate .fbcard{width:100%;max-width:420px;background:var(--surface,#fff);color:var(--fg,#1b1b1b);border:1px solid var(--line,#ddd);border-radius:16px;padding:28px 24px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.08);margin:auto}
-#fbgate .fbcard.fbwide{max-width:560px;text-align:left}
-#fbgate .fblogo{width:52px;height:52px;border-radius:14px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:var(--accent,#2F5249);color:#fff}
-#fbgate .fbname{font-size:30px;margin:0;line-height:1.15;letter-spacing:-.01em}
-#fbgate .fbpron{font-size:13.5px;color:var(--muted,#555);margin:4px 0 16px}#fbgate .fbpron b{color:var(--accent,#2F5249)}#fbgate .fbpron span{white-space:nowrap}
-#fbgate .fbslogan{font-size:17px;font-style:italic;color:var(--fg,#1b1b1b);margin:0 0 4px;line-height:1.4}
-#fbgate .fbref{font-size:12px;color:var(--muted,#555);margin-bottom:20px;letter-spacing:.02em}
-#fbgate p{margin:0 0 16px;font-size:15px;line-height:1.5;color:var(--muted,#555)}
-#fbgate p b{color:var(--fg,#1b1b1b);word-break:break-word}
-#fbgate .fbsmall{font-size:13.5px}
-#fbgate .fbor{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--muted,#555);font-size:13px}
-#fbgate .fbor::before,#fbgate .fbor::after{content:"";flex:1;height:1px;background:var(--line,#ddd)}
+/* entrada: à esquerda a marca, à direita o formulário; no celular, a marca fica em cima */
+.fbshell{min-height:100%;display:grid;grid-template-columns:minmax(320px,5fr) 6fr}
+.fbside{--ink:#F3F6F4;background:#24443C;background-image:radial-gradient(120% 90% at 0% 0%,rgba(255,255,255,.07),transparent 60%);color:var(--ink);padding:56px 56px 48px;display:flex;flex-direction:column;justify-content:center;gap:18px;position:relative}
+.fbside .fbverse{position:absolute;left:56px;right:56px;bottom:44px;margin:0}
+.fbverse blockquote{margin:0;font-family:"Open Sans",var(--f-ui,sans-serif);font-style:italic;font-weight:300;font-size:19px;line-height:1.4;opacity:.92}
+.fbverse figcaption{margin-top:6px;font-size:12.5px;letter-spacing:.04em;opacity:.65}
+.fblock{--lh:56px;display:inline-flex;align-items:center;gap:calc(var(--lh)*.3)}
+.fbmark{width:var(--lh);height:var(--lh);border-radius:calc(var(--lh)*.26);display:grid;place-items:center;flex:none;background:var(--ink);color:#24443C}
+.fbmark svg{width:62%;height:62%;display:block}
+.fbword{font-family:"Open Sans",var(--f-ui,sans-serif);font-style:italic;font-weight:300;font-size:calc(var(--lh)*.92);line-height:1;letter-spacing:-.005em;transform:translateY(-.06em);padding-right:.08em}
+.fbtag{margin:4px 0 0;font-size:22px;font-weight:600;letter-spacing:-.01em;line-height:1.35;max-width:22ch}
+.fbmain{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px 28px;gap:28px}
+.fbpanel{width:100%;max-width:380px}
+#fbgate .fbh{font-size:26px;font-weight:600;letter-spacing:-.015em;margin:0 0 6px;line-height:1.2}
+#fbgate .fbsub{margin:0 0 26px;font-size:15px;line-height:1.5;color:var(--muted,#5F6368)}
+#fbgate .fbsub b,#fbgate .fbnote b{color:var(--fg,#1b1b1b);word-break:break-word}
+#fbgate .fbnote{margin:-10px 0 22px;font-size:14px;line-height:1.55;color:var(--muted,#5F6368)}
+#fbgate .fbor{display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--muted,#5F6368);font-size:13px;white-space:nowrap}
+#fbgate .fbor::before,#fbgate .fbor::after{content:"";flex:1;height:1px;background:var(--line,#DAD8D3)}
 #fbgate .fbmail{display:flex;flex-direction:column;gap:8px}
-#fbgate .fbmail input{border:1px solid var(--line,#ccc);border-radius:10px;padding:12px 14px;font-size:16px;background:var(--surface,#fff);color:var(--fg,#1b1b1b);font-family:inherit}
+#fbgate .fblab{font-size:13.5px;font-weight:600}
+#fbgate .fbmail input{border:1px solid var(--line-b,#C9C6BF);border-radius:10px;padding:12px 14px;font-size:16px;background:var(--surface,#fff);color:var(--fg,#1b1b1b);font-family:inherit;min-height:48px}
+#fbgate .fbmail input:focus{outline:2px solid var(--accent,#2F5249);outline-offset:1px;border-color:transparent}
+#fbgate .fbmail .fbbtn{margin-top:6px}
+#fbgate .fberr{color:var(--err,#B3261E);font-size:14px;margin:14px 0 0;line-height:1.45}
+#fbgate .fbwait{display:flex;flex-direction:column;align-items:center;gap:14px;padding:24px 0;color:var(--muted,#5F6368);text-align:center}
+#fbgate .fbwait p{margin:0;font-size:15px}
+.fbspin{width:28px;height:28px;border-radius:50%;border:3px solid var(--line,#DAD8D3);border-top-color:var(--accent,#2F5249);animation:fbspin .8s linear infinite}
+@keyframes fbspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.fbspin{animation-duration:2.4s}}
 .fbsr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-#fbgate .fberr{color:var(--err,#B3261E);font-size:14px;margin:12px 0 0}
-.fbbtn{display:inline-flex;align-items:center;gap:10px;justify-content:center;width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--line,#ccc);background:var(--surface,#fff);color:var(--fg,#1b1b1b);font-size:15.5px;font-weight:600;cursor:pointer;font-family:inherit}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fbside{background:#18231F;border-right:1px solid var(--line,#343A38)}:root:not([data-theme="light"]) .fbmark{color:#18231F}}
+:root[data-theme="dark"] .fbside{background:#18231F;border-right:1px solid var(--line,#343A38)}:root[data-theme="dark"] .fbmark{color:#18231F}
+@media (max-width:860px){
+  .fbshell{grid-template-columns:1fr;grid-template-rows:auto auto;align-content:center;padding-bottom:4vh}
+  .fbside{background:none!important;border:0!important;color:var(--fg,#1b1b1b);padding:44px 24px 4px;align-items:center;text-align:center;gap:10px}
+  .fbside .fbverse{display:none}
+  .fbmark{background:var(--accent,#2F5249)!important;color:var(--accent-fg,#fff)!important}
+  .fblock{--lh:48px}
+  .fbtag{font-size:17px;max-width:24ch}
+  .fbmain{justify-content:flex-start;padding:28px 20px 24px}
+  .fbpanel{background:var(--surface,#fff);border:1px solid var(--line,#DAD8D3);border-radius:16px;padding:26px 22px}
+  #fbgate .fbh{font-size:22px}
+}
+#fbgate .fbcard{width:100%;max-width:560px;background:var(--surface,#fff);color:var(--fg,#1b1b1b);border:1px solid var(--line,#ddd);border-radius:16px;padding:28px 24px;box-shadow:0 10px 30px rgba(0,0,0,.08);margin:24px auto}
+#fbgate:has(.fbcard){display:flex;align-items:flex-start;justify-content:center;padding:16px}
+.fbbtn{display:inline-flex;align-items:center;gap:10px;justify-content:center;width:100%;min-height:48px;padding:12px 16px;border-radius:10px;border:1px solid var(--line,#ccc);background:var(--surface,#fff);color:var(--fg,#1b1b1b);font-size:15.5px;font-weight:600;cursor:pointer;font-family:inherit}
 .fbbtn:hover{background:var(--surface-2,#f2f2f2)}
 .fbbtn.fbprim{background:var(--accent,#2F5249);color:var(--accent-fg,#fff);border-color:var(--accent,#2F5249);margin-top:6px}
 .fbbtn.fbprim:disabled{opacity:.45;cursor:not-allowed}
 .fbbtn.fbsec{border-color:transparent;background:transparent;font-weight:500;color:var(--muted,#555);margin-top:4px}
-.fblinks{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:18px;font-size:12.5px}
-.fblinks a,.fbdoctxt a,.fbchk a{color:var(--muted,#555);text-decoration:underline;text-underline-offset:2px}
-.fblinks span{color:var(--line,#ccc)}
+.fblinks{display:flex;gap:4px 20px;justify-content:center;flex-wrap:wrap;font-size:13px}
+.fblinks a{color:var(--muted,#5F6368);text-decoration:none;padding:6px 0}.fblinks a:hover{color:var(--fg,#1b1b1b);text-decoration:underline;text-underline-offset:3px}
+.fbdoctxt a,.fbchk a{color:var(--muted,#555);text-decoration:underline;text-underline-offset:2px}
 .fbchk{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.45;margin:14px 0 8px;cursor:pointer;color:var(--fg,#1b1b1b)}
 .fbchk input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--accent,#2F5249)}
 #fbdoc{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;padding:16px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -223,14 +278,15 @@
 #fbgate .fbinline .fbdate{color:var(--muted,#555);font-size:12.5px}
 #fbgate .fbinline h2{margin:0 0 2px}
 @media (max-width:520px){#fbdoc{padding:0;align-items:flex-end}#fbdoc .fbdocbox{max-height:92vh;border-radius:14px 14px 0 0}#fbdoc .fbdoctxt{padding:20px 18px 8px}#fbgate .fbcard{padding:24px 18px}}
+#fbgate .fbcard p{margin:0 0 12px;line-height:1.5}
 </style>
 
 <title>Designar</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,600;1,700&family=Roboto+Condensed:wght@500;600;700&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@1,300&family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,600;1,700&family=Roboto+Condensed:wght@500;600;700&display=swap">
+<script src="lib/jspdf.umd.min.js"></script>
 <style>
 /* Layout: app bar com abas; à esquerda a lista de semanas, à direita o editor colorido por seção (as mesmas cores da folha impressa). */
 :root{
@@ -266,13 +322,19 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 header.app{background:var(--surface);border-bottom:1px solid var(--line)}
 header.app .wrap.top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:16px 6px}
-.brand{display:flex;align-items:baseline;gap:14px;min-width:0;flex:1;flex-wrap:wrap}
-.wordmark{font-family:var(--f-cond);font-weight:700;font-size:27px;letter-spacing:-.01em;color:var(--accent);line-height:1.1}
-.brand .sep{width:1px;height:22px;background:var(--line);align-self:center}
-.brand h1{font-size:16px;margin:0;line-height:1.2;font-weight:600}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
+/* logotipo: o livro e o nome têm a mesma altura visual; o nome desce um pouco para alinhar a base das letras com a base do livro */
+.logo{--lh:32px;display:inline-flex;align-items:center;gap:calc(var(--lh)*.3);text-decoration:none;color:var(--fg);flex:none}
+.logo-mark{width:var(--lh);height:var(--lh);border-radius:calc(var(--lh)*.26);background:var(--accent);display:grid;place-items:center;flex:none}
+.logo-mark svg{width:62%;height:62%;display:block}
+.wordmark{font-family:"Open Sans",var(--f-ui);font-style:italic;font-weight:300;font-size:calc(var(--lh)*.92);letter-spacing:-.005em;line-height:1;color:inherit;padding-right:.08em;transform:translateY(-.06em)}
+.logo.sm{--lh:24px}
+.brand .sep{width:1px;height:24px;background:var(--line)}
+.brand h1{font-size:18px;margin:0;line-height:1.25;font-weight:600;color:var(--fg);letter-spacing:-.005em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .brand h1:empty,.brand h1:empty~*{display:none}
 .status{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.status .dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.status .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
+@media (max-width:480px){.status:not(.saving):not(.error) #statusTxt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}}
 .status.saving .dot{background:var(--warn)} .status.error{color:var(--err)} .status.error .dot{background:var(--err)}
 nav.areas{display:flex;gap:4px 28px;flex-wrap:wrap}
 nav.areas a{padding:10px 0 12px;text-decoration:none;color:var(--muted);font-weight:500;border-bottom:3px solid transparent;white-space:nowrap}
@@ -287,9 +349,18 @@ nav.bnav{display:none}
 nav.bnav:empty,nav.areas:empty{display:none!important}
 .temabtn{width:40px;height:40px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer;flex:none}
 .temabtn:hover{background:var(--surface-2)}
+.conta{position:relative;flex:none}
+.contabtn{width:40px;height:40px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-fg);font-weight:700;font-size:14px;cursor:pointer;font-family:var(--f-ui)}
+.contamenu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;width:260px;max-width:calc(100vw - 32px);background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 32px rgba(0,0,0,.16);padding:6px;display:flex;flex-direction:column}
+.contamenu[hidden]{display:none}
+.contaq{display:flex;flex-direction:column;gap:1px;padding:10px 10px 12px;border-bottom:1px solid var(--line);margin-bottom:4px;font-size:13.5px;color:var(--muted);word-break:break-word}
+.contaq b{color:var(--fg);font-size:15px}
+.contaitem{text-align:left;border:0;background:transparent;padding:0 10px;min-height:44px;border-radius:6px;cursor:pointer;font-size:14.5px;color:var(--fg)}
+.contaitem:hover{background:var(--surface-2)}
+.contaitem.sair{color:var(--err);font-weight:600}
 @media (max-width:720px){
   header.app .wrap.top{padding-block:12px 12px;gap:10px}
-  .wordmark{font-size:22px}.brand{gap:0 10px;flex-direction:column;align-items:flex-start}.brand .sep{display:none}.brand h1{font-size:13.5px;font-weight:500;color:var(--muted)}
+  .logo{--lh:30px}.brand{gap:10px}.brand h1{font-size:16px}
   nav.areas{display:none}
   nav.subtabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:0;margin:-22px -16px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
   nav.subtabs a{justify-content:center;padding:10px 4px 11px;border-bottom:3px solid transparent;font-size:14px;text-align:center}
@@ -302,7 +373,7 @@ nav.bnav:empty,nav.areas:empty{display:none!important}
   nav.bnav a[aria-current="page"]{color:var(--accent);font-weight:600}
   main{padding-bottom:110px!important}
   .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
-  .appfoot{padding-bottom:96px!important}
+  .appfoot{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))!important}
 }
 main{padding-block:22px 60px}
 .banner{background:var(--warn-bg);color:var(--fg);padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:14px}
@@ -477,8 +548,23 @@ select[data-cbx]{display:none!important}
 .actlist{display:flex;flex-direction:column;max-height:360px;overflow:auto}
 .actrow{display:grid;grid-template-columns:128px minmax(0,1fr);gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px}
 @media (max-width:520px){.actrow{grid-template-columns:1fr;gap:2px}}
-.appfoot{max-width:1180px;margin:8px auto 0;padding:18px 16px calc(28px + env(safe-area-inset-bottom,0px));display:flex;gap:6px 16px;flex-wrap:wrap;justify-content:center;font-size:12.5px;color:var(--muted)}
-.appfoot a{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+.appfoot{margin-top:24px;border-top:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:13.5px;padding-bottom:env(safe-area-inset-bottom,0px)}
+.appfoot .ftop{display:grid;grid-template-columns:1.3fr 1fr 1.1fr;gap:28px;padding-block:28px 22px}
+.appfoot .fcol{display:flex;flex-direction:column;gap:7px;min-width:0;align-items:flex-start}
+.appfoot h2{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--fg);margin:0 0 3px}
+.appfoot p{margin:0;line-height:1.5}
+.appfoot .fhead{display:flex;align-items:center;gap:9px;margin-bottom:4px}.appfoot .fcong{color:var(--fg);font-size:15px;font-weight:600}.appfoot .fcong:empty{display:none}
+.appfoot a{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;min-height:28px}
+.appfoot a:hover{text-decoration:underline;text-underline-offset:3px}
+.appfoot a svg{width:13px;height:13px;flex:none;opacity:.6}
+.appfoot p .footmail{display:inline;min-height:0;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.appfoot .fbot:empty{display:none}
+.appfoot .fbot{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;justify-content:flex-start;background:linear-gradient(var(--line),var(--line)) top center/calc(100% - 32px) 1px no-repeat;padding-block:14px 18px;font-size:12.5px}
+.appfoot .fbot nav{display:flex;flex-wrap:wrap;gap:4px 16px}
+.appfoot .fbot a{color:var(--muted);min-height:32px}
+@media (max-width:720px){.appfoot .ftop{grid-template-columns:1fr 1fr;gap:22px 18px;padding-block:22px 16px}.appfoot .fbrandcol{grid-column:1/-1}.appfoot .fbot{flex-direction:column;align-items:flex-start;gap:2px}}
+@media (max-width:420px){.appfoot .ftop{grid-template-columns:1fr}.appfoot .flinks{flex-direction:row;flex-wrap:wrap;column-gap:20px}.appfoot .flinks h2{width:100%}}
+@media print{.appfoot{display:none!important}}
 .accrow small{font-size:12px;line-height:1.5}
 .phead{display:flex;flex-direction:column;gap:2px;margin-bottom:14px}
 .phead small{font-family:var(--f-cond);font-size:13px;font-weight:600;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
@@ -501,6 +587,30 @@ select[data-cbx]{display:none!important}
 .pdl{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr);gap:8px 16px;font-size:14.5px}.pdl span{color:var(--muted)}.pdl b{font-weight:600;word-break:break-word}
 @media (max-width:520px){.pdl{grid-template-columns:1fr;gap:2px}.pdl b{margin-bottom:8px}.phead h2{font-size:28px}}
 .respbox{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:13.5px;margin:-4px 0 0}.respbox .nao{color:var(--ev);font-weight:600}
+.pzoom{zoom:var(--pz,1)}
+.phead{flex-direction:row!important;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.phead>div:first-child{display:flex;flex-direction:column;gap:2px}
+.pfonte{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted)}
+.pfonte span{margin-right:4px}
+.pfonte button{min-width:40px;height:40px;border:1px solid var(--line);background:var(--surface);border-radius:6px;font-weight:700;cursor:pointer;color:var(--fg);font-family:var(--f-ui)}
+.pfonte button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.instcard{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;background:var(--accent-soft);border-radius:6px;padding:12px 14px;margin-bottom:16px;max-width:760px}
+.instcard>div:first-child{display:flex;flex-direction:column;gap:2px;font-size:14px;flex:1 1 260px}.instcard b{font-size:15px}
+.instacts{display:flex;gap:6px}
+.accrow.conv{grid-template-columns:minmax(0,1fr) 170px auto auto}
+@media (max-width:520px){.accrow.conv{grid-template-columns:minmax(0,1fr) auto auto}}
+.pimplist{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.pimprow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,240px);gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-2);font-size:14.5px}
+.pimpch{font-size:13px;margin-top:2px;color:var(--muted)}
+.pimpsx{display:flex;gap:14px;font-size:13.5px;margin-top:4px}
+.pimpfora{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px 12px;margin-top:8px}
+@media (max-width:600px){.pimprow{grid-template-columns:1fr}}
+.eqf{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;align-items:end}
+.eqfut{font-size:14px;display:flex;gap:8px;align-items:center;min-height:38px}
+.eqres{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:14px}.eqres .nao{color:var(--ev)}.eqres .mto{color:var(--warn)}
+.eqtab td{vertical-align:middle}.eqtab .eqnum{text-align:center;font-variant-numeric:tabular-nums;color:var(--muted)}
+.eqtab tr.nao td:first-child b{color:var(--ev)}.eqtab tr.mto td:first-child b{color:var(--warn)}
+.eqbar{display:inline-block;width:90px;height:6px;background:var(--line-2);border-radius:3px;overflow:hidden;margin-right:8px;vertical-align:middle}.eqbar i{display:block;height:100%;background:var(--accent)}
 .accbox{border-top:1px solid var(--line);padding-top:16px;margin-top:4px}
 .acclist{display:flex;flex-direction:column;margin:6px 0 10px}
 .accrow{display:grid;grid-template-columns:minmax(0,1fr) 170px auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
@@ -688,7 +798,7 @@ select[data-cbx]{display:none!important}
 
 <header class="app">
   <div class="wrap top">
-    <div class="brand"><span class="wordmark">designar</span><span class="sep" aria-hidden="true"></span><h1 id="hName">Congregação</h1></div>
+    <div class="brand"><span class="logo"><span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="#fff" d="M3 6.4c2.6-1.1 5.6-1 8 .7v11.2c-2.4-1.6-5.4-1.7-8-.6zM21 6.4c-2.6-1.1-5.6-1-8 .7v11.2c2.4-1.6 5.4-1.7 8-.6z"/></svg></span></span><h1 id="hName">Congregação</h1></div>
     <div class="status" id="status" role="status"><span class="dot"></span><span id="statusTxt">Carregando…</span></div>
     <button class="temabtn" id="temaBtn" type="button"></button>
   </div>
@@ -709,6 +819,8 @@ select[data-cbx]{display:none!important}
   <section id="v-whatsapp" hidden></section>
   <section id="v-ajustes" hidden></section>
   <section id="v-painel" hidden></section>
+  <section id="v-pubimport" hidden></section>
+  <section id="v-equilibrio" hidden></section>
 </main>
 <div id="toast" class="toast" hidden></div>
 <nav class="bnav" id="bnav" aria-label="Áreas"></nav>
@@ -748,6 +860,13 @@ const pname=id=>id&&pubs[id]?pubs[id].nome:'';
 const tc=n=>String(n||'').toLowerCase().replace(/(^|[\s(\-])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase()).replace(/ (D[aeo]s?|E) /g,m=>m.toLowerCase());
 const pn=id=>tc(pname(id));
 const clone=o=>JSON.parse(JSON.stringify(o));
+/* Segurança: todo dado que vem do banco passa por aqui antes de aparecer na tela.
+   Troca os caracteres que montam código HTML (< > " `) por equivalentes visuais e descarta chaves suspeitas,
+   para que um texto gravado com código malicioso nunca seja executado (proteção extra além do esc()). */
+const okId=k=>typeof k==='string'&&k.length<200&&!/[<>"'`&\\]/.test(k);
+const TROCA={'<':'‹','>':'›','"':'”','`':'´'};
+const limpa=v=>typeof v==='string'?v.replace(/[<>"`]/g,c=>TROCA[c]):Array.isArray(v)?v.map(limpa):(v&&typeof v==='object')?Object.fromEntries(Object.entries(v).filter(([k])=>okId(k)).map(([k,x])=>[k,limpa(x)])):v;
+const sane=o=>limpa(clone(o));
 function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600)}
 function setStatus(t,cls){const s=$('#status');s.className='status '+(cls||'');$('#statusTxt').textContent=t}
 
@@ -773,9 +892,9 @@ function setEvent(date,patch){const id=weekMonday(date);const cur=Object.assign(
   if(!cur.tipo){delete evs[id];removeDoc('eventos',id)}else{evs[id]=cur;queueSave('eventos',id,cur)}buildHist()}
 function evBox(d){const tp=evTipo(d),ev=evOf(d)||{};
   const wk=impTarget(d);const md=wk?meetDate(wk):shiftDays(shiftDays(weekMonday(d),((+cfg.dia)+6)%7),tp==='visita'?-1:0);
-  return`<div class="evbox"><div class="evgrid"><label class="f">Tipo de semana<select class="ev-tipo" data-date="${d}"><option value="">Semana normal</option>${Object.entries(EVENTOS).map(([k,l])=>`<option value="${k}" ${tp===k?'selected':''}>${l}</option>`).join('')}</select></label>
-    ${tp==='visita'?`<label class="f">Superintendente de circuito<input type="text" class="ev-f" data-k="superintendente" data-date="${d}" value="${esc(ev.superintendente||'')}" placeholder="Nome do superintendente"></label>`:''}</div>
-    ${tp==='visita'?`<div class="evgrid"><label class="f">Tema do discurso do superintendente (meio de semana)<input type="text" class="ev-f" data-k="temaSC" data-date="${d}" value="${esc(ev.temaSC||'')}" placeholder="A definir"></label><label class="f">Tema do discurso final (fim de semana)<input type="text" class="ev-f" data-k="temaFinal" data-date="${d}" value="${esc(ev.temaFinal||'')}" placeholder="A definir"></label></div>
+  return`<div class="evbox"><div class="evgrid"><label class="f">Tipo de semana<select class="ev-tipo" data-date="${esc(d)}"><option value="">Semana normal</option>${Object.entries(EVENTOS).map(([k,l])=>`<option value="${k}" ${tp===k?'selected':''}>${l}</option>`).join('')}</select></label>
+    ${tp==='visita'?`<label class="f">Superintendente de circuito<input type="text" class="ev-f" data-k="superintendente" data-date="${esc(d)}" value="${esc(ev.superintendente||'')}" placeholder="Nome do superintendente"></label>`:''}</div>
+    ${tp==='visita'?`<div class="evgrid"><label class="f">Tema do discurso do superintendente (meio de semana)<input type="text" class="ev-f" data-k="temaSC" data-date="${esc(d)}" value="${esc(ev.temaSC||'')}" placeholder="A definir"></label><label class="f">Tema do discurso final (fim de semana)<input type="text" class="ev-f" data-k="temaFinal" data-date="${esc(d)}" value="${esc(ev.temaFinal||'')}" placeholder="A definir"></label></div>
     <div class="hint">Nesta semana a reunião do meio de semana passa para ${DIAS[parse(md).getDay()]}, ${br(md)}, e o Estudo bíblico de congregação dá lugar ao discurso do superintendente (30 min). No fim de semana: discurso público, resumo de A Sentinela (30 min, sem leitor) e discurso final.</div>`:''}
     ${SEM_REUNIAO(tp)?`<div class="drawres short">Não haverá reuniões nesta semana: ${esc(EVENTOS[tp])}. A folha impressa mostra só o aviso, e ninguém recebe designação.</div>`:''}
   </div>`}
@@ -813,6 +932,7 @@ function lsWrite(){try{localStorage.setItem(LS,JSON.stringify({publicadores:pubs
 const pending={},timers={},busy={};
 function queueSave(coll,id,data){const k=coll+'/'+id;pending[k]={coll,id,data:clone(data)};clearTimeout(timers[k]);setStatus('Salvando…','saving');timers[k]=setTimeout(()=>flush(k),650)}
 async function flush(k){if(busy[k]){timers[k]=setTimeout(()=>flush(k),300);return}const p=pending[k];if(!p)return;delete pending[k];busy[k]=true;
+  if(mode==='db'&&window.FBX&&!navigator.onLine){store.set(p.coll,p.id,p.data).catch(()=>{});busy[k]=false;setStatus('Sem internet: salvo neste aparelho, será enviado quando a conexão voltar','saving');return}
   try{await store.set(p.coll,p.id,p.data);if(!Object.keys(pending).length)setStatus(mode==='db'?'Tudo salvo':'Salvo neste navegador')}
   catch(e){setStatus('Não foi possível salvar: '+(e&&(e.code==='invalid_argument'||e.code==='permission-denied')?'sem permissão de edição':(e&&e.message)||'erro'),'error')}
   finally{busy[k]=false}}
@@ -825,7 +945,9 @@ async function init(){
   /* versão hospedada (GitHub Pages + Firebase): espera o login e usa o Firestore */
   if(!db&&window.FBX){setStatus('Aguardando login…');try{db=await window.FBX.ready()}catch(e){showBanner('Não foi possível conectar ao banco de dados ('+((e&&e.code)||'erro')+'). Recarregue a página.');setStatus('Sem conexão','error');return}
     if(window.FBX.papel==='leitor')showBanner('Você tem acesso só para visualizar. Alterações feitas aqui não são salvas.');
-    document.body.insertAdjacentHTML('beforeend',`<footer class="appfoot"><span>${esc(window.FBX.app||'')} · versão ${esc(window.FBX.versao||'')}</span><a href="#" data-doc="sobre">Sobre</a><a href="#" data-doc="privacidade">Aviso de privacidade</a><a href="#" data-doc="termos">Termo de uso</a></footer>`)}
+    contaInit();
+}
+  rodape();
   if(db){mode='db';
     store={set:(c,id,d)=>db.collection(c).doc(id).set(d),del:(c,id)=>db.collection(c).doc(id).delete()};
     /* versão hospedada: cada gravação leva quem alterou e quando (conferido pelas regras) e entra no registro de atividade */
@@ -838,22 +960,22 @@ async function init(){
     const err=e=>{clearTimeout(tm);showBanner('A conexão com os dados foi interrompida ('+(e.code||'erro')+'). Recarregue a página.')};
     const PO=painelOnly();
     if(window.FBX){
-      db.doc('quadro/nomes').onSnapshot(s=>{const m=(s.exists&&s.data().nomes)||{};nomesRemote=m;if(PO){pubs={};Object.entries(m).forEach(([id,n])=>pubs[id]={nome:n});loaded.p=true;done()}changed()},err);
+      db.doc('quadro/nomes').onSnapshot(s=>{const m=limpa((s.exists&&s.data().nomes)||{});nomesRemote=m;if(PO){pubs={};Object.entries(m).forEach(([id,n])=>pubs[id]={nome:n});loaded.p=true;done()}changed()},err);
       const rq=PO?db.collection('respostas').where('pub','==',window.FBX.pubId||'-'):db.collection('respostas');
-      rq.onSnapshot(s=>{const n={};s.docs.forEach(d=>n[d.id]=clone(d.data()));resp=n;changed()},()=>{});
+      rq.onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>n[d.id]=sane(d.data()));resp=n;changed()},()=>{});
     }
-    if(!PO)db.collection('publicadores').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('publicadores',d.id)&&pubs[d.id]?pubs[d.id]:clone(d.data())});pubs=n;if(!s.metadata.fromCache)loaded.p=true;done();changed()},err);
-    db.collection('semanas').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('semanas',d.id)&&weeks[d.id]?weeks[d.id]:norm(clone(d.data()))});weeks=n;if(!s.metadata.fromCache)loaded.w=true;done();changed()},err);
-    db.collection('fimdesemana').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('fimdesemana',d.id)&&fds[d.id]?fds[d.id]:normF(clone(d.data()))});fds=n;if(!s.metadata.fromCache)loaded.f=true;changed()},err);
-    db.collection('limpezaGrupos').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('limpezaGrupos',d.id)&&lgr[d.id]?lgr[d.id]:clone(d.data())});lgr=n;changed()},err);
-    db.collection('campo').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('campo',d.id)&&cmp[d.id]?cmp[d.id]:clone(d.data())});cmp=n;changed()},err);
-    db.collection('av').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('av',d.id)&&avd[d.id]?avd[d.id]:clone(d.data())});avd=n;changed()},err);
-    if(!PO)db.collection('estoque').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('estoque',d.id)&&stk[d.id]?stk[d.id]:clone(d.data())});stk=n;changed()},err);
-    db.collection('limpeza').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('limpeza',d.id)&&lmp[d.id]?lmp[d.id]:clone(d.data())});lmp=n;changed()},err);
-    db.collection('eventos').onSnapshot(s=>{const n={};s.docs.forEach(d=>{n[d.id]=isLocalPending('eventos',d.id)&&evs[d.id]?evs[d.id]:clone(d.data())});evs=n;if(!s.metadata.fromCache)loaded.e=true;changed()},err);
-    db.doc('config/geral').onSnapshot(s=>{if(!isLocalPending('config','geral'))cfg=Object.assign({},DEF_CFG,s.exists?clone(s.data()):{});if(!s.metadata.fromCache)loaded.c=true;done();changed()},err);
+    if(!PO)db.collection('publicadores').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('publicadores',d.id)&&pubs[d.id]?pubs[d.id]:sane(d.data())});pubs=n;if(!s.metadata.fromCache||!navigator.onLine)loaded.p=true;done();changed()},err);
+    db.collection('semanas').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('semanas',d.id)&&weeks[d.id]?weeks[d.id]:norm(sane(d.data()))});weeks=n;if(!s.metadata.fromCache||!navigator.onLine)loaded.w=true;done();changed()},err);
+    db.collection('fimdesemana').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('fimdesemana',d.id)&&fds[d.id]?fds[d.id]:normF(sane(d.data()))});fds=n;if(!s.metadata.fromCache||!navigator.onLine)loaded.f=true;changed()},err);
+    db.collection('limpezaGrupos').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('limpezaGrupos',d.id)&&lgr[d.id]?lgr[d.id]:sane(d.data())});lgr=n;changed()},err);
+    db.collection('campo').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('campo',d.id)&&cmp[d.id]?cmp[d.id]:sane(d.data())});cmp=n;changed()},err);
+    db.collection('av').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('av',d.id)&&avd[d.id]?avd[d.id]:sane(d.data())});avd=n;changed()},err);
+    if(!PO)db.collection('estoque').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('estoque',d.id)&&stk[d.id]?stk[d.id]:sane(d.data())});stk=n;changed()},err);
+    db.collection('limpeza').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('limpeza',d.id)&&lmp[d.id]?lmp[d.id]:sane(d.data())});lmp=n;changed()},err);
+    db.collection('eventos').onSnapshot(s=>{const n={};s.docs.filter(d=>okId(d.id)).forEach(d=>{n[d.id]=isLocalPending('eventos',d.id)&&evs[d.id]?evs[d.id]:sane(d.data())});evs=n;if(!s.metadata.fromCache||!navigator.onLine)loaded.e=true;changed()},err);
+    db.doc('config/geral').onSnapshot(s=>{if(!isLocalPending('config','geral'))cfg=Object.assign({},DEF_CFG,s.exists?sane(s.data()):{});if(!s.metadata.fromCache||!navigator.onLine)loaded.c=true;done();changed()},err);
   }else{mode='local';
-    const d=lsRead();if(d){pubs=d.publicadores||{};weeks={};Object.entries(d.semanas||{}).forEach(([k,v])=>weeks[k]=norm(v));cfg=Object.assign({},DEF_CFG,d.config||{});fds={};Object.entries(d.fimdesemana||{}).forEach(([k,v])=>fds[k]=normF(v));evs=d.eventos||{};lgr=d.limpezaGrupos||{};lmp=d.limpeza||{};stk=d.estoque||{};avd=d.av||{};cmp=d.campo||{}}
+    const d=limpa(lsRead());if(d){pubs=d.publicadores||{};weeks={};Object.entries(d.semanas||{}).forEach(([k,v])=>weeks[k]=norm(v));cfg=Object.assign({},DEF_CFG,d.config||{});fds={};Object.entries(d.fimdesemana||{}).forEach(([k,v])=>fds[k]=normF(v));evs=d.eventos||{};lgr=d.limpezaGrupos||{};lmp=d.limpeza||{};stk=d.estoque||{};avd=d.av||{};cmp=d.campo||{}}
     store={set:async(c,id,data)=>{if(c==='publicadores')pubs[id]=data;else if(c==='semanas')weeks[id]=data;else if(c==='fimdesemana')fds[id]=data;else if(c==='eventos')evs[id]=data;else if(c==='limpezaGrupos')lgr[id]=data;else if(c==='limpeza')lmp[id]=data;else if(c==='estoque')stk[id]=data;else if(c==='av')avd[id]=data;else if(c==='campo')cmp[id]=data;else cfg=data;lsWrite()},
            del:async(c,id)=>{if(c==='publicadores')delete pubs[id];else if(c==='semanas')delete weeks[id];else if(c==='fimdesemana')delete fds[id];else if(c==='eventos')delete evs[id];else if(c==='limpezaGrupos')delete lgr[id];else if(c==='limpeza')delete lmp[id];else if(c==='estoque')delete stk[id];else if(c==='av')delete avd[id];else if(c==='campo')delete cmp[id];lsWrite()}};
     loaded={p:true,w:true,c:true,f:true,e:true};setStatus('Salvo neste navegador');
@@ -861,6 +983,9 @@ async function init(){
     changed();
   }
 }
+/* sem internet: avisa e segue com o que está salvo no aparelho */
+window.addEventListener('offline',()=>{if(mode==='db'&&window.FBX)setStatus('Sem internet: as alterações serão enviadas quando a conexão voltar','saving')});
+window.addEventListener('online',()=>{if(mode==='db'&&window.FBX)setStatus(Object.keys(pending).length?'Salvando…':'Tudo salvo')});
 function showBanner(t){const b=$('#banner');b.textContent=t;b.hidden=false}
 function hideBanner(){$('#banner').hidden=true}
 
@@ -870,11 +995,11 @@ function changed(){if(renderQueued)return;renderQueued=true;requestAnimationFram
 function renderAll(fromData){
   $('#hName').textContent=cfg.congregacao&&cfg.congregacao!=='Congregação'?'Congregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):'';
   if(painelOnly())ui.tab='painel';
-  drawNav();
-  ['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel'].forEach(t=>$('#v-'+t).hidden=t!==ui.tab);
+  drawNav();contaSync();
+  ['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio'].forEach(t=>$('#v-'+t).hidden=t!==ui.tab);
   const v=$('#v-'+ui.tab);
   if(fromData&&v.contains(document.activeElement)&&document.activeElement.matches('input,textarea,select'))return; // não atrapalha quem está digitando
-  ({semanas:rSemanas,fimdesemana:rFds,limpeza:rLimpeza,av:rAV,campo:rCampo,publicadores:rPubs,imprimir:rPrint,whatsapp:rWa,ajustes:rAjustes,painel:rPainel})[ui.tab]();
+  ({semanas:rSemanas,fimdesemana:rFds,limpeza:rLimpeza,av:rAV,campo:rCampo,publicadores:rPubs,imprimir:rPrint,whatsapp:rWa,ajustes:rAjustes,painel:rPainel,pubimport:rPubImport,equilibrio:rEquilibrio})[ui.tab]();
 }
 /* Tema: segue o sistema (automático) ou fica fixo em claro/escuro; a escolha fica guardada neste aparelho */
 const TEMAS=['auto','claro','escuro'];
@@ -897,7 +1022,7 @@ const NAVI={cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const AREAS=[{k:'reunioes',l:'Reuniões',i:'cal',t:[['semanas','Meio de semana'],['fimdesemana','Fim de semana']]},
   {k:'limpeza',l:'Limpeza',i:'casa',t:[['limpeza','Limpeza e itens'],['av','A/V e Indicadores']]},
   {k:'pregacao',l:'Pregação',i:'pin',t:[['campo','Saídas de campo']]},
-  {k:'publicadores',l:'Publicadores',i:'gente',t:[['publicadores','Publicadores']]},
+  {k:'publicadores',l:'Publicadores',i:'gente',t:[['publicadores','Publicadores'],['equilibrio','Equilíbrio'],['pubimport','Importar e exportar']]},
   {k:'imprimir',l:'Imprimir',i:'print',t:[['imprimir','Imprimir / PDF']]},
   {k:'mais',l:'Mais',i:'mais',t:[['whatsapp','WhatsApp'],['ajustes','Ajustes']]}];
 function navAreas(){if(painelOnly())return[];if(!myPubId())return AREAS;return AREAS.map(a=>a.k==='mais'?Object.assign({},a,{t:[['painel','Meu painel'],...a.t]}):a)}
@@ -906,7 +1031,7 @@ function drawNav(){const AR=navAreas();const cur=AR.find(a=>a.t.some(x=>x[0]===u
   $('#areas').innerHTML=AR.map(a=>`<a href="${href(a)}" aria-current="${a===cur?'page':'false'}">${a.l}</a>`).join('');
   $('#bnav').innerHTML=AR.map(a=>`<a href="${href(a)}" aria-current="${a===cur?'page':'false'}">${NAVI[a.i]}${a.l}</a>`).join('');
   $('#subtabs').innerHTML=cur.t.length>1?cur.t.map(([k,l])=>`<a href="#${k}" aria-current="${k===ui.tab?'page':'false'}">${l}</a>`).join(''):''}
-function route(){ui.delAsk=null;const h=location.hash.slice(1);ui.tab=['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel'].includes(h)?h:'semanas';renderAll()}
+function route(){ui.delAsk=null;const h=location.hash.slice(1);ui.tab=['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio'].includes(h)?h:'semanas';renderAll()}
 window.addEventListener('hashchange',route);
 
 /* cabeçalho da folha e item da lista de semanas (bloco de calendário + situação) */
@@ -914,7 +1039,7 @@ function sheetHead(date,hora){const d=parse(date);return`<div class="sheethead">
 function wkItem(act,id,date,n,t,sel){const tp=evTipo(id),off=SEM_REUNIAO(tp);const dt=parse(date);
   const title=off?EVENTOS[tp]:tp==='visita'?'Visita do superintendente':n>=t?'Semana completa':(t-n)+(t-n>1?' designações em aberto':' designação em aberto');
   const lab=cap(DIAS[dt.getDay()])+', '+dt.getDate()+' de '+MESES[dt.getMonth()]+': '+title;
-  return`<button class="wk${off?' ev':''}" data-a="${act}" data-id="${id}" aria-current="${sel}" aria-label="${esc(lab)}"><span class="cal" aria-hidden="true"><small>${DIAS[dt.getDay()].slice(0,3).toUpperCase()}</small><b>${pad(dt.getDate())}</b></span>
+  return`<button class="wk${off?' ev':''}" data-a="${act}" data-id="${esc(id)}" aria-current="${sel}" aria-label="${esc(lab)}"><span class="cal" aria-hidden="true"><small>${DIAS[dt.getDay()].slice(0,3).toUpperCase()}</small><b>${pad(dt.getDate())}</b></span>
     <span class="wi" aria-hidden="true"><span class="wt">${esc(title)}</span>${off?'<span class="wev">Sem reunião nesta semana</span>':`<span class="wbar"><i><span style="width:${t?Math.round(100*Math.min(n,t)/t):0}%"></span></i>${n} de ${t}</span>`}</span></button>`}
 function sortedWeeks(){return Object.values(weeks).sort((a,b)=>a.data<b.data?-1:1)}
 function upcomingWeek(){const t=iso(new Date());const ws=sortedWeeks();return(ws.find(w=>w.data>=t)||ws[ws.length-1]||{}).data||null}
@@ -1041,7 +1166,7 @@ APO.mi=s=>{const u=s.toUpperCase().replace('MARCO','MARÇO');return APO.MESES.in
 
 
 let imp=null; // {nome, semanas:[{...,on:true}], erro}
-const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+const PDFJS='lib/pdfjs/';
 function loadScript(src){return new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=src;sc.onload=ok;sc.onerror=()=>no(new Error('não carregou '+src));document.head.appendChild(sc)})}
 async function ensurePdfjs(){if(window.pdfjsLib&&window.pdfjsWorker)return;await loadScript(PDFJS+'pdf.min.js');await loadScript(PDFJS+'pdf.worker.min.js');window.pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS+'pdf.worker.min.js'}
 /* O tipo do arquivo é decidido pelo conteúdo: no Android o nome muitas vezes chega sem extensão. */
@@ -1055,7 +1180,7 @@ async function fileToText(f){
   else if(buf[0]===0x50&&buf[1]===0x4B)kind='zip';
   impDiag.tipo=kind;impDiag.bytes=buf.length;
   if(kind==='zip')throw new Error(name.endsWith('.jwpub')||!name.includes('.')?'Este arquivo parece ser um JWPUB (ou outro arquivo compactado), que não pode ser lido aqui. Use o PDF ou o RTF da apostila.':'Este arquivo é compactado (ZIP, DOCX, JWPUB…) e não pode ser lido aqui. Use o PDF ou o RTF da apostila.');
-  if(kind==='pdf'){await ensurePdfjs();const doc=await window.pdfjsLib.getDocument({data:buf}).promise;let t='';
+  if(kind==='pdf'){await ensurePdfjs();const doc=await window.pdfjsLib.getDocument({data:buf,isEvalSupported:false}).promise;let t='';
     for(let i=1;i<=doc.numPages;i++){t+=APO.itemsToText((await (await doc.getPage(i)).getTextContent()).items)+'\n'}
     impDiag.paginas=doc.numPages;return t}
   if(kind==='rtf')return APO.rtfToText(new TextDecoder('windows-1252').decode(buf));
@@ -1087,6 +1212,9 @@ async function impRead(f){
   imp={nome:f.name,lendo:true};impDiag={};rSemanas();
   try{const t=await fileToText(f);const r=APO.parse(t,{dia:cfg.dia});
     impDiag.chars=t.replace(/\s/g,'').length;impDiag.amostra=t.replace(/[ \t]+/g,' ').trim().slice(0,700);
+    /* folha já preenchida (a programação do quadro), em vez da apostila */
+    const folha=/Reuni[aã]o Vida e Minist[eé]rio Crist[aã]os?\s*[-–]\s*\p{L}+\s+\d{4}/iu.test(t)&&(t.match(/\b\d{2}\/\d{2}\/\d{4}\b/g)||[]).length>=2;
+    if(!r.semanas.length&&folha)throw new Error('Este arquivo é uma programação já preenchida (a folha do quadro de anúncios), não a apostila. Para importar, use a Apostila da Reunião Vida e Ministério (arquivo mwb) baixada do jw.org, em PDF ou RTF.');
     if(!r.semanas.length)throw new Error(impDiag.tipo==='pdf'&&impDiag.chars<200?'Este PDF não tem texto que possa ser lido (parece ser uma imagem ou digitalização). Use o PDF original da apostila, baixado do jw.org, ou o RTF.':'Não encontrei semanas neste arquivo. Confira se é a Apostila da Reunião Vida e Ministério (PDF ou RTF).');
     imp={nome:f.name,ano:r.ano,semanas:r.semanas.map(x=>Object.assign(x,{on:true}))}}
   catch(e){imp={nome:f.name,erro:(e&&e.message)||'Não foi possível ler o arquivo.'};if(/carregou/.test(imp.erro))imp.erro='Não foi possível carregar o leitor de PDF. Verifique a internet e tente de novo.';else if(/Invalid PDF|PDF structure|password/i.test(imp.erro))imp.erro='Este PDF está danificado ou protegido e não pode ser lido. Baixe a apostila de novo no jw.org e tente outra vez.'}
@@ -1253,7 +1381,7 @@ function rPubs(){
       <button class="btn primary" data-a="pnew">+ Novo publicador</button>
     </div>
     <div class="panel tablewrap"><table class="pubs ptab"><thead><tr><th>Nome</th><th>WhatsApp</th><th>Pode fazer</th><th>Última parte</th></tr></thead><tbody>
-      ${rows.length?rows.map(([id,p])=>{const l=(hist[id]||[]).filter(d=>d<=today).pop();return`<tr data-a="pedit" data-id="${id}" class="${id===ui.pub?'sel':''}"><td><b>${esc(p.nome)}</b>${p.ativo===false?' <span class="tag">inativo</span>':''}<div class="muted" style="font-size:12.5px">${[p.sexo==='F'?'Irmã':'Irmão',...(p.privilegios||[]).map(k=>PRIVNAME[k]||k)].join(' · ')}</div></td><td style="font-variant-numeric:tabular-nums;white-space:nowrap">${p.tel?esc(fmtTel(p.tel)):'<span class="muted">—</span>'}</td><td><div class="tags">${(p.cats||[]).map(c=>`<span class="tag">${esc(CATNAME[c]||c)}</span>`).join('')}</div></td><td data-l="Última parte" style="white-space:nowrap;font-variant-numeric:tabular-nums">${l?br(l):'<span class="muted">—</span>'}</td></tr>`}).join('')
+      ${rows.length?rows.map(([id,p])=>{const l=(hist[id]||[]).filter(d=>d<=today).pop();return`<tr data-a="pedit" data-id="${esc(id)}" class="${id===ui.pub?'sel':''}"><td><b>${esc(p.nome)}</b>${p.ativo===false?' <span class="tag">inativo</span>':''}<div class="muted" style="font-size:12.5px">${[p.sexo==='F'?'Irmã':'Irmão',...(p.privilegios||[]).map(k=>PRIVNAME[k]||esc(k))].join(' · ')}</div></td><td style="font-variant-numeric:tabular-nums;white-space:nowrap">${p.tel?esc(fmtTel(p.tel)):'<span class="muted">—</span>'}</td><td><div class="tags">${(p.cats||[]).map(c=>`<span class="tag">${esc(CATNAME[c]||c)}</span>`).join('')}</div></td><td data-l="Última parte" style="white-space:nowrap;font-variant-numeric:tabular-nums">${l?br(l):'<span class="muted">—</span>'}</td></tr>`}).join('')
       :`<tr><td colspan="4" class="muted" style="padding:18px">${total?'Ninguém encontrado com esse filtro.':(mode==='db'&&!loaded.p?'Carregando publicadores…':'Nenhum publicador cadastrado. Use o formulário ao lado para adicionar o primeiro.')}</td></tr>`}
     </tbody></table></div>
     <p class="hint">${total} publicadores cadastrados. Clique em um nome para editar.</p>
@@ -1303,6 +1431,23 @@ document.addEventListener('input',e=>{if(e.target.id==='pq'){ui.pubFilter=e.targ
 document.addEventListener('change',e=>{if(e.target.id==='pc'){ui.pubCat=e.target.value;draft=readDraft();rPubs()}});
 function fmtTel(t){const d=String(t).replace(/\D/g,'').replace(/^55(?=\d{10,11}$)/,'');if(d.length===11)return`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;if(d.length===10)return`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;return t}
 function waNumber(t){let d=String(t||'').replace(/\D/g,'').replace(/^0+/,'');if(!d)return'';if(d.length<=11)d='55'+d;return d}
+
+/* ================= Rodapé: contato do desenvolvedor e links úteis ================= */
+const DEV={mail:['tallisdocarmo','gmail.com'].join('@')};
+const LINKS_UTEIS=[['JW.ORG','https://www.jw.org/pt/'],['JW Hub','https://hub.jw.org/'],['Biblioteca On-line','https://wol.jw.org/pt/']];
+const EXT_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
+/* o e-mail sai com assunto e um roteiro já preenchidos; as informações técnicas ajudam a encontrar o erro */
+function devMailto(){const F=window.FBX||{};const ua=navigator.userAgent.replace(/\s*\([^)]*\)\s*/,' ').replace(/\s+/g,' ').slice(0,160);
+  const body=`Olá!\n\nEscreva aqui a sua dúvida ou sugestão. Se for um erro, conte o que você fez, o que esperava e o que aconteceu:\n\n\n\n— Para ajudar no atendimento (pode manter) —\nVersão: ${F.versao||'artifact'}\nTela: ${location.hash||'#inicio'}\nPerfil: ${F.papel||'—'}\nAparelho: ${ua}`;
+  return 'mailto:'+DEV.mail+'?subject='+encodeURIComponent('Sistema de designações · dúvida ou problema')+'&body='+encodeURIComponent(body)}
+function rodape(){if(document.querySelector('footer.appfoot'))return;setTimeout(()=>{const h=$('#hName'),f=document.querySelector('.appfoot .fcong');if(h&&f){const sync=()=>{f.textContent=h.textContent};sync();new MutationObserver(sync).observe(h,{childList:true,characterData:true,subtree:true})}},0);const F=window.FBX;
+  const logo=document.querySelector('header.app .logo');
+  document.body.insertAdjacentHTML('beforeend',`<footer class="appfoot"><div class="wrap ftop">
+    <div class="fcol fbrandcol">${logo?`<span class="fhead"><span class="logo sm">${logo.innerHTML}</span><b class="fcong"></b></span>`:''}<p>As designações da congregação, num só lugar.</p>${F?`<p>Versão ${esc(F.versao||'')}</p>`:''}</div>
+    <div class="fcol flinks"><h2>Links úteis</h2>${LINKS_UTEIS.map(([t,u])=>`<a href="${u}" target="_blank" rel="noopener noreferrer">${t}${EXT_IC}</a>`).join('')}</div>
+    <div class="fcol"><h2>Suporte</h2><p>Dúvidas, sugestões ou encontrou um erro? <a class="footmail" href="#">Fale com o desenvolvedor</a>.</p></div>
+  </div><div class="wrap fbot">${F?`<nav aria-label="Documentos"><a href="#" data-doc="sobre">Sobre</a><a href="#" data-doc="privacidade">Aviso de privacidade</a><a href="#" data-doc="termos">Termo de uso</a></nav>`:''}</div></footer>`);
+  document.querySelector('footer.appfoot .footmail').addEventListener('click',e=>{e.currentTarget.href=devMailto()});document.querySelector('footer.appfoot .footmail').href='mailto:'+DEV.mail}
 
 /* ================= Aba Imprimir ================= */
 const ICONS={
@@ -1379,7 +1524,7 @@ function rPrint(){
       <div><div class="hint" style="font-weight:600;margin-bottom:6px">${L?'Meses na folha':K?'Reuniões na folha':C?'Semanas de saída na folha':'Semanas na folha'}</div>
         <div class="wkchecks">${L?all.map(w=>`<label><input type="checkbox" class="pw" value="${w.data}" ${P.set.has(w.data)?'checked':''}> ${cap(monthLabel(w.ym))}</label>`).join(''):months.length?months.map(m=>`<div class="mg">${monthLabel(m)}<button data-a="pselall" data-m="${m}">só este mês</button></div>${all.filter(w=>w.data.startsWith(m)).map(w=>{const tp=evTipo(w.data);return`<label><input type="checkbox" class="pw" value="${w.data}" ${P.set.has(w.data)?'checked':''}> ${C?esc(campoLabel(w.mon)):br(K?w.data:meetDate(w))}${tp?` <span class="evtag">${EVTAG[tp]}</span>`:''}</label>`}).join('')}`).join(''):`<p class="muted">${K?'Nenhuma reunião de fim de semana criada.':C?'Nenhuma semana de saídas montada.':'Nenhuma semana criada.'}</p>`}</div></div>
       <button class="btn primary" data-a="pdf" id="pdfBtn" ${sel.length?'':'disabled'} style="justify-content:center">Baixar PDF para imprimir</button>
-      <p class="hint" style="margin:0">Papel ${cfg.papel}${L?'':' · '+(K?'quatro reuniões':'duas semanas')+' por folha'}. Abra o PDF e imprima normalmente.</p>
+      <p class="hint" style="margin:0">Papel ${esc(cfg.papel)}${L?'':' · '+(K?'quatro reuniões':'duas semanas')+' por folha'}. Abra o PDF e imprima normalmente.</p>
     </div>
     <div class="stage" id="printStage"></div></div>`;
   layoutPages(sel,ui.printSub||P.autoSub,P.kind);
@@ -1604,10 +1749,10 @@ function rWa(){
    <div class="walist">${w?(SEM_REUNIAO(tp)?`<p class="muted">Não haverá reunião nesta semana (${esc(EVENTOS[tp])}).</p>`:ms.length?ms.map((m,i)=>{const n=waNumber(m.p.tel);return`<div class="panel wacard ${w.enviados[m.pid]?'sent':''}">
       <h3>${esc(m.p.nome)}<span class="tel ${n?'':'none'}">${n?esc(fmtTel(m.p.tel)):'sem telefone'}</span></h3>
       <pre>${esc(m.msg)}</pre>
-      <div class="acts">${n?`<a class="btn small wa" href="https://wa.me/${n}?text=${encodeURIComponent(m.msg)}" target="_blank" rel="noopener">Abrir no WhatsApp</a>`:`<a class="btn small" href="#publicadores" data-a="pedit" data-id="${m.pid}">Cadastrar telefone</a>`}
+      <div class="acts">${n?`<a class="btn small wa" href="https://wa.me/${n}?text=${encodeURIComponent(m.msg)}" target="_blank" rel="noopener">Abrir no WhatsApp</a>`:`<a class="btn small" href="#publicadores" data-a="pedit" data-id="${esc(m.pid)}">Cadastrar telefone</a>`}
         <button class="btn small" data-a="wacopy" data-i="${i}">Copiar</button>
         ${K?'':studentParts(w).filter(sp=>sp.pub===m.pid||sp.ajudante===m.pid).map(sp=>`<button class="btn small" data-a="s89" data-n="${sp.n}">Cartão S-89 · parte ${sp.n}</button>`).join('')}
-        <label><input type="checkbox" class="wasent" data-pid="${m.pid}" ${w.enviados[m.pid]?'checked':''}> Enviado</label></div><div class="s89prev"></div></div>`}).join(''):'<p class="muted">Ninguém designado nesta reunião ainda.</p>'):`<p class="muted">${K?'Crie as reuniões na aba Fim de semana primeiro.':'Crie uma semana na aba Meio de semana primeiro.'}</p>`}</div>`;
+        <label><input type="checkbox" class="wasent" data-pid="${esc(m.pid)}" ${w.enviados[m.pid]?'checked':''}> Enviado</label></div><div class="s89prev"></div></div>`}).join(''):'<p class="muted">Ninguém designado nesta reunião ainda.</p>'):`<p class="muted">${K?'Crie as reuniões na aba Fim de semana primeiro.':'Crie uma semana na aba Meio de semana primeiro.'}</p>`}</div>`;
 }
 document.addEventListener('change',e=>{
   if(e.target.id==='waw'){if(ui.waKind==='fds')ui.waFds=e.target.value;else ui.waWeek=e.target.value;rWa()}
@@ -1788,7 +1933,7 @@ function misaligned(){const t=iso(new Date());
 /* aviso na própria aba quando há reuniões futuras fora do dia configurado em Ajustes */
 function misBanner(k){if(mode==='db'&&!(loaded.w&&loaded.c))return'';const m=misaligned()[k];if(!m.length)return'';const dia=k==='ws'?+cfg.dia:+cfg.diaFds;
   const dias=[...new Set(m.map(x=>DIAS[parse(x.data).getDay()]))].join(' e ');
-  return`<div class="drawres short misb" style="margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between"><span>${m.length} ${k==='ws'?'semana'+(m.length>1?'s':''):'reuni'+(m.length>1?'ões':'ão')} marcada${m.length>1?'s':''} para ${esc(dias)} (${m.slice(0,4).map(x=>br(x.data).slice(0,5)).join(', ')}${m.length>4?'…':''}), mas em Ajustes a reunião é ${k==='ws'?'de':'aos'} ${esc(DIAS[dia])}${k==='ws'?'':'s'}.</span><button class="btn small primary" data-a="alignone" data-k="${k}">Mover para ${esc(DIAS[dia])}</button></div>`}
+  return`<div class="drawres short misb" style="margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between"><span>${m.length} ${k==='ws'?'semana'+(m.length>1?'s':''):'reuni'+(m.length>1?'ões':'ão')} marcada${m.length>1?'s':''} para ${esc(dias)} (${m.slice(0,4).map(x=>br(x.data).slice(0,5)).join(', ')}${m.length>4?'…':''}), mas em Ajustes a reunião é ${k==='ws'?'de':'aos'} ${esc(DIAS[dia])}${k==='ws'?'':'s'}.</span><button class="btn small primary" data-a="alignone" data-k="${esc(k)}">Mover para ${esc(DIAS[dia])}</button></div>`}
 function alignDates(only){const {ws,fs}=misaligned();let n=0;
   if(only!=='fs')ws.forEach(w=>{const nd=shiftDays(weekMonday(w.data),((+cfg.dia)+6)%7);if(nd===w.data||weeks[nd])return;const old=w.data;w.data=nd;delete weeks[old];removeDoc('semanas',old);saveWeek(w);n++});
   if(only!=='ws')fs.forEach(f=>{const nd=shiftDays(weekMonday(f.data),((+cfg.diaFds)+6)%7);if(nd===f.data||fds[nd])return;const old=f.data;f.data=nd;delete fds[old];removeDoc('fimdesemana',old);saveFds(f);n++});
@@ -1848,7 +1993,7 @@ function rLimpeza(){
       ${slots.map(s=>{const a=lmp[s.id],g=a&&lgr[a.grupo];
         if(s.sem)return`<tr><td style="font-variant-numeric:tabular-nums">${br(s.data).slice(0,5)}</td><td>${DIAS3[parse(s.data).getDay()]}</td><td colspan="3"><span class="evtag">${EVTAG[s.ev]}</span> <span class="muted">Sem reunião nesta semana</span></td></tr>`;
         return`<tr style="cursor:default"><td style="font-variant-numeric:tabular-nums">${br(s.data).slice(0,5)}</td><td>${DIAS3[parse(s.data).getDay()]}</td><td>${LTIPO[s.tipo]}</td>
-          <td><div style="display:flex;gap:6px;align-items:center"><span class="lpill" style="background:${g?lcor(g.letra):'transparent'}">${g?g.letra:''}</span><select class="lsel" data-id="${s.id}" data-date="${s.data}" data-tipo="${s.tipo}" aria-label="Grupo de ${br(s.data)}"><option value="">—</option>${gs.map(x=>`<option value="${x.letra}" ${a&&a.grupo===x.letra?'selected':''}>${x.letra} · ${esc(x.nome)}</option>`).join('')}</select></div></td>
+          <td><div style="display:flex;gap:6px;align-items:center"><span class="lpill" style="background:${g?lcor(g.letra):'transparent'}">${g?g.letra:''}</span><select class="lsel" data-id="${esc(s.id)}" data-date="${esc(s.data)}" data-tipo="${esc(s.tipo)}" aria-label="Grupo de ${br(s.data)}"><option value="">—</option>${gs.map(x=>`<option value="${x.letra}" ${a&&a.grupo===x.letra?'selected':''}>${x.letra} · ${esc(x.nome)}</option>`).join('')}</select></div></td>
           <td class="muted" style="font-size:13px;min-width:200px">${g?esc(groupMembers(g).join(', ')):''}</td></tr>`}).join('')||'<tr><td colspan="5" class="muted">Nenhuma data neste mês.</td></tr>'}
       </tbody></table></div>
       ${gs.length&&slots.some(s=>!s.sem)?`<div class="evbox" style="flex-direction:row;flex-wrap:wrap;align-items:flex-end;gap:10px">
@@ -1864,7 +2009,7 @@ function rLimpeza(){
     const bros=Object.entries(pubs).filter(([id,p])=>p.ativo!==false&&p.sexo!=='F').sort(byName);
     const ordPanel=`<div class="panel" style="padding:16px;display:flex;flex-direction:column;gap:12px"><b>Ordem do rodízio</b>
       <p class="hint" style="margin:0">Escreva as letras na ordem em que os grupos se revezam. Pode repetir letras para montar sequências mais longas. O sistema sempre continua do último grupo designado.</p>
-      <div class="evgrid">${Object.entries(LTIPO).map(([k,l])=>{const o=limpOrder(k);return`<label class="f">${l}${k==='semanal'?' ('+DIAS[cfg.diaLimpeza]+')':' ('+DIAS[cfg.dia]+' e '+DIAS[cfg.diaFds]+')'}<input type="text" class="lord" data-k="${k}" value="${esc(o.join(', '))}" placeholder="Ex.: C, D, F, A" autocomplete="off">
+      <div class="evgrid">${Object.entries(LTIPO).map(([k,l])=>{const o=limpOrder(k);return`<label class="f">${l}${k==='semanal'?' ('+DIAS[cfg.diaLimpeza]+')':' ('+DIAS[cfg.dia]+' e '+DIAS[cfg.diaFds]+')'}<input type="text" class="lord" data-k="${esc(k)}" value="${esc(o.join(', '))}" placeholder="Ex.: C, D, F, A" autocomplete="off">
         <span class="chips" style="margin-top:4px">${o.map((L,i)=>`<span class="lpill" style="background:${lcor(L)}">${L}</span>${i<o.length-1?'<span class="muted">→</span>':''}`).join('')}${o.length?'<span class="muted">↺</span>':''}</span></label>`}).join('')}</div>
       ${ui.ordErr?`<div class="warnline">${esc(ui.ordErr)}</div>`:''}</div>`;
     body=ordPanel+`<div class="lgrid">${gs.map(g=>`<div class="panel lgcard" style="border-top:4px solid ${lcor(g.letra)}">
@@ -2005,7 +2150,7 @@ function itemsView(){
     return''};
   const countForm=ui.itCount?`<div class="itform"><b>Conferir estoque</b><p class="hint" style="margin:0">Anote a quantidade de cada item que tem hoje no depósito. Deixe em branco o que não conferiu.</p>
       <label class="f" style="max-width:200px">Data da conferência<input type="date" id="itc-data" value="${hoje}"></label>
-      <div class="tablewrap"><table class="pubs" style="font-size:14px"><thead><tr><th>Item</th><th>Registro anterior</th><th>Tem hoje</th></tr></thead><tbody>${its.map(it=>`<tr style="cursor:default"><td><b>${esc(it.nome)}</b></td><td class="muted">${it.qtd==null?'—':esc(qU(it.qtd,it.unidade))}</td><td><span style="display:flex;gap:6px;align-items:center"><input type="text" inputmode="decimal" class="itc" data-id="${it.id}" style="width:90px"> <span class="muted">${esc(plu(2,it.unidade))}</span></span></td></tr>`).join('')}</tbody></table></div>
+      <div class="tablewrap"><table class="pubs" style="font-size:14px"><thead><tr><th>Item</th><th>Registro anterior</th><th>Tem hoje</th></tr></thead><tbody>${its.map(it=>`<tr style="cursor:default"><td><b>${esc(it.nome)}</b></td><td class="muted">${it.qtd==null?'—':esc(qU(it.qtd,it.unidade))}</td><td><span style="display:flex;gap:6px;align-items:center"><input type="text" inputmode="decimal" class="itc" data-id="${esc(it.id)}" style="width:90px"> <span class="muted">${esc(plu(2,it.unidade))}</span></span></td></tr>`).join('')}</tbody></table></div>
       <div style="display:flex;gap:8px"><button class="btn primary small" data-a="itcountsave">Salvar conferência</button><button class="btn small" data-a="itcount">Cancelar</button></div></div>`:'';
   return`<div class="kpis">
       <div class="panel kpi"><span>Itens cadastrados</span><b>${its.length}</b></div>
@@ -2029,7 +2174,7 @@ function itemsView(){
         <td data-l="Mínimo">${it.minimo==null?'<span class="muted">—</span>':fmtQ(it.minimo)}</td>
         <td data-l="Última compra" style="white-space:nowrap">${u?br(u.data)+`<div class="muted" style="font-size:12.5px">${u.preco!=null?brl(u.preco)+'/'+esc(it.unidade||'un')+' · ':''}${u.qtd?fmtQ(u.qtd)+' = '+brl(compraTotal(u)):''}</div>`+(u.local?`<div class="muted" style="font-size:12px">${esc(u.local)}</div>`:''):'<span class="muted">—</span>'}</td>
         <td data-l="Consumo e previsão" style="font-size:13px;max-width:230px">${esc(previsaoTxt(it))}</td>
-        <td><div class="itacts"><button class="btn small" data-a="itcompra" data-id="${it.id}">Compra</button><button class="btn small" data-a="itconta" data-id="${it.id}">Contagem</button><button class="btn small ghost" data-a="itedit" data-id="${it.id}">Editar</button><button class="btn small ghost" data-a="ithist" data-id="${it.id}">Histórico</button></div></td></tr>${panel(it)}`}).join('')||'<tr><td colspan="6" class="muted">Nenhum item cadastrado.</td></tr>'}
+        <td><div class="itacts"><button class="btn small" data-a="itcompra" data-id="${esc(it.id)}">Compra</button><button class="btn small" data-a="itconta" data-id="${esc(it.id)}">Contagem</button><button class="btn small ghost" data-a="itedit" data-id="${esc(it.id)}">Editar</button><button class="btn small ghost" data-a="ithist" data-id="${esc(it.id)}">Histórico</button></div></td></tr>${panel(it)}`}).join('')||'<tr><td colspan="6" class="muted">Nenhum item cadastrado.</td></tr>'}
       </tbody></table></div>
       <p class="hint" style="margin:0">Registre cada compra (soma ao estoque e guarda preço e data) e faça a conferência do estoque de tempos em tempos, por exemplo uma vez por mês. Comparando as conferências com as compras, o sistema calcula quanto se gasta por mês e até quando o estoque deve durar. O item entra na lista de compras quando chega no mínimo ou quando deve acabar nos próximos 30 dias.</p></div>`}
 function itemId(n){return(n.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'item')+'-'+Math.random().toString(36).slice(2,5)}
@@ -2141,7 +2286,7 @@ function rAV(){
   if(!ui.avMonth)ui.avMonth=iso(new Date()).slice(0,7);const slots=avSlots(ui.avMonth);
   const empt=slots.filter(s=>!s.sem).reduce((a,s)=>{const d=avNorm(avd[s.id]||avBlank(s.data));return a+[d.av,d.palco,...d.mic,...d.ind].filter(x=>!x).length},0);
   const sel=(s,field,idx,val,pool)=>{const ids=[...pool];if(val&&!ids.includes(val))ids.unshift(val);
-    return`<select class="avsel" data-id="${s.id}" data-f="${field}" data-i="${idx==null?'':idx}" aria-label="${field} ${br(s.data)}"><option value="">—</option>${ids.map(id=>`<option value="${id}" ${id===val?'selected':''}>${esc(tc(pname(id)))}${isElder(id)?' · ancião':''} · ${avSince(id,s.data)}</option>`).join('')}</select>`};
+    return`<select class="avsel" data-id="${esc(s.id)}" data-f="${field}" data-i="${idx==null?'':idx}" aria-label="${field} ${br(s.data)}"><option value="">—</option>${ids.map(id=>`<option value="${id}" ${id===val?'selected':''}>${esc(tc(pname(id)))}${isElder(id)?' · ancião':''} · ${avSince(id,s.data)}</option>`).join('')}</select>`};
   const B=bros(),O=avOps();
   const cards=slots.map(s=>{const lab=`<div class="avh"><b>${br(s.data).slice(0,5)}</b><span>${cap(DIAS[parse(s.data).getDay()])} · ${s.kind==='meio'?'Meio de semana':'Fim de semana'}</span>${s.ev&&!s.sem?`<span class="evtag">${EVTAG[s.ev]}</span>`:''}</div>`;
     if(s.sem)return`<div class="panel avcard">${lab}<p class="muted" style="margin:0">Sem reunião nesta semana (${esc(EVENTOS[s.ev])}).</p></div>`;
@@ -2199,7 +2344,7 @@ function rWaAV(seg){const ym=ui.waAV||(ui.waAV=iso(new Date()).slice(0,7));const
      ${ms.length?`<span class="progress"><b>${sent}</b> de <b>${ms.length}</b> marcados como enviados</span>`:''}</div>
    <p class="hint" style="margin:-6px 0 16px">Uma mensagem por irmão com todas as datas dele no mês.</p>
    <div class="walist">${ms.length?ms.map((m,i)=>{const n=waNumber(m.p.tel);return`<div class="panel wacard ${env[m.pid]?'sent':''}"><h3>${esc(m.p.nome)}<span class="tel ${n?'':'none'}">${n?esc(fmtTel(m.p.tel)):'sem telefone'}</span></h3><pre>${esc(m.msg)}</pre>
-      <div class="acts">${n?`<a class="btn small wa" href="https://wa.me/${n}?text=${encodeURIComponent(m.msg)}" target="_blank" rel="noopener">Abrir no WhatsApp</a>`:''}<button class="btn small" data-a="avwacopy" data-i="${i}">Copiar</button><label><input type="checkbox" class="avsent" data-pid="${m.pid}" ${env[m.pid]?'checked':''}> Enviado</label></div></div>`}).join(''):'<p class="muted">Nenhuma designação neste mês. Monte a escala na aba A/V e Indicadores.</p>'}</div>`}
+      <div class="acts">${n?`<a class="btn small wa" href="https://wa.me/${n}?text=${encodeURIComponent(m.msg)}" target="_blank" rel="noopener">Abrir no WhatsApp</a>`:''}<button class="btn small" data-a="avwacopy" data-i="${i}">Copiar</button><label><input type="checkbox" class="avsent" data-pid="${esc(m.pid)}" ${env[m.pid]?'checked':''}> Enviado</label></div></div>`}).join(''):'<p class="muted">Nenhuma designação neste mês. Monte a escala na aba A/V e Indicadores.</p>'}</div>`}
 Object.assign(PACTS,{avwacopy:b=>copyText(avMsgs(ui.waAV)[+b.dataset.i].msg)});
 document.addEventListener('change',e=>{const t=e.target;if(t.id==='wawav'){ui.waAV=t.value;rWa()}
   if(t.classList&&t.classList.contains('avsent')){cfg.avEnviados=cfg.avEnviados||{};const m=cfg.avEnviados[ui.waAV]=Object.assign({},cfg.avEnviados[ui.waAV]||{});if(t.checked)m[t.dataset.pid]=1;else delete m[t.dataset.pid];queueSave('config','geral',cfg);rWa()}});
@@ -2269,14 +2414,14 @@ function campoRowsEd(key,rows){const{d,o}=campoDirs();const mods=campoMods();
   const dsel=cur=>`<select class="cin" data-f="dir" aria-label="Dirigente"><option value="">—</option>${cur&&!pubs[cur]?`<option value="${esc(cur)}" selected>(removido)</option>`:''}<optgroup label="Dirigentes de campo">${d.map(id=>opt(id,cur)).join('')}</optgroup>${o.length?`<optgroup label="Outros irmãos">${o.map(id=>opt(id,cur)).join('')}</optgroup>`:''}</select>`;
   let last=0;
   return`<div class="crows"><div class="crow chead"><span>Dia</span><span>Horário</span><span>Modalidade</span><span>Território</span><span>Dirigente</span><span></span></div>
-    ${rows.map((r,i)=>{const first=r.dia!==last;last=r.dia;return`<div class="crow ${first?'first':''} ${/isolad/i.test(r.mod||'')?'iso':''}" data-k="${key}" data-i="${i}">
+    ${rows.map((r,i)=>{const first=r.dia!==last;last=r.dia;return`<div class="crow ${first?'first':''} ${/isolad/i.test(r.mod||'')?'iso':''}" data-k="${esc(key)}" data-i="${i}">
       <select class="cin" data-f="dia" aria-label="Dia">${DIAS_C.map((n,j)=>j?`<option value="${j}" ${j===r.dia?'selected':''}>${n}</option>`:'').join('')}</select>
       <input type="text" class="cin" data-f="hora" inputmode="numeric" maxlength="5" placeholder="08:30" value="${esc(r.hora||'')}" aria-label="Horário">
       <select class="cin" data-f="mod" aria-label="Modalidade">${(r.mod&&!mods.includes(r.mod)?[r.mod,...mods]:mods).map(m=>`<option ${m===r.mod?'selected':''}>${esc(m)}</option>`).join('')}</select>
       <input type="text" class="cin" data-f="terr" list="terrList" value="${esc(r.terr||'')}" placeholder="Território" aria-label="Território">
       ${dsel(r.dir)}
-      <button class="btn small ghost danger cx" data-a="crowdel" data-k="${key}" data-i="${i}" aria-label="Remover saída" title="Remover">✕</button></div>`}).join('')}
-    </div><div><button class="btn small" data-a="crowadd" data-k="${key}">+ Adicionar saída</button></div>`}
+      <button class="btn small ghost danger cx" data-a="crowdel" data-k="${esc(key)}" data-i="${i}" aria-label="Remover saída" title="Remover">✕</button></div>`}).join('')}
+    </div><div><button class="btn small" data-a="crowadd" data-k="${esc(key)}">+ Adicionar saída</button></div>`}
 function campoGet(key){if(key[0]==='#'){const k=key.slice(1);return{saidas:clone(campoModelo(k)),_m:k}}return cmp[key]?clone(cmp[key]):null}
 function campoPut(key,c){if(c._m){c.saidas=sortSaidas(c.saidas);cfg.campoModelos=Object.assign({},cfg.campoModelos||{},{[c._m]:c.saidas});queueSave('config','geral',cfg)}else saveCampo(c)}
 function rCampo(){
@@ -2380,7 +2525,7 @@ function rWaCampo(seg){const ws=sortedCampo().map(c=>c.semana);if(!ui.waCampo||!
    ${mon?`<p class="hint" style="margin:-6px 0 16px">Um cartão por dirigente com as saídas dele na semana. "Programação da semana" copia tudo para mandar no grupo da congregação.</p>
    <div class="walist"><div class="panel wacard"><h3>Programação da semana</h3><pre>${esc(campoGroupMsg(mon))}</pre><div class="acts"><button class="btn small primary" data-a="cwagrp">Copiar para o grupo</button></div></div>
    ${ms.map((m,i)=>{const n=waNumber(m.p.tel);return`<div class="panel wacard ${env[m.pid]?'sent':''}"><h3>${esc(m.p.nome)}<span class="tel ${n?'':'none'}">${n?esc(fmtTel(m.p.tel)):'sem telefone'}</span></h3><pre>${esc(m.msg)}</pre>
-      <div class="acts">${n?`<a class="btn small wa" href="https://wa.me/${n}?text=${encodeURIComponent(m.msg)}" target="_blank" rel="noopener">Abrir no WhatsApp</a>`:''}<button class="btn small" data-a="cwacopy" data-i="${i}">Copiar</button><label><input type="checkbox" class="csent" data-pid="${m.pid}" ${env[m.pid]?'checked':''}> Enviado</label></div></div>`}).join('')}</div>`:'<p class="muted">Nenhuma semana de saídas montada. Monte a programação na aba Saídas de campo.</p>'}`}
+      <div class="acts">${n?`<a class="btn small wa" href="https://wa.me/${n}?text=${encodeURIComponent(m.msg)}" target="_blank" rel="noopener">Abrir no WhatsApp</a>`:''}<button class="btn small" data-a="cwacopy" data-i="${i}">Copiar</button><label><input type="checkbox" class="csent" data-pid="${esc(m.pid)}" ${env[m.pid]?'checked':''}> Enviado</label></div></div>`}).join('')}</div>`:'<p class="muted">Nenhuma semana de saídas montada. Monte a programação na aba Saídas de campo.</p>'}`}
 Object.assign(PACTS,{cwacopy:b=>copyText(campoMsgs(ui.waCampo)[+b.dataset.i].msg),cwagrp:()=>copyText(campoGroupMsg(ui.waCampo))});
 document.addEventListener('change',e=>{const t=e.target;if(t.id==='wacampo'){ui.waCampo=t.value;rWa()}
   if(t.classList&&t.classList.contains('csent')){const c=cmp[ui.waCampo];if(!c)return;c.enviados=Object.assign({},c.enviados||{});if(t.checked)c.enviados[t.dataset.pid]=1;else delete c.enviados[t.dataset.pid];saveCampo(c);rWa()}});
@@ -2474,11 +2619,12 @@ function rPainel(){const v=$('#v-painel');const pid=myPubId();
     ui.pnItems=its}
   else if(V==='prog'){if(!ui.pnMonth)ui.pnMonth=iso(new Date()).slice(0,7);const K=ui.pnKind||'meio';
     const kinds=[['meio','Meio de semana'],['fds','Fim de semana'],['limp','Limpeza'],['av','A/V e Indicadores'],['campo','Pregação']];
-    body=`<div class="seg seg4" style="max-width:520px">${kinds.map(([k,l])=>`<button data-a="pnkind" data-k="${k}" aria-pressed="${K===k}">${l}</button>`).join('')}</div>
+    body=`<div class="seg seg4" style="max-width:520px">${kinds.map(([k,l])=>`<button data-a="pnkind" data-k="${esc(k)}" aria-pressed="${K===k}">${l}</button>`).join('')}</div>
       <div class="monthnav" style="margin:14px 0 10px;justify-content:flex-start;gap:12px"><button class="btn small ghost" data-a="pnprev" aria-label="Mês anterior">‹</button><strong>${monthLabel(ui.pnMonth)}</strong><button class="btn small ghost" data-a="pnnext" aria-label="Próximo mês">›</button></div>
       <div id="pnStage" class="pnstage"></div>`}
   else{body=`<div class="panel" style="padding:20px;display:flex;flex-direction:column;gap:10px" id="pnDados"><p class="muted" style="margin:0">Carregando…</p></div>`}
-  v.innerHTML=`<div class="phead"><small>Meu painel</small><h2>Olá, ${esc(String(nome).split(' ')[0]||'irmão')}</h2></div>${seg}<div class="pbodyp">${body}</div>`;
+  const fz=fonteGet();const letra=`<div class="pfonte" role="group" aria-label="Tamanho da letra"><span>Letra</span>${FONTES.map(([v,l])=>`<button data-a="fonte" data-v="${v}" aria-pressed="${v===fz}" aria-label="Letra ${v===1?'normal':v<1.2?'grande':'maior'}" style="font-size:${13*v}px">${l}</button>`).join('')}</div>`;
+  v.innerHTML=`<div class="pzoom"><div class="phead"><div><small>Meu painel</small><h2>Olá, ${esc(String(nome).split(' ')[0]||'irmão')}</h2></div>${letra}</div>${instalarCard()}${seg}<div class="pbodyp">${body}</div></div>`;
   if(V==='prog')requestAnimationFrame(pnStage);
   if(V==='dados')pnDados(pid)}
 function pnStage(){const st=$('#pnStage');if(!st)return;const ym=ui.pnMonth,K=ui.pnKind||'meio';let sel=[];
@@ -2513,6 +2659,180 @@ function syncNomes(){const F=window.FBX;if(!F||!['admin','editor'].includes(F.pa
   const map={};Object.entries(pubs).forEach(([id,p])=>{if(p&&p.nome)map[id]=tc(p.nome)});
   if(JSON.stringify(map)===JSON.stringify(nomesRemote))return;clearTimeout(syncNomes.t);
   syncNomes.t=setTimeout(()=>{nomesRemote=map;store.set('quadro','nomes',{nomes:map}).catch(()=>{nomesRemote=null})},1200)}
+
+/* ================= Publicadores: importar e exportar listas ================= */
+/* Aceita Excel (.xlsx/.xls/.csv), Word (.docx), PDF, RTF ou texto. Cada linha: nome, telefone e qualificações
+   (ancião, servo ministerial, pioneiro), em qualquer ordem: "Fulano (ancião; pioneiro) +55 75 9999-9999". */
+const XLSX_URL='lib/xlsx.full.min.js';
+const JSZIP_URL='lib/jszip.min.js';
+const foldTxt=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
+const telDig=t=>{let d=String(t||'').replace(/\D/g,'');if(d.length===10||d.length===11)d='55'+d;return d};
+const telFim=t=>String(t||'').replace(/\D/g,'').slice(-8);
+function fmtTelBR(d){d=telDig(d);if(!d)return'';const m=/^55(\d{2})(\d{4,5})(\d{4})$/.exec(d);return m?`(${m[1]}) ${m[2]}-${m[3]}`:'+'+d}
+/* nomes femininos que não terminam em "a" e masculinos que terminam (ajuste fino do palpite de irmão/irmã) */
+const NOME_F=new Set(['isa','raquel','ester','rute','miriam','lilian','floranice','evelyn','rallyne','rafaelly','ketely','nikelle','idalecia','marismar','yasmin','gilmara','raline','luane','rosimeire','meire','michele','michelle','reijane','rejane','eunice','cleide','stephenie','tayane','ivone','iriene','marlene','milca','raimunda','vanusa','neve','neves','beatriz','isabel','carmem','ruth','ingrid','alice','aline','jaqueline','denise','elisa','elaine','irene','ines','lourdes','mercedes','nair','noemi','priscila','rosangela','simone','solange','suely','vitoria','tereza','terezinha','teresa']);
+const NOME_M=new Set(['luca','lucca','joshua','elias','jonas','matias','tobias','isaias','jeremias','zacarias','nicolas','barnabe','jona','andrea','sasha']);
+function palpiteSexo(nome,priv){if((priv||[]).some(p=>p==='anciao'||p==='servo'))return'M';const f=foldTxt(nome).split(' ')[0]||'';
+  if(NOME_F.has(f))return'F';if(NOME_M.has(f))return'M';return /a$/.test(f)?'F':'M'}
+function lerQualif(t){const f=foldTxt(t);const p=[];if(/\bancia|\banciao|\banciaos/.test(f))p.push('anciao');if(/\bservo|\bs\.?\s?m\b/.test(f))p.push('servo');if(/pioneir/.test(f))p.push('pioneiro');return p}
+/* uma linha de texto solta → {nome, tel, priv} */
+function linhaPub(raw){let s=String(raw||'').replace(/ /g,' ').trim();if(!s)return null;let priv=[];
+  s=s.replace(/\(([^)]*)\)/g,(m,x)=>{const q=lerQualif(x);if(q.length){priv=priv.concat(q);return' '}return m});
+  let tel='';s=s.replace(/(\+?\(?\d[\d\s().\-]{7,}\d)/,m=>{const d=telDig(m);if(d.length>=10){tel=d;return' '}return m});
+  const resto=lerQualif(s);if(resto.length){priv=priv.concat(resto);s=s.replace(/\b(anci[aã]o|anci[aã]os|servo(?:\s+ministerial)?|pioneir[oa](?:\s+regular|\s+auxiliar)?)\b/gi,' ')}
+  const nome=s.replace(/[;|,\-–—:]+/g,' ').replace(/\s+/g,' ').trim();
+  if(!nome||nome.length<2||/^\d/.test(nome))return null;
+  if(/^(nome|publicador(es)?|lista|congrega)/i.test(nome)&&!tel)return null;
+  return{nome:tc(nome),tel,priv:[...new Set(priv)]}}
+/* linhas de uma planilha: usa o cabeçalho se houver colunas reconhecíveis */
+function linhasPlanilha(rows){rows=rows.map(r=>r.map(c=>String(c??'').trim())).filter(r=>r.some(Boolean));if(!rows.length)return[];
+  const H=rows[0].map(foldTxt);const col=re=>H.findIndex(h=>re.test(h));
+  const cN=col(/^nome|publicador/),cT=col(/telefone|whats|celular|fone|contato|numero/),cQ=col(/qualifica|privil|cargo|funcao|designa/);
+  if(cN>=0){return rows.slice(1).map(r=>{const nome=r[cN]||'';if(!nome)return null;const x=linhaPub(nome)||{nome:tc(nome),tel:'',priv:[]};
+    if(cT>=0&&r[cT])x.tel=telDig(r[cT])||x.tel;if(cQ>=0&&r[cQ])x.priv=[...new Set(x.priv.concat(lerQualif(r[cQ])))];return x}).filter(Boolean)}
+  return rows.map(r=>linhaPub(r.filter(Boolean).join(' '))).filter(Boolean)}
+async function lerListaArquivo(f){const buf=new Uint8Array(await f.arrayBuffer());const name=(f.name||'').toLowerCase();
+  const head=new TextDecoder('latin1').decode(buf.slice(0,8));const zip=buf[0]===0x50&&buf[1]===0x4B,ole=buf[0]===0xD0&&buf[1]===0xCF;
+  const planilha=async()=>{await loadScript(XLSX_URL);const wb=window.XLSX.read(buf,{type:'array'});let out=[];
+    wb.SheetNames.forEach(n=>{out=out.concat(linhasPlanilha(window.XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:false,defval:''})))});return out};
+  if(/\.csv$/.test(name)){const t=new TextDecoder('utf-8').decode(buf);const l0=t.split('\n')[0];const sep=(l0.match(/;/g)||[]).length>(l0.match(/,/g)||[]).length?';':(l0.includes('\t')?'\t':',');return linhasPlanilha(t.split(/\r?\n/).map(l=>l.split(sep)))}
+  if(ole){if(/\.doc$/.test(name))throw new Error('Arquivos .doc (Word antigo) não podem ser lidos. No Word, use "Salvar como" › Documento do Word (.docx) e envie de novo.');return planilha()}
+  if(zip){await loadScript(JSZIP_URL);const z=await window.JSZip.loadAsync(buf);const x=z.file('word/document.xml');
+    if(!x){if(z.file('xl/workbook.xml')||z.file('content.xml'))return planilha();throw new Error('Não reconheci este arquivo. Envie uma planilha do Excel, um documento do Word (.docx), PDF ou texto.')}
+    const xml=await x.async('string');const doc=new DOMParser().parseFromString(xml,'application/xml');const W='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+    const rows=[];[...doc.getElementsByTagNameNS(W,'tbl')].forEach(t=>[...t.getElementsByTagNameNS(W,'tr')].forEach(tr=>rows.push([...tr.getElementsByTagNameNS(W,'tc')].map(c=>[...c.getElementsByTagNameNS(W,'t')].map(n=>n.textContent).join('')))));
+    if(rows.length)return linhasPlanilha(rows);
+    return[...doc.getElementsByTagNameNS(W,'p')].map(p=>[...p.getElementsByTagNameNS(W,'t')].map(n=>n.textContent).join('')).map(linhaPub).filter(Boolean)}
+  if(head.includes('%PDF')||/\.(pdf|rtf)$/.test(name)){const t=await fileToText(f);return t.split(/\n/).map(linhaPub).filter(Boolean)}
+  return new TextDecoder('utf-8').decode(buf).split(/\r?\n/).map(linhaPub).filter(Boolean)}
+/* compara cada linha com o cadastro: mesmo nome; ou primeiro e último nome; ou mesmo telefone com o mesmo primeiro nome */
+function casarPub(x,usados){const fn=foldTxt(x.nome),tk=fn.split(' ');const L=Object.entries(pubs).filter(([id])=>!usados.has(id));
+  let c=L.filter(([,p])=>foldTxt(p.nome)===fn);
+  if(!c.length&&tk.length>1)c=L.filter(([,p])=>{const t=foldTxt(p.nome).split(' ');return t.length>1&&t[0]===tk[0]&&t[t.length-1]===tk[tk.length-1]});
+  if(!c.length&&x.tel)c=L.filter(([,p])=>p.tel&&telFim(p.tel)===telFim(x.tel)&&foldTxt(p.nome).split(' ')[0]===tk[0]);
+  return c.length===1?c[0][0]:null}
+function planoImport(lista){const usados=new Set();const linhas=lista.map(x=>{const id=casarPub(x,usados);if(id)usados.add(id);const p=id?pubs[id]:null;const mud=[];
+    if(p){if(x.nome&&x.nome!==p.nome&&foldTxt(x.nome)!==foldTxt(p.nome))mud.push('nome');else if(x.nome&&x.nome!==p.nome)mud.push('grafia');
+      if(x.tel&&telFim(x.tel)!==telFim(p.tel))mud.push('tel');
+      const a=[...(p.privilegios||[])].sort().join(),b=[...x.priv].sort().join();if(a!==b)mud.push('priv');if(p.ativo===false)mud.push('reativar')}
+    const parecidos=id?[]:Object.keys(pubs).filter(k=>foldTxt(pubs[k].nome).split(' ')[0]===foldTxt(x.nome).split(' ')[0]);
+    return Object.assign({},x,{id,acao:id?(mud.length?'atualizar':'igual'):'novo',mud,sexo:id?pubs[id].sexo:palpiteSexo(x.nome,x.priv),parecidos,privOk:true})});
+  const fora=Object.keys(pubs).filter(id=>!usados.has(id)&&pubs[id].ativo!==false);
+  return{linhas,fora,inativar:new Set()}}
+function rPubImport(){const v=$('#v-pubimport');const P=ui.pimp;
+  const drop=`<label class="drop" for="pimpfile"><b>Escolha a lista de publicadores</b><span class="hint">Planilha do Excel, documento do Word (.docx), PDF ou texto, com nome, telefone e qualificação (ancião, servo ministerial, pioneiro). Antes de gravar, você confere cada linha.</span><span class="btn primary dropbtn">Escolher arquivo</span><input type="file" id="pimpfile"></label>`;
+  const exp=`<div class="panel" style="padding:16px;display:flex;flex-direction:column;gap:10px"><h3 style="margin:0;font-size:18px">Exportar</h3><p class="hint" style="margin:0">Baixa a lista atual (nome, telefone, irmão/irmã, qualificações e em que partes cada um pode ser designado). O arquivo tem telefones: guarde com cuidado.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-a="pexpxlsx">Baixar planilha do Excel</button><button class="btn" data-a="pexpdocx">Baixar documento do Word</button></div></div>`;
+  let body='';
+  if(!P)body=drop;
+  else if(P.lendo)body=`<p class="muted">Lendo ${esc(P.nome)}…</p>`;
+  else if(P.erro)body=drop+`<div class="drawres short">${esc(P.erro)}</div>`;
+  else{const L=P.linhas;const n={novo:0,atualizar:0,igual:0,ignorar:0};L.forEach(x=>n[x.acao]++);
+    const opts=x=>`<select class="pimpact" data-i="${L.indexOf(x)}" aria-label="O que fazer com ${esc(x.nome)}"><option value="novo" ${x.acao==='novo'?'selected':''}>Cadastrar como novo</option>${x.id?`<option value="atualizar" ${x.acao==='atualizar'||x.acao==='igual'?'selected':''}>Atualizar ${esc(tc(pname(x.id)))}</option>`:''}${x.parecidos.filter(k=>k!==x.id).map(k=>`<option value="ligar:${k}">É o mesmo que ${esc(tc(pname(k)))}</option>`).join('')}<option value="ignorar" ${x.acao==='ignorar'?'selected':''}>Ignorar</option></select>`;
+    const muda=x=>{if(x.acao==='novo')return`<span class="tagnew">novo</span>`;if(x.acao==='igual')return'<span class="muted">sem mudança</span>';if(x.acao==='ignorar')return'<span class="muted">ignorado</span>';const p=pubs[x.id]||{};const t=[];
+      if(x.mud.includes('nome'))t.push('nome: '+esc(p.nome)+' → <b>'+esc(x.nome)+'</b>');if(x.mud.includes('grafia'))t.push('grafia do nome: <b>'+esc(x.nome)+'</b>');
+      if(x.mud.includes('tel'))t.push('telefone: '+(p.tel?esc(fmtTelBR(p.tel)):'—')+' → <b>'+esc(fmtTelBR(x.tel))+'</b>');
+      if(x.mud.includes('priv'))t.push('qualificação: '+esc((p.privilegios||[]).map(k=>PRIVNAME[k]).join(', ')||'nenhuma')+' → <b>'+esc(x.priv.map(k=>PRIVNAME[k]).join(', ')||'nenhuma')+'</b>');
+      if(x.mud.includes('reativar'))t.push('<b>volta a ficar ativo</b>');return'<span class="tagupd">atualiza</span> '+t.join(' · ')};
+    const show=ui.pimpTodos?L:L.filter(x=>x.acao!=='igual');
+    body=`<div class="panel" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+      <p style="margin:0"><b>${esc(P.nome)}</b>: ${L.length} pessoa${L.length===1?'':'s'} na lista · <b>${n.novo}</b> nova${n.novo===1?'':'s'} · <b>${n.atualizar}</b> com mudanças · ${n.igual} sem mudança${n.ignorar?' · '+n.ignorar+' ignorada'+(n.ignorar>1?'s':''):''}</p>
+      <div class="pimplist">${show.map(x=>`<div class="pimprow"><div><b>${esc(x.nome)}</b>${x.tel?' <span class="muted">'+esc(fmtTelBR(x.tel))+'</span>':' <span class="muted">sem telefone</span>'}${x.priv.length?' <span class="muted">· '+esc(x.priv.map(k=>PRIVNAME[k]).join(', '))+'</span>':''}<div class="pimpch">${muda(x)}</div>
+        ${x.acao==='novo'?`<div class="pimpsx"><label><input type="radio" name="sx${L.indexOf(x)}" class="pimpsx" data-i="${L.indexOf(x)}" value="M" ${x.sexo==='M'?'checked':''}> Irmão</label><label><input type="radio" name="sx${L.indexOf(x)}" class="pimpsx" data-i="${L.indexOf(x)}" value="F" ${x.sexo==='F'?'checked':''}> Irmã</label></div>`:''}</div>${opts(x)}</div>`).join('')||'<p class="muted" style="margin:0">Nada a mudar: a lista é igual ao cadastro.</p>'}</div>
+      ${L.some(x=>x.acao==='igual')?`<label style="font-size:14px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="pimptodos" ${ui.pimpTodos?'checked':''}> Mostrar também quem não muda (${n.igual})</label>`:''}
+      ${P.fora.length?`<div class="drawres"><b>${P.fora.length} ${P.fora.length===1?'pessoa ativa do cadastro não está':'pessoas ativas do cadastro não estão'} na lista.</b> Marque quem deve ficar inativo (sai das listas de designação, mas o histórico fica guardado):<div class="pimpfora">${P.fora.map(id=>`<label><input type="checkbox" class="pimpfora" value="${id}" ${P.inativar.has(id)?'checked':''}> ${esc(tc(pname(id)))}</label>`).join('')}</div></div>`:''}
+      <p class="hint" style="margin:0">Quem é cadastrado como novo entra sem categorias de designação: depois, abra a ficha e marque em que partes cada um pode ser designado.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" data-a="pimpgo" ${n.novo+n.atualizar+P.inativar.size?'':'disabled'}>Gravar ${n.novo+n.atualizar+P.inativar.size} alteraç${n.novo+n.atualizar+P.inativar.size===1?'ão':'ões'}</button><button class="btn" data-a="pimpcancel">Cancelar</button></div></div>`}
+  v.innerHTML=`<div style="display:grid;gap:16px;max-width:900px"><div class="panel imp" style="padding:16px"><h2 style="margin:0">Importar lista</h2>${body}</div>${exp}</div>`}
+async function pimpRead(f){ui.pimp={nome:f.name,lendo:true};rPubImport();
+  try{const lista=await lerListaArquivo(f);if(!lista.length)throw new Error('Não encontrei nomes neste arquivo. Cada linha (ou linha da tabela) deve ter o nome da pessoa; telefone e qualificação são opcionais.');
+    ui.pimp=Object.assign({nome:f.name},planoImport(lista))}
+  catch(e){ui.pimp={nome:f.name,erro:(e&&e.message)||'Não foi possível ler o arquivo.'};if(/carregou|load/i.test(ui.pimp.erro))ui.pimp.erro='Não foi possível carregar o leitor de planilhas. Verifique a internet e tente de novo.'}
+  rPubImport()}
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.id==='pimpfile'&&t.files[0]){pimpRead(t.files[0]);return}
+  if(!ui.pimp||!ui.pimp.linhas)return;const L=ui.pimp.linhas;
+  if(t.classList.contains('pimpact')){const x=L[+t.dataset.i];const v=t.value;if(v.startsWith('ligar:')){x.id=v.slice(6);const p=pubs[x.id];x.mud=[];if(x.tel&&telFim(x.tel)!==telFim(p.tel))x.mud.push('tel');if(foldTxt(x.nome)!==foldTxt(p.nome))x.mud.push('nome');if([...(p.privilegios||[])].sort().join()!==[...x.priv].sort().join())x.mud.push('priv');x.acao=x.mud.length?'atualizar':'igual';x.sexo=p.sexo;ui.pimp.fora=ui.pimp.fora.filter(k=>k!==x.id)}else x.acao=v==='atualizar'&&!x.mud.length?'igual':v;rPubImport()}
+  if(t.classList.contains('pimpsx')){L[+t.dataset.i].sexo=t.value}
+  if(t.classList.contains('pimpfora')){if(t.checked)ui.pimp.inativar.add(t.value);else ui.pimp.inativar.delete(t.value);rPubImport()}
+  if(t.id==='pimptodos'){ui.pimpTodos=t.checked;rPubImport()}});
+Object.assign(PACTS,{
+  pimpcancel:()=>{ui.pimp=null;rPubImport()},
+  pimpgo:()=>{const P=ui.pimp;if(!P||!P.linhas)return;let novos=0,atual=0,inat=0;
+    P.linhas.forEach(x=>{if(x.acao==='novo'){const id=foldTxt(x.nome).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)+'-'+Math.random().toString(36).slice(2,6);
+        const d=Object.assign(blankPub(),{nome:x.nome,tel:x.tel?fmtTelBR(x.tel):'',sexo:x.sexo,privilegios:x.priv});pubs[id]=d;queueSave('publicadores',id,d);novos++}
+      else if(x.acao==='atualizar'&&x.id&&pubs[x.id]){const p=Object.assign({},pubs[x.id]);if(x.mud.includes('nome')||x.mud.includes('grafia'))p.nome=x.nome;if(x.mud.includes('tel'))p.tel=fmtTelBR(x.tel);if(x.mud.includes('priv'))p.privilegios=x.priv;if(x.mud.includes('reativar'))p.ativo=true;pubs[x.id]=p;queueSave('publicadores',x.id,p);atual++}});
+    P.inativar.forEach(id=>{if(!pubs[id])return;const p=Object.assign({},pubs[id],{ativo:false});pubs[id]=p;queueSave('publicadores',id,p);inat++});
+    ui.pimp=null;buildHist();rPubImport();toast([novos?novos+' cadastrado'+(novos>1?'s':''):'',atual?atual+' atualizado'+(atual>1?'s':''):'',inat?inat+' inativado'+(inat>1?'s':''):''].filter(Boolean).join(' · ')||'Nada a gravar')},
+  pexpxlsx:async()=>{try{await loadScript(XLSX_URL)}catch(e){toast('Não foi possível carregar o gerador de planilhas');return}
+    const rows=[['Nome','Telefone','Irmão/Irmã','Qualificação','Pode ser designado para','Ativo']].concat(Object.values(pubs).sort((a,b)=>a.nome.localeCompare(b.nome,'pt')).map(p=>[tc(p.nome),p.tel||'',p.sexo==='F'?'Irmã':'Irmão',(p.privilegios||[]).map(k=>PRIVNAME[k]).join(', '),(p.cats||[]).map(c=>CATNAME[c]).filter(Boolean).join(', '),p.ativo===false?'Não':'Sim']));
+    const ws=window.XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:28},{wch:18},{wch:10},{wch:30},{wch:60},{wch:7}];const wb=window.XLSX.utils.book_new();window.XLSX.utils.book_append_sheet(wb,ws,'Publicadores');
+    const out=window.XLSX.write(wb,{bookType:'xlsx',type:'array'});await saveFile('publicadores-'+iso(new Date())+'.xlsx',new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}))},
+  pexpdocx:async()=>{try{await loadScript(JSZIP_URL)}catch(e){toast('Não foi possível carregar o gerador de documentos');return}
+    const x=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const cell=(t,b)=>`<w:tc><w:tcPr><w:tcBorders><w:top w:val="single" w:sz="4" w:color="BFBFBF"/><w:bottom w:val="single" w:sz="4" w:color="BFBFBF"/></w:tcBorders></w:tcPr><w:p><w:r>${b?'<w:rPr><w:b/></w:rPr>':''}<w:t xml:space="preserve">${x(t)}</w:t></w:r></w:p></w:tc>`;
+    const lista=Object.values(pubs).filter(p=>p.ativo!==false).sort((a,b)=>a.nome.localeCompare(b.nome,'pt'));
+    const rows=[['Nome','Telefone','Qualificação']].concat(lista.map(p=>[tc(p.nome),p.tel||'',(p.privilegios||[]).map(k=>PRIVNAME[k]).join(', ')])).map((r,i)=>`<w:tr>${r.map(c=>cell(c,i===0)).join('')}</w:tr>`).join('');
+    const titulo=(cfg.congregacao&&cfg.congregacao!=='Congregação'?'Congregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,'')+' · ':'')+'Publicadores';
+    const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:pPr><w:spacing w:after="200"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="32"/></w:rPr><w:t>${x(titulo)}</w:t></w:r></w:p><w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/></w:tblPr>${rows}</w:tbl><w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr></w:body></w:document>`;
+    const z=new window.JSZip();z.file('[Content_Types].xml','<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>');
+    z.file('_rels/.rels','<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>');
+    z.file('word/document.xml',doc);const blob=await z.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+    await saveFile('publicadores-'+iso(new Date())+'.docx',blob)}});
+
+/* ================= Equilíbrio das designações ================= */
+function equilibrio(de,ate){const c={};const add=(id,k)=>{if(!id||!pubs[id])return;const x=c[id]=c[id]||{meio:0,fds:0,av:0,campo:0,total:0,ult:''};x[k]++;x.total++};
+  const last=(id,d)=>{if(c[id]&&d>c[id].ult)c[id].ult=d};
+  sortedWeeks().forEach(w=>{const d=meetDate(w);if(d<de||d>ate)return;roles(w).forEach(r=>{add(r.pub,'meio');last(r.pub,d)})});
+  sortedFds().forEach(f=>{if(f.data<de||f.data>ate)return;rolesFds(f).forEach(r=>{add(r.pub,'fds');last(r.pub,f.data)})});
+  Object.values(avd).forEach(d0=>{const d=avNorm(d0);if(!d.data||d.data<de||d.data>ate)return;avIds(d).forEach(id=>{add(id,'av');last(id,d.data)})});
+  Object.values(cmp).forEach(cw=>(cw.saidas||[]).forEach(r=>{const d=cDate(cw.semana,r.dia);if(d<de||d>ate||!r.dir)return;add(r.dir,'campo');last(r.dir,d)}));
+  return c}
+function rEquilibrio(){const v=$('#v-equilibrio');const M=ui.eqMeses||3;const hoje=iso(new Date());const fut=ui.eqFuturo!==false;const de=shiftMonth(hoje.slice(0,7),-M)+hoje.slice(7),ate=fut?shiftDays(hoje,62):hoje;
+  const c=equilibrio(de,ate);const cat=ui.eqCat||'';const K=ui.eqTipo||'total';
+  let ids=Object.keys(pubs).filter(id=>pubs[id].ativo!==false&&(!cat||(cat==='F'||cat==='M'?pubs[id].sexo===cat:(pubs[id].cats||[]).includes(cat))));
+  ids=ids.filter(id=>(pubs[id].cats||[]).length||c[id]);
+  const val=id=>(c[id]||{})[K]||0;ids.sort((a,b)=>(val(b)-val(a))||pname(a).localeCompare(pname(b),'pt'));
+  const vals=ids.map(val).sort((a,b)=>a-b);const max=Math.max(1,...vals);
+  const media=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;
+  const muito=id=>val(id)>=Math.max(3,Math.ceil(media*2)),nada=id=>val(id)===0;
+  const nM=ids.filter(muito).length,nZ=ids.filter(nada).length;
+  v.innerHTML=`<div style="display:flex;flex-direction:column;gap:14px;max-width:900px">
+    <div class="panel" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+      <div><h2 style="margin:0">Equilíbrio das designações</h2><p class="hint" style="margin:4px 0 0">Quantas partes cada um teve no período, somando meio de semana, fim de semana, A/V e indicadores e saídas de campo dirigidas. Ajuda a não sobrecarregar uns e esquecer outros.</p></div>
+      <div class="eqf"><label class="f">Período<select id="eqmes">${[1,2,3,6,12].map(m=>`<option value="${m}" ${m===M?'selected':''}>Últimos ${m} ${m===1?'mês':'meses'}</option>`).join('')}</select></label>
+        <label class="f">Contar<select id="eqtipo">${[['total','Todas as partes'],['meio','Meio de semana'],['fds','Fim de semana'],['av','A/V e indicadores'],['campo','Saídas de campo']].map(([k,l])=>`<option value="${k}" ${k===K?'selected':''}>${l}</option>`).join('')}</select></label>
+        <label class="f">Quem<select id="eqcat"><option value="">Todos com alguma categoria</option><option value="M" ${cat==='M'?'selected':''}>Só irmãos</option><option value="F" ${cat==='F'?'selected':''}>Só irmãs</option><optgroup label="Pode ser designado para">${CATS.map(([k,l])=>`<option value="${k}" ${k===cat?'selected':''}>${l}</option>`).join('')}</optgroup></select></label>
+        <label class="eqfut"><input type="checkbox" id="eqfut" ${fut?'checked':''}> Incluir os próximos 2 meses já designados</label></div>
+      <div class="eqres">${nZ?`<span class="nao"><b>${nZ}</b> sem nenhuma parte</span>`:''}${nM?`<span class="mto"><b>${nM}</b> com o dobro da média ou mais</span>`:''}<span>Média: <b>${media.toFixed(1).replace('.',',')}</b> parte${media>0&&media<2?'':'s'} por pessoa</span><span class="muted">${br(de)} a ${br(ate)}</span></div>
+    </div>
+    <div class="panel tablewrap"><table class="pubs eqtab"><thead><tr><th>Nome</th><th>Partes</th><th class="eqnum">Meio</th><th class="eqnum">Fim de sem.</th><th class="eqnum">A/V</th><th class="eqnum">Campo</th><th>Última</th></tr></thead><tbody>
+      ${ids.map(id=>{const x=c[id]||{meio:0,fds:0,av:0,campo:0,total:0,ult:''};return`<tr class="${muito(id)?'mto':nada(id)?'nao':''}"><td><b>${esc(tc(pname(id)))}</b></td><td><span class="eqbar"><i style="width:${Math.round(100*val(id)/max)}%"></i></span><b>${val(id)}</b></td><td class="eqnum">${x.meio}</td><td class="eqnum">${x.fds}</td><td class="eqnum">${x.av}</td><td class="eqnum">${x.campo}</td><td>${x.ult?br(x.ult).slice(0,5):'<span class="muted">—</span>'}</td></tr>`}).join('')||'<tr><td colspan="7" class="muted">Ninguém neste filtro.</td></tr>'}
+    </tbody></table></div></div>`}
+document.addEventListener('change',e=>{const t=e.target;if(t.id==='eqmes'){ui.eqMeses=+t.value;rEquilibrio()}if(t.id==='eqtipo'){ui.eqTipo=t.value;rEquilibrio()}if(t.id==='eqcat'){ui.eqCat=t.value;rEquilibrio()}if(t.id==='eqfut'){ui.eqFuturo=t.checked;rEquilibrio()}});
+
+/* ================= Painel: letra maior e instalar como aplicativo ================= */
+const FONTES=[[1,'A'],[1.15,'A+'],[1.3,'A++']];
+function fonteGet(){try{const v=+localStorage.getItem('vmc-fonte');return FONTES.some(f=>f[0]===v)?v:1}catch(e){return 1}}
+function fonteApply(){document.documentElement.style.setProperty('--pz',String(fonteGet()))}
+fonteApply();
+let instalarEvt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instalarEvt=e;if(ui.tab==='painel')rPainel()});
+window.addEventListener('appinstalled',()=>{instalarEvt=null;try{localStorage.setItem('vmc-instalado','1')}catch(e){}if(ui.tab==='painel')rPainel()});
+const ehIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const ehApp=()=>window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+function instalarCard(){if(!window.FBX||ehApp())return'';let ok=false;try{ok=localStorage.getItem('vmc-instalar-fechado')==='1'}catch(e){}if(ok)return'';
+  if(instalarEvt)return`<div class="instcard"><div><b>Instale no celular</b><span>Ele fica na tela inicial, com ícone próprio, e abre direto, como um aplicativo.</span></div><div class="instacts"><button class="btn small primary" data-a="instalar">Instalar</button><button class="btn small ghost" data-a="instfechar">Agora não</button></div></div>`;
+  if(ehIOS())return`<div class="instcard"><div><b>Coloque na tela inicial</b><span>No Safari, toque no botão <b>Compartilhar</b> (o quadrado com a seta para cima) e depois em <b>Adicionar à Tela de Início</b>. Na primeira vez que abrir pelo ícone, entre de novo com a sua conta.</span></div><div class="instacts"><button class="btn small ghost" data-a="instfechar">Entendi</button></div></div>`;
+  return''}
+Object.assign(PACTS,{
+  fonte:b=>{try{localStorage.setItem('vmc-fonte',b.dataset.v)}catch(e){}fonteApply();rPainel()},
+  instalar:async()=>{if(!instalarEvt)return;instalarEvt.prompt();try{await instalarEvt.userChoice}catch(e){}instalarEvt=null;rPainel()},
+  instfechar:()=>{try{localStorage.setItem('vmc-instalar-fechado','1')}catch(e){}rPainel()}});
+
+/* ================= Convite pelo WhatsApp para entrar no painel ================= */
+function conviteMsg(email,pid){const p=pubs[pid]||{};const nome=tc(String(p.nome||'').split(' ')[0]||'');const url=location.origin+location.pathname;
+  const google=/@(gmail|googlemail)\.com$/i.test(email);
+  return`Olá${nome?', '+nome:''}!\n\nAgora você pode ver as suas designações da congregação pelo celular:\n${url}\n\nComo entrar:\n1. Abra o link.\n2. ${google?`Toque em "Entrar com Google" e escolha a conta ${email}.`:`Digite o seu e-mail (${email}) e toque em "Receber link de acesso". Abra o e-mail que chegar e toque no link, no mesmo celular.`}\n3. Leia e aceite o termo de uso.\n\nDica: depois de entrar, use "Adicionar à tela inicial" no menu do navegador para abrir como um aplicativo.\n${cfg.congregacao&&cfg.congregacao!=='Congregação'?'\nCongregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):''}`}
 
 /* ================= Aba Ajustes ================= */
 const isAdm=()=>!window.FBX||window.FBX.papel==='admin';
@@ -2563,6 +2883,21 @@ function bkCheck(){const box=$('#bkBox');if(!box)return;if(!window.FBX||!isAdm()
   if((dias!=null&&dias<30)||Date.now()<snooze){box.hidden=true;return}
   box.innerHTML=`<span>${dias==null?'Ainda não há cópia de segurança dos dados.':'Faz '+dias+' dias desde a última cópia de segurança.'} Baixe uma e guarde com você: se algo for apagado por engano, é com ela que se recupera.</span><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small primary" data-a="exportjson">Baixar cópia agora</button><button class="btn small ghost" data-a="bkadiar">Lembrar daqui a 7 dias</button></span>`;box.hidden=false}
 Object.assign(PACTS,{bkadiar:()=>{try{localStorage.setItem('vmc-bk-adiar',String(Date.now()+7*864e5))}catch(e){}bkCheck()}});
+/* ===== Conta no topo: quem está conectado e botão Sair (versão hospedada) ===== */
+function contaInit(){const F=window.FBX;if(!F||!F.email||$('#contaBtn'))return;
+  const nome=F.nome||F.email.split('@')[0];const ini=nome.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+  $('#temaBtn').insertAdjacentHTML('afterend',`<div class="conta"><button class="contabtn" id="contaBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Sua conta: ${esc(F.email)}">${esc(ini)}</button>
+    <div class="contamenu" id="contaMenu" hidden><div class="contaq"><b>${esc(nome)}</b><span>${esc(F.email)}</span><span class="abtag" style="align-self:flex-start;margin-top:4px">${esc(PAPEIS[F.papel]||F.papel)}</span></div>
+    <button type="button" class="contaitem" data-doc="privacidade">Aviso de privacidade</button>
+    <button type="button" class="contaitem sair" data-a="fbout">Sair da conta</button></div></div>`)}
+/* nome mostrado: o da conta Google ou, se não houver (entrada por e-mail), o do cadastro de publicador */
+function contaNome(){const F=window.FBX;if(!F||!F.email)return'';const p=myPubId();return F.nome||(p&&pname(p)?tc(pname(p)):'')||F.email.split('@')[0]}
+function contaSync(){const b=$('#contaBtn');if(!b)return;const n=contaNome();const ini=n.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+  if(b.textContent!==ini)b.textContent=ini;const q=$('#contaMenu .contaq b');if(q&&q.textContent!==n)q.textContent=n}
+function contaToggle(open){contaSync();const m=$('#contaMenu'),b=$('#contaBtn');if(!m)return;m.hidden=!open;b.setAttribute('aria-expanded',String(open));if(open){const f=m.querySelector('button');if(f)f.focus()}}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#contaBtn');if(b){contaToggle($('#contaMenu').hidden);return}
+  const m=$('#contaMenu');if(m&&!m.hidden&&!m.contains(e.target))contaToggle(false);if(m&&!m.hidden&&e.target.closest&&e.target.closest('.contaitem'))contaToggle(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const m=$('#contaMenu');if(m&&!m.hidden){contaToggle(false);$('#contaBtn').focus()}}});
 /* ===== Acesso (só na versão hospedada com Firebase) ===== */
 const PAPEIS={admin:'Administrador',editor:'Pode editar',leitor:'Só visualizar',publicador:'Publicador (só o painel)'};
 function drawAcc(){const box=$('#accBox');if(!box)return;const F=window.FBX;const adm=F.papel==='admin';
@@ -2584,7 +2919,7 @@ function drawAcc(){const box=$('#accBox');if(!box)return;const F=window.FBX;cons
     <h3 style="margin:22px 0 4px;font-size:16px">Painel dos publicadores</h3>
     <p class="hint" style="margin:0 0 8px">Publicadores com acesso veem só as próprias designações, as programações do mês e os próprios dados. Não veem telefones nem dados de outros.</p>
     ${pend.length?`<div class="drawres" style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span>${pend.length} publicador${pend.length>1?'es têm':' tem'} e-mail no cadastro e ainda não ${pend.length>1?'têm':'tem'} acesso ao painel.</span><button class="btn small primary" data-a="accbulk">Liberar o painel para ${pend.length>1?'todos':'ele'}</button></div>`:''}
-    <div class="acclist">${pubAcc.map(a=>`<div class="accrow"><span>${a.pub&&pubs[a.pub]?'<b>'+esc(tc(pname(a.pub)))+'</b> · ':''}${esc(a.email)}<br>${a.pub?accInfo(a.email):'<small style="color:var(--err)">sem ligação com um publicador</small>'}</span><select class="accpub" data-e="${esc(a.email)}" aria-label="Publicador ligado a ${esc(a.email)}">${pubOpts(a.pub||'')}</select>
+    <div class="acclist">${pubAcc.map(a=>`<div class="accrow conv"><span>${a.pub&&pubs[a.pub]?'<b>'+esc(tc(pname(a.pub)))+'</b> · ':''}${esc(a.email)}<br>${a.pub?accInfo(a.email):'<small style="color:var(--err)">sem ligação com um publicador</small>'}</span><select class="accpub" data-e="${esc(a.email)}" aria-label="Publicador ligado a ${esc(a.email)}">${pubOpts(a.pub||'')}</select>${a.pub&&pubs[a.pub]&&waNumber(pubs[a.pub].tel||'')?`<a class="btn small wa" target="_blank" rel="noopener" href="https://wa.me/${waNumber(pubs[a.pub].tel)}?text=${encodeURIComponent(conviteMsg(a.email,a.pub))}">Convite</a>`:'<span></span>'}
       ${ui.delAsk==='acc'+a.email?`<span class="confirm"><button class="btn small danger" data-a="accdelok" data-e="${esc(a.email)}">Remover</button><button class="btn small" data-a="accno">Não</button></span>`:`<button class="btn small ghost danger" data-a="accdel" data-e="${esc(a.email)}">Remover</button>`}</div>`).join('')||'<div class="muted" style="font-size:14px;padding:6px 0">Nenhum publicador com acesso ainda. Cadastre o e-mail na ficha de cada publicador (aba Publicadores) e use o botão acima.</div>'}</div>`:''}
   </div>`}
 Object.assign(PACTS,{
