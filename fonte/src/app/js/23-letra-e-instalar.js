@@ -30,7 +30,7 @@ function instalarCard(forcar){if(!window.FBX||ehApp())return'';let ok=false;try{
   const [t,d]=instalarTexto();
   return`<div class="instcard"><div><b>${t}</b><span>${d}</span></div><div class="instacts"><button class="btn small ghost" data-a="instfechar">Entendi</button></div></div>`}
 /* aparece no topo de qualquer tela até a pessoa instalar ou tocar em "Entendi"; depois, fica no menu da conta */
-function instalarBox(){const b=$('#instBox');if(!b)return;const h=window.FBX&&window.FBX.email?instalarCard(ui.instForcar):'';b.innerHTML=h;b.hidden=!h;if(typeof avisoBox==='function')avisoBox()}
+function instalarBox(){const b=$('#instBox');if(!b)return;const h=window.FBX&&window.FBX.email?instalarCard(ui.instForcar):'';poeHTML(b,h);b.hidden=!h;if(typeof avisoBox==='function')avisoBox()}
 Object.assign(PACTS,{
   fonte:b=>{try{localStorage.setItem('vmc-fonte',b.dataset.v)}catch(e){}fonteApply();rPainel()},
   instalar:async b=>{if(!instalarEvt||ui.instalando)return;if(b){b.disabled=true;b.textContent='Aguarde…'}const ev=instalarEvt;instalarEvt=null;ev.prompt();let r=null;try{r=await ev.userChoice}catch(e){}

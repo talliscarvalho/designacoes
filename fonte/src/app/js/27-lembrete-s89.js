@@ -17,11 +17,11 @@ function s89Avisos(){const hoje=iso(new Date()),lim=shiftDays(hoje,S89_DIAS);con
 function lembreteS89(){const box=$('#s89Box');if(!box)return;
   if(!podeEditarS89()||painelOnly()||!['semanas','fimdesemana','imprimir','confirmacoes'].includes(ui.tab)||!loaded.w){box.hidden=true;return}
   const av=s89Avisos();if(!av.length){box.hidden=true;return}
-  box.innerHTML=av.map(a=>{const urg=a.dias<=7;const nomes=[...new Set(a.pend.map(p=>tc(pname(p.pid))))];
+  poeHTML(box,av.map(a=>{const urg=a.dias<=7;const nomes=[...new Set(a.pend.map(p=>tc(pname(p.pid))))];
     const quando=a.dias===0?'hoje':a.dias===1?'amanhã':'em '+a.dias+' dias';
     return`<div class="s89av ${urg?'urg':''}"><div class="s89txt"><b>S-89 · reunião de ${br(a.d)} (${quando})</b>
       <span>${a.pend.length?`${a.pend.length} ${a.pend.length===1?'designação de Faça Seu Melhor no Ministério ainda não foi encaminhada':'designações de Faça Seu Melhor no Ministério ainda não foram encaminhadas'}: ${esc(nomes.join(', '))}.`:''}${a.vagas?` ${a.vagas===1?'Falta 1 designado':'Faltam '+a.vagas+' designados'} nas partes.`:''}</span></div>
-      <span class="s89act"><a class="btn small ${urg?'primary':''}" href="#whatsapp" data-a="s89ir" data-w="${esc(a.w.data)}">Encaminhar</a><button class="btn small ghost" data-a="s89adiar" data-w="${esc(a.w.data)}">Lembrar amanhã</button></span></div>`}).join('');
+      <span class="s89act"><a class="btn small ${urg?'primary':''}" href="#whatsapp" data-a="s89ir" data-w="${esc(a.w.data)}">Encaminhar</a><button class="btn small ghost" data-a="s89adiar" data-w="${esc(a.w.data)}">Lembrar amanhã</button></span></div>`}).join(''));
   box.hidden=false}
 Object.assign(PACTS,{
   s89ir:b=>{ui.waKind='meio';ui.waWeek=b.dataset.w},

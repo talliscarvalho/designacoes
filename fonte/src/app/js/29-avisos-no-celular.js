@@ -25,7 +25,7 @@ function avisoCard(){const st=avisoEstado();const forc=ui.avisoForcar;
     ios:['Instale o aplicativo primeiro','No iPhone, os avisos só funcionam com o aplicativo na tela de início (iOS 16.4 ou mais novo). No Safari, toque em <b>Compartilhar</b> › <b>Adicionar à Tela de Início</b>, abra pelo ícone e ative os avisos no menu da sua conta.',''],
     sem:['Este navegador não recebe avisos','Abra o sistema no <b>Chrome</b> (ou no Samsung Internet), de preferência instalado como aplicativo, e ative os avisos no menu da sua conta.','']}[st];
   return`<div class="instcard"><div><b>${T[0]}</b><span>${T[1]}</span></div><div class="instacts">${T[2]}${fechar}</div></div>`}
-function avisoBox(){const b=$('#avisoBox');if(!b)return;const h=avisoLigado()?avisoCard():'';if(b.innerHTML!==h)b.innerHTML=h;b.hidden=!h}
+function avisoBox(){const b=$('#avisoBox');if(!b)return;const h=avisoLigado()?avisoCard():'';poeHTML(b,h);b.hidden=!h}
 /* renova o código uma vez por dia (o Firebase pode trocá-lo) e mantém o registro em nome de quem está conectado */
 async function avisoRenovar(){if(!avisoLigado()||avisoEstado()!=='ativo'||lsG('vmc-aviso-dia')===iso(new Date()))return;
   try{const reg=await avisoReg();const m=await avisoMsg();const tok=await m.getToken({vapidKey:VAPID,serviceWorkerRegistration:reg});const ant=lsG('vmc-aviso');

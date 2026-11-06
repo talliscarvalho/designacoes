@@ -1,5 +1,7 @@
 /* ================= Renderização geral ================= */
 let renderQueued=false;
+/* só troca o conteúdo quando ele muda de fato (evita perder um toque num botão redesenhado à toa) */
+function poeHTML(el,h){if(el._h===h)return;el._h=h;el.innerHTML=h}
 /* só redesenha a tela quando os dados mudaram de verdade (o Firebase também avisa quando só confirma o que já estava no aparelho) */
 let lastSig='';
 function dataSig(){try{return JSON.stringify([pubs,weeks,fds,evs,lgr,lmp,stk,avd,cmp,cfg,typeof resp==='undefined'?0:resp,loaded])}catch(e){return String(Math.random())}}

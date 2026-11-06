@@ -35,7 +35,7 @@
   const CFG=window.DESIGNAR_CONFIG||{};
   const FIREBASE_CONFIG=CFG.firebase;
   const OWNER=String(CFG.dono||'').trim().toLowerCase();
-  const APP="Designar", VERSAO="2026.11.06-1508", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
+  const APP="Designar", VERSAO="2026.11.06-1529", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
   const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,whatsapp:CFG.whatsapp||'',pub:{}};
   const t=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let resolveReady,rejectReady;const readyP=new Promise((r,j)=>{resolveReady=r;rejectReady=j});
@@ -1086,6 +1086,8 @@ function hideBanner(){$('#banner').hidden=true}
 
 /* ================= Renderização geral ================= */
 let renderQueued=false;
+/* só troca o conteúdo quando ele muda de fato (evita perder um toque num botão redesenhado à toa) */
+function poeHTML(el,h){if(el._h===h)return;el._h=h;el.innerHTML=h}
 /* só redesenha a tela quando os dados mudaram de verdade (o Firebase também avisa quando só confirma o que já estava no aparelho) */
 let lastSig='';
 function dataSig(){try{return JSON.stringify([pubs,weeks,fds,evs,lgr,lmp,stk,avd,cmp,cfg,typeof resp==='undefined'?0:resp,loaded])}catch(e){return String(Math.random())}}
@@ -2998,7 +3000,7 @@ function instalarCard(forcar){if(!window.FBX||ehApp())return'';let ok=false;try{
   const [t,d]=instalarTexto();
   return`<div class="instcard"><div><b>${t}</b><span>${d}</span></div><div class="instacts"><button class="btn small ghost" data-a="instfechar">Entendi</button></div></div>`}
 /* aparece no topo de qualquer tela até a pessoa instalar ou tocar em "Entendi"; depois, fica no menu da conta */
-function instalarBox(){const b=$('#instBox');if(!b)return;const h=window.FBX&&window.FBX.email?instalarCard(ui.instForcar):'';b.innerHTML=h;b.hidden=!h;if(typeof avisoBox==='function')avisoBox()}
+function instalarBox(){const b=$('#instBox');if(!b)return;const h=window.FBX&&window.FBX.email?instalarCard(ui.instForcar):'';poeHTML(b,h);b.hidden=!h;if(typeof avisoBox==='function')avisoBox()}
 Object.assign(PACTS,{
   fonte:b=>{try{localStorage.setItem('vmc-fonte',b.dataset.v)}catch(e){}fonteApply();rPainel()},
   instalar:async b=>{if(!instalarEvt||ui.instalando)return;if(b){b.disabled=true;b.textContent='Aguarde…'}const ev=instalarEvt;instalarEvt=null;ev.prompt();let r=null;try{r=await ev.userChoice}catch(e){}
@@ -3272,11 +3274,11 @@ function s89Avisos(){const hoje=iso(new Date()),lim=shiftDays(hoje,S89_DIAS);con
 function lembreteS89(){const box=$('#s89Box');if(!box)return;
   if(!podeEditarS89()||painelOnly()||!['semanas','fimdesemana','imprimir','confirmacoes'].includes(ui.tab)||!loaded.w){box.hidden=true;return}
   const av=s89Avisos();if(!av.length){box.hidden=true;return}
-  box.innerHTML=av.map(a=>{const urg=a.dias<=7;const nomes=[...new Set(a.pend.map(p=>tc(pname(p.pid))))];
+  poeHTML(box,av.map(a=>{const urg=a.dias<=7;const nomes=[...new Set(a.pend.map(p=>tc(pname(p.pid))))];
     const quando=a.dias===0?'hoje':a.dias===1?'amanhã':'em '+a.dias+' dias';
     return`<div class="s89av ${urg?'urg':''}"><div class="s89txt"><b>S-89 · reunião de ${br(a.d)} (${quando})</b>
       <span>${a.pend.length?`${a.pend.length} ${a.pend.length===1?'designação de Faça Seu Melhor no Ministério ainda não foi encaminhada':'designações de Faça Seu Melhor no Ministério ainda não foram encaminhadas'}: ${esc(nomes.join(', '))}.`:''}${a.vagas?` ${a.vagas===1?'Falta 1 designado':'Faltam '+a.vagas+' designados'} nas partes.`:''}</span></div>
-      <span class="s89act"><a class="btn small ${urg?'primary':''}" href="#whatsapp" data-a="s89ir" data-w="${esc(a.w.data)}">Encaminhar</a><button class="btn small ghost" data-a="s89adiar" data-w="${esc(a.w.data)}">Lembrar amanhã</button></span></div>`}).join('');
+      <span class="s89act"><a class="btn small ${urg?'primary':''}" href="#whatsapp" data-a="s89ir" data-w="${esc(a.w.data)}">Encaminhar</a><button class="btn small ghost" data-a="s89adiar" data-w="${esc(a.w.data)}">Lembrar amanhã</button></span></div>`}).join(''));
   box.hidden=false}
 Object.assign(PACTS,{
   s89ir:b=>{ui.waKind='meio';ui.waWeek=b.dataset.w},
@@ -3295,7 +3297,7 @@ function avisarPedido(p){try{if(!('Notification' in window)||Notification.permis
 function pedidoPub(id){return Object.keys(pubs).find(k=>idDoPub(pubs[k])===id)||Object.keys(pubs).find(k=>pubs[k].tel&&telE164(pubs[k].tel)===id)||''}
 function pedidoBox(){const box=$('#pedBox');if(!box)return;const l=pedidos||[];
   if(!l.length||!window.FBX||window.FBX.papel!=='admin'||ui.tab==='ajustes'||painelOnly()){box.hidden=true;return}
-  box.innerHTML=`<span><b>${l.length===1?'1 pedido de acesso':l.length+' pedidos de acesso'}</b> aguardando: ${esc(l.slice(0,3).map(p=>p.nome||idLbl(p.id)).join(', '))}${l.length>3?'…':''}</span><a class="btn small primary" href="#ajustes" data-a="pedver">Ver pedidos</a>`;box.hidden=false}
+  poeHTML(box,`<span><b>${l.length===1?'1 pedido de acesso':l.length+' pedidos de acesso'}</b> aguardando: ${esc(l.slice(0,3).map(p=>p.nome||idLbl(p.id)).join(', '))}${l.length>3?'…':''}</span><a class="btn small primary" href="#ajustes" data-a="pedver">Ver pedidos</a>`);box.hidden=false}
 function pedidosHTML(){const l=pedidos||[];if(!l.length)return'';
   const notif='Notification' in window&&Notification.permission==='default'?`<button class="btn small ghost" data-a="pednotif">Avisar neste aparelho quando chegar um pedido</button>`:'';
   return`<div class="pedlist" id="pedidos"><h3 style="margin:0 0 4px;font-size:16px">Pedidos de acesso</h3><p class="hint" style="margin:0 0 8px">Pessoas que tentaram entrar e ainda não estão na lista. Libere ou recuse.</p>
@@ -3338,7 +3340,7 @@ function avisoCard(){const st=avisoEstado();const forc=ui.avisoForcar;
     ios:['Instale o aplicativo primeiro','No iPhone, os avisos só funcionam com o aplicativo na tela de início (iOS 16.4 ou mais novo). No Safari, toque em <b>Compartilhar</b> › <b>Adicionar à Tela de Início</b>, abra pelo ícone e ative os avisos no menu da sua conta.',''],
     sem:['Este navegador não recebe avisos','Abra o sistema no <b>Chrome</b> (ou no Samsung Internet), de preferência instalado como aplicativo, e ative os avisos no menu da sua conta.','']}[st];
   return`<div class="instcard"><div><b>${T[0]}</b><span>${T[1]}</span></div><div class="instacts">${T[2]}${fechar}</div></div>`}
-function avisoBox(){const b=$('#avisoBox');if(!b)return;const h=avisoLigado()?avisoCard():'';if(b.innerHTML!==h)b.innerHTML=h;b.hidden=!h}
+function avisoBox(){const b=$('#avisoBox');if(!b)return;const h=avisoLigado()?avisoCard():'';poeHTML(b,h);b.hidden=!h}
 /* renova o código uma vez por dia (o Firebase pode trocá-lo) e mantém o registro em nome de quem está conectado */
 async function avisoRenovar(){if(!avisoLigado()||avisoEstado()!=='ativo'||lsG('vmc-aviso-dia')===iso(new Date()))return;
   try{const reg=await avisoReg();const m=await avisoMsg();const tok=await m.getToken({vapidKey:VAPID,serviceWorkerRegistration:reg});const ant=lsG('vmc-aviso');

@@ -11,7 +11,7 @@ function avisarPedido(p){try{if(!('Notification' in window)||Notification.permis
 function pedidoPub(id){return Object.keys(pubs).find(k=>idDoPub(pubs[k])===id)||Object.keys(pubs).find(k=>pubs[k].tel&&telE164(pubs[k].tel)===id)||''}
 function pedidoBox(){const box=$('#pedBox');if(!box)return;const l=pedidos||[];
   if(!l.length||!window.FBX||window.FBX.papel!=='admin'||ui.tab==='ajustes'||painelOnly()){box.hidden=true;return}
-  box.innerHTML=`<span><b>${l.length===1?'1 pedido de acesso':l.length+' pedidos de acesso'}</b> aguardando: ${esc(l.slice(0,3).map(p=>p.nome||idLbl(p.id)).join(', '))}${l.length>3?'…':''}</span><a class="btn small primary" href="#ajustes" data-a="pedver">Ver pedidos</a>`;box.hidden=false}
+  poeHTML(box,`<span><b>${l.length===1?'1 pedido de acesso':l.length+' pedidos de acesso'}</b> aguardando: ${esc(l.slice(0,3).map(p=>p.nome||idLbl(p.id)).join(', '))}${l.length>3?'…':''}</span><a class="btn small primary" href="#ajustes" data-a="pedver">Ver pedidos</a>`);box.hidden=false}
 function pedidosHTML(){const l=pedidos||[];if(!l.length)return'';
   const notif='Notification' in window&&Notification.permission==='default'?`<button class="btn small ghost" data-a="pednotif">Avisar neste aparelho quando chegar um pedido</button>`:'';
   return`<div class="pedlist" id="pedidos"><h3 style="margin:0 0 4px;font-size:16px">Pedidos de acesso</h3><p class="hint" style="margin:0 0 8px">Pessoas que tentaram entrar e ainda não estão na lista. Libere ou recuse.</p>
