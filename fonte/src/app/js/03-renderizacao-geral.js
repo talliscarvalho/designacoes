@@ -10,12 +10,12 @@ function renderAll(fromData){
   $('#hName').textContent=cfg.congregacao&&cfg.congregacao!=='Congregação'?'Congregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):'';
   if(painelOnly())ui.tab='painel';
   drawNav();contaSync();
-  ['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio','confirmacoes'].forEach(t=>$('#v-'+t).hidden=t!==ui.tab);
+  ['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio','confirmacoes','calendario'].forEach(t=>$('#v-'+t).hidden=t!==ui.tab);
   const v=$('#v-'+ui.tab);
-  lembreteS89();pedidoBox();instalarBox();avisoBox();
+  lembreteS89();pedidoBox();instalarBox();avisoBox();calSemear();zoomMenu();
   if(ui.abaAnterior!==ui.tab){ui.abaAnterior=ui.tab;ui.rolarSemana=true}
   if(fromData&&v.contains(document.activeElement)&&document.activeElement.matches('input,textarea,select'))return; // não atrapalha quem está digitando
-  ({semanas:rSemanas,fimdesemana:rFds,limpeza:rLimpeza,av:rAV,campo:rCampo,publicadores:rPubs,imprimir:rPrint,whatsapp:rWa,ajustes:rAjustes,painel:rPainel,pubimport:rPubImport,equilibrio:rEquilibrio,confirmacoes:rConfirm})[ui.tab]();
+  ({semanas:rSemanas,fimdesemana:rFds,limpeza:rLimpeza,av:rAV,campo:rCampo,publicadores:rPubs,imprimir:rPrint,whatsapp:rWa,ajustes:rAjustes,painel:rPainel,pubimport:rPubImport,equilibrio:rEquilibrio,confirmacoes:rConfirm,calendario:rCalendario})[ui.tab]();
 }
 /* Tema: segue o sistema (automático) ou fica fixo em claro/escuro; a escolha fica guardada neste aparelho */
 const TEMAS=['auto','claro','escuro'];
@@ -40,7 +40,7 @@ const AREAS=[{k:'reunioes',l:'Reuniões',i:'cal',t:[['semanas','Meio de semana']
   {k:'pregacao',l:'Pregação',i:'pin',t:[['campo','Saídas de campo']]},
   {k:'publicadores',l:'Publicadores',i:'gente',t:[['publicadores','Publicadores'],['confirmacoes','Confirmações'],['equilibrio','Equilíbrio'],['pubimport','Importar e exportar']]},
   {k:'imprimir',l:'Imprimir',i:'print',t:[['imprimir','Imprimir / PDF']]},
-  {k:'mais',l:'Mais',i:'mais',t:[['whatsapp','WhatsApp'],['ajustes','Ajustes']]}];
+  {k:'mais',l:'Mais',i:'mais',t:[['calendario','Calendário'],['whatsapp','WhatsApp'],['ajustes','Ajustes']]}];
 function navAreas(){if(painelOnly())return[];if(!myPubId())return AREAS;return AREAS.map(a=>a.k==='mais'?Object.assign({},a,{t:[['painel','Meu painel'],...a.t]}):a)}
 function drawNav(){const AR=navAreas();const cur=AR.find(a=>a.t.some(x=>x[0]===ui.tab))||AR[0]||{k:'',t:[]};ui.areaLast=ui.areaLast||{};ui.areaLast[cur.k]=ui.tab;
   const href=a=>'#'+(ui.areaLast[a.k]||a.t[0][0]);
@@ -49,7 +49,7 @@ function drawNav(){const AR=navAreas();const cur=AR.find(a=>a.t.some(x=>x[0]===u
   const st=$('#subtabs');st.classList.toggle('muitas',cur.t.length>3);poeHTML(st,cur.t.length>1?cur.t.map(([k,l])=>`<a href="#${k}" aria-current="${k===ui.tab?'page':'false'}">${l}</a>`).join(''):'');
   /* no celular a faixa pode rolar para o lado: mantém a aba atual à vista */
   const at=st.querySelector('[aria-current="page"]');if(at&&st.scrollWidth>st.clientWidth){const l=at.offsetLeft-st.offsetLeft,r=l+at.offsetWidth;if(l<st.scrollLeft||r>st.scrollLeft+st.clientWidth)st.scrollLeft=l-16}}
-function route(){ui.delAsk=null;const h=location.hash.slice(1);ui.tab=['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio','confirmacoes'].includes(h)?h:'semanas';renderAll()}
+function route(){ui.delAsk=null;const h=location.hash.slice(1);ui.tab=['semanas','fimdesemana','limpeza','av','campo','publicadores','imprimir','whatsapp','ajustes','painel','pubimport','equilibrio','confirmacoes','calendario'].includes(h)?h:'semanas';renderAll()}
 window.addEventListener('hashchange',route);
 
 /* cabeçalho da folha e item da lista de semanas (bloco de calendário + situação) */

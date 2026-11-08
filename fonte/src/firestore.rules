@@ -49,7 +49,8 @@ service cloud.firestore {
     // Ajustes gerais que so administradores podem mudar
     function mudaAjusteProtegido() {
       return request.resource.data.diff(resource.data).affectedKeys().hasAny(
-        ['congregacao', 'dia', 'hora', 'diaFds', 'horaFds', 'diaLimpeza', 'mensagem', 'intervaloMeses', 'papel', 'ultimoBackup']);
+        ['congregacao', 'dia', 'hora', 'diaFds', 'horaFds', 'diaLimpeza', 'mensagem', 'intervaloMeses', 'papel', 'ultimoBackup',
+         'calendario', 'zoom']);
     }
     function reservada(c) {
       return c in ['acesso', 'registro', 'config', 'aceites', 'publico', 'quadro', 'respostas', 'copias', 'erros', 'pedidos', 'avisos'];

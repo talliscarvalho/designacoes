@@ -14,6 +14,7 @@ function rAjustes(){
     <label class="f">Dia da limpeza semanal<select id="c-dialimp">${DIAS.map((d,i)=>`<option value="${i}" ${+cfg.diaLimpeza===i?'selected':''}>${cap(d)}</option>`).join('')}</select></label>
     <label class="f">Sem repetir irmã no ministério por (meses)<input type="number" id="c-int" min="0" max="12" value="${esc(cfg.intervaloMeses??2)}" style="width:100%"></label>
     <label class="f">Papel<select id="c-papel"><option ${cfg.papel==='A4'?'selected':''}>A4</option><option ${cfg.papel==='Carta'?'selected':''}>Carta</option></select></label>
+    <label class="f full">Link da reunião no Zoom<input type="url" id="c-zoom" value="${esc(cfg.zoom||'')}" placeholder="https://jworg.zoom.us/j/..." inputmode="url" autocomplete="off"><span class="hint">Aparece para todos no painel e no menu da conta, com o botão "Entrar no Zoom". Fica guardado só no banco da congregação.</span></label>
     <label class="f full">Mensagem do WhatsApp<textarea id="c-msg">${esc(cfg.mensagem)}</textarea>
       <span class="hint" style="font-weight:400">Use {nome}, {nome_completo}, {reuniao}, {data}, {dia_semana}, {hora}, {designacoes} e {congregacao}. Eles são trocados pelos dados de cada publicador.</span></label>
     <div class="full" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
@@ -57,6 +58,7 @@ function contaInit(){const F=window.FBX;if(!F||!F.email||$('#contaBtn'))return;
   $('#temaBtn').insertAdjacentHTML('afterend',`<div class="conta"><button class="contabtn" id="contaBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Sua conta: ${esc(F.email)}">${esc(ini)}</button>
     <div class="contamenu" id="contaMenu" hidden><div class="contaq"><b>${esc(nome)}</b><span>${esc(F.email)}</span><span class="abtag" style="align-self:flex-start;margin-top:4px">${esc(PAPEIS[F.papel]||F.papel)}</span></div>
     ${ehApp()?'':'<button type="button" class="contaitem" data-a="instmenu">Instalar como aplicativo</button>'}
+    <button type="button" class="contaitem" id="zoomItem" data-a="zoomir" hidden>Reunião pelo Zoom</button>
     ${avisoLigado()?'<button type="button" class="contaitem" data-a="avisomenu">Avisos no celular</button>':''}
     <button type="button" class="contaitem" data-doc="privacidade">Aviso de privacidade</button>
     <button type="button" class="contaitem sair" data-a="fbout">Sair da conta</button></div></div>`)}
@@ -111,7 +113,7 @@ Object.assign(PACTS,{
   accdelok:async b=>{ui.delAsk=null;try{await window.FBX.delAccess(b.dataset.e);toast('Acesso removido')}catch(err){toast('Não foi possível remover');drawAcc()}}});
 document.addEventListener('change',async e=>{const t=e.target;if(!t.classList||!t.classList.contains('accpub'))return;try{await window.FBX.setAccess(t.dataset.e,'publicador',t.value||null);toast('Ligação alterada')}catch(err){toast('Não foi possível alterar')}});
 document.addEventListener('change',async e=>{const t=e.target;if(!t.classList||!t.classList.contains('accp'))return;try{await window.FBX.setAccess(t.dataset.e,t.value);toast('Permissão alterada')}catch(err){toast('Não foi possível alterar')}});
-document.addEventListener('input',e=>{const id=e.target.id;const map={'c-cong':'congregacao','c-dia':'dia','c-hora':'hora','c-papel':'papel','c-msg':'mensagem','c-int':'intervaloMeses','c-diafds':'diaFds','c-horafds':'horaFds','c-dialimp':'diaLimpeza'};
+document.addEventListener('input',e=>{const id=e.target.id;const map={'c-cong':'congregacao','c-dia':'dia','c-hora':'hora','c-papel':'papel','c-msg':'mensagem','c-int':'intervaloMeses','c-diafds':'diaFds','c-horafds':'horaFds','c-dialimp':'diaLimpeza','c-zoom':'zoom'};
   if((id==='c-resp'||id==='c-cont'||id==='c-cong')&&window.FBX&&window.FBX.setPublic){clearTimeout(rAjustes.pt);rAjustes.pt=setTimeout(()=>{const d={congregacao:cfg.congregacao||''};const r=$('#c-resp'),c=$('#c-cont');if(r)d.responsavel=r.value.trim();if(c)d.contato=c.value.trim();window.FBX.setPublic(d).then(()=>setStatus('Tudo salvo')).catch(()=>setStatus('Não foi possível salvar o aviso de privacidade','error'))},800)}
   if(map[id]){cfg[map[id]]=(id==='c-dia'||id==='c-int'||id==='c-diafds'||id==='c-dialimp')?+e.target.value:e.target.value;if(id==='c-dia'||id==='c-diafds')setTimeout(rAjustes,0);queueSave('config','geral',cfg);$('#hName').textContent=cfg.congregacao?'Congregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):'';}});
 async function exportJson(){const blob=new Blob([JSON.stringify({publicadores:pubs,semanas:weeks,fimdesemana:fds,eventos:evs,limpezaGrupos:lgr,limpeza:lmp,estoque:stk,av:avd,campo:cmp,config:cfg},null,1)],{type:'application/json'});const ok=await saveFile('designacoes-vmc-'+iso(new Date())+'.json',blob);if(ok&&window.FBX&&isAdm()){cfg.ultimoBackup=iso(new Date());queueSave('config','geral',cfg);bkCheck()}}

@@ -78,7 +78,7 @@ function avHTML(ym){const N=id=>id?esc(tc(pname(id))):'<span class="empty">—</
 PV.headAV=(x,W)=>{PV.text(PV.congName(),x+W/2,50,'bold',19,'#111111',{align:'center'});PV.rect(x,59,W,1.6,'#A3A3A3');
   PV.text('ÁUDIO/VÍDEO E INDICADORES',x+W/2,76,'normal',10,'#111111',{align:'center',charSpace:0.6});return 92};
 PV.av=(ym,x,y,W)=>{const y0=y,d0=PV.doc;const C=[['DATA',x+6],['DIA',x+64],['ÁUDIO/VÍDEO',x+112],['PALCO',x+212],['MICROFONES',x+312],['INDICADORES',x+420]];const cw=96;
-  PV.rect(x,y,W,20,'#2F5249');PV.text(monthLabel(ym).toUpperCase(),x+8,y+14,'bold',11.5,'#FFFFFF',{charSpace:0.4});y+=20;
+  PV.rect(x,y,W,20,'#4F3A82');PV.text(monthLabel(ym).toUpperCase(),x+8,y+14,'bold',11.5,'#FFFFFF',{charSpace:0.4});y+=20;
   PV.rect(x,y,W,15,'#E3EAE7');C.forEach(([t,xx])=>PV.text(t,xx,y+10.5,'bold',7,'#4A5753'));y+=15;
   avSlots(ym).forEach((s,i)=>{if(s.sem){PV.rect(x,y,W,18,'#F3F3F3');PV.text(br(s.data),x+6,y+12,'normal',8.5,'#666666');PV.text(DIAS3[parse(s.data).getDay()],x+64,y+12,'normal',8.5,'#666666');
       PV.text(EVENTOS[s.ev]+': sem reunião',x+112,y+12,'italic',8.5,'#666666',{maxW:W-118});y+=18;return}

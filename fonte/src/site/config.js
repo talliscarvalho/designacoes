@@ -10,6 +10,7 @@ window.DESIGNAR_CONFIG={
     messagingSenderId:"565921295019",
     appId:"1:565921295019:web:77c633172ac8581e71e5ee"
   },
+  congregacao:"Jorrinho - Tucano BA",     // nome mostrado na tela de entrada
   dono:"talliscarvalhoo@gmail.com",      // administrador principal (fixo)
   whatsapp:"5575992799894",              // WhatsApp do "Fale com o desenvolvedor" e da "Ajuda" (com DDI e DDD)
   vapid:"BLzsmxqkn0MprW3f6unkSQPC_Voe0iC6YFoIlriTNBtdrwCGjl_Qn5VL_cBIalC4s5KsDtoWgLDhEbonY0xWbcI"                               // avisos no celular: chave pública "Web Push" (Firebase › Configurações › Cloud Messaging). Vazio = desligado

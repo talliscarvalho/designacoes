@@ -29,7 +29,7 @@ CSP=("default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.
   "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://apis.google.com https://www.google.com https://fonts.googleapis.com https://fonts.gstatic.com; "
   "frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com https://www.google.com https://recaptcha.google.com; worker-src 'self' blob:; manifest-src 'self'; "
   "object-src 'none'; base-uri 'self'; form-action 'self'")
-fav="data:image/svg+xml,"+urllib.parse.quote(f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='#2F5249'/><path fill='white' transform='translate(4 4)' d='{MARCA}'/></svg>",safe="/:=' ")
+fav="data:image/svg+xml,"+urllib.parse.quote(f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='#4F3A82'/><path fill='white' transform='translate(4 4)' d='{MARCA}'/></svg>",safe="/:=' ")
 head=f'''<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -40,7 +40,7 @@ head=f'''<!doctype html>
 <meta http-equiv="Content-Security-Policy" content="{CSP}">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <script>/* impede que o site seja aberto dentro de outra página (golpe de "clique falso") */if(window.top!==window.self){{document.documentElement.style.display='none';try{{window.top.location=window.self.location.href}}catch(e){{}}}}</script>
-<meta name="theme-color" content="#2F5249">
+<meta name="theme-color" content="#4F3A82">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -50,7 +50,7 @@ head=f'''<!doctype html>
 <link rel="icon" href="{fav}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@1,300&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,700;1,300&display=swap">
 <style>[hidden]{{display:none!important}}body{{margin:0}}img{{max-width:100%}}</style>
 <script src="config.js"></script>
 </head>

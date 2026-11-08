@@ -124,7 +124,7 @@ async function itemsPdf(){
     PV.text(PV.congName(),x+W/2,50,'bold',19,'#111111',{align:'center'});PV.rect(x,59,W,1.6,'#A3A3A3');
     PV.text('ITENS DE HIGIENE E LIMPEZA  ·  '+br(iso(new Date())),x+W/2,76,'normal',10,'#111111',{align:'center',charSpace:0.5});
     let y=96;const cols=[['ITEM',x+6],['ESTOQUE',x+168],['MÍN.',x+232],['ÚLTIMA COMPRA',x+266],['PREÇO (UN.)',x+336],['CONSUMO/MÊS',x+398]];
-    PV.rect(x,y,W,20,'#2F5249');cols.forEach(([t,xx])=>PV.text(t,xx,y+13.5,'bold',7.2,'#FFFFFF'));PV.text('SITUAÇÃO',x+W-6,y+13.5,'bold',7.2,'#FFFFFF',{align:'right'});y+=20;
+    PV.rect(x,y,W,20,'#4F3A82');cols.forEach(([t,xx])=>PV.text(t,xx,y+13.5,'bold',7.2,'#FFFFFF'));PV.text('SITUAÇÃO',x+W-6,y+13.5,'bold',7.2,'#FFFFFF',{align:'right'});y+=20;
     sortedItems().forEach((it,i)=>{const st=itStatus(it),u=it.ultimaCompra,c=consumo(it);if(y>PH-60){doc.addPage();y=50}
       if(i%2)PV.rect(x,y,W,22,'#F7F9F8');const by=y+14.5;
       PV.text(it.nome,x+6,by,'bold',8.8,'#1B1B1B',{maxW:158});
@@ -136,7 +136,7 @@ async function itemsPdf(){
       const col={info:'#8A8A8A',zerado:'#B42318',baixo:'#B45309',breve:'#B45309',ok:'#2E7D4F'}[st];PV.text(ITST[st][0],x+W-6,by,'bold',8.2,col,{align:'right'});
       y+=22;doc.setDrawColor(225,230,228);doc.setLineWidth(0.5);doc.line(x,y,x+W,y)});
     const sl=shoppingList();y+=22;if(y>PH-100){doc.addPage();y=50}
-    PV.text('LISTA DE COMPRAS',x,y,'bold',11,'#2F5249',{charSpace:0.4});y+=14;
+    PV.text('LISTA DE COMPRAS',x,y,'bold',11,'#4F3A82',{charSpace:0.4});y+=14;
     if(!sl.its.length)PV.text('Nenhum item precisa de reposição.',x,y+4,'normal',9.5,'#444444');
     else sl.its.forEach(it=>{if(y>PH-40){doc.addPage();y=50}const u=it.ultimaCompra;doc.setDrawColor(120,120,120);doc.setLineWidth(0.7);doc.rect(x,y-1,9,9);
       PV.text(it.nome+' — tem '+qU(it.qtd,it.unidade)+(it.minimo!=null?' (mínimo '+fmtQ(it.minimo)+')':'')+(u&&u.preco!=null?' · última compra: '+brl(u.preco)+' em '+br(u.data):''),x+16,y+7,'normal',9.5,'#222222',{maxW:W-16});y+=17});

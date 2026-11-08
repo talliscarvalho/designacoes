@@ -1,5 +1,5 @@
 /* ================= Limpeza do Salão do Reino ================= */
-const LCOR={A:'#2F5249',B:'#4D6873',C:'#C27A0E',D:'#B0182C',E:'#6B4E9B',F:'#2E8C8E',G:'#7A5C2E',H:'#5B6B2E',I:'#8C3B6B',J:'#3B5B8C'};
+const LCOR={A:'#4F3A82',B:'#4D6873',C:'#C27A0E',D:'#B0182C',E:'#6B4E9B',F:'#2E8C8E',G:'#7A5C2E',H:'#5B6B2E',I:'#8C3B6B',J:'#3B5B8C'};
 const lcor=L=>LCOR[L]||'#555555';
 const LTIPO={reuniao:'Limpeza a cada reunião',semanal:'Limpeza semanal'};
 const DIAS3=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
@@ -119,7 +119,7 @@ PV.headLimp=(x,W)=>{PV.text(PV.congName(),x+W/2,50,'bold',19,'#111111',{align:'c
   PV.text('DESIGNAÇÕES DE LIMPEZA',x+W/2,76,'normal',10,'#111111',{align:'center',charSpace:0.6});return 92};
 PV.limp=(ym,x,y,W)=>{const y0=y,d=PV.doc,slots=limpSlots(ym);
   const cD=x+6,cDia=x+64,cG=x+108,cT=x+W-6,cDes=x+146,desW=W-146-112;
-  PV.rect(x,y,W,20,'#2F5249');PV.text(monthLabel(ym).toUpperCase(),x+8,y+14,'bold',11.5,'#FFFFFF',{charSpace:0.4});y+=20;
+  PV.rect(x,y,W,20,'#4F3A82');PV.text(monthLabel(ym).toUpperCase(),x+8,y+14,'bold',11.5,'#FFFFFF',{charSpace:0.4});y+=20;
   PV.rect(x,y,W,15,'#E3EAE7');[['DATA',cD],['DIA',cDia],['GRUPO',cG-3],['DESIGNADOS',cDes]].forEach(([t,xx])=>PV.text(t,xx,y+10.5,'bold',7,'#4A5753'));PV.text('TAREFA',cT,y+10.5,'bold',7,'#4A5753',{align:'right'});y+=15;
   slots.forEach((s,i)=>{const a=lmp[s.id],g=a&&lgr[a.grupo];
     if(s.sem){PV.rect(x,y,W,18,'#F3F3F3');PV.text(br(s.data),cD,y+12,'normal',8.5,'#666666');PV.text(DIAS3[parse(s.data).getDay()],cDia,y+12,'normal',8.5,'#666666');
@@ -131,7 +131,7 @@ PV.limp=(ym,x,y,W)=>{const y0=y,d=PV.doc,slots=limpSlots(ym);
     if(g){if(!PV.dry){d.setFillColor(...PV.hex(lcor(g.letra)));d.roundedRect(cG,y+4.5,17,12,2.5,2.5,'F')}PV.text(g.letra,cG+8.5,y+13,'bold',8.5,'#FFFFFF',{align:'center'});
       PV.text(g.nome,cDes,y+13,'bold',8.8,'#1B1B1B',{maxW:desW});lines.forEach((l,j)=>PV.text(l,cDes,y+24+j*10,'normal',8.3,'#444444'))}
     else PV.text('a designar',cDes,y+13,'normal',8.5,'#B5B5B5');
-    PV.text(LTIPO[s.tipo],cT,y+13,s.tipo==='semanal'?'bold':'normal',8.3,s.tipo==='semanal'?'#2F5249':'#555555',{align:'right'});
+    PV.text(LTIPO[s.tipo],cT,y+13,s.tipo==='semanal'?'bold':'normal',8.3,s.tipo==='semanal'?'#4F3A82':'#555555',{align:'right'});
     y+=h;if(!PV.dry){d.setDrawColor(225,230,228);d.setLineWidth(0.5);d.line(x,y,x+W,y)}});
   return y+16-y0};
 function limpMsgs(ym){const by={};limpSlots(ym).forEach(s=>{const a=lmp[s.id];if(!s.sem&&a&&a.grupo&&lgr[a.grupo])(by[a.grupo]=by[a.grupo]||[]).push(s)});

@@ -32,7 +32,7 @@ function icsFor(it){const p2=n=>String(n).padStart(2,'0');const d=it.date.replac
 function rPainel(){const v=$('#v-painel');const pid=myPubId();
   if(!pid){v.innerHTML=`<div class="panel" style="padding:20px"><h2 style="margin:0 0 6px">Meu painel</h2><p class="muted" style="margin:0">Sua conta ainda não está ligada a um cadastro de publicador. Peça a um administrador para conferir o seu e-mail na ficha de publicador.</p></div>`;return}
   const nome=pname(pid)||'';const V=ui.pnView||'minhas';
-  const seg=`<div class="seg pseg"><button data-a="pnview" data-v="minhas" aria-pressed="${V==='minhas'}">Minhas designações</button><button data-a="pnview" data-v="prog" aria-pressed="${V==='prog'}">Programação</button><button data-a="pnview" data-v="dados" aria-pressed="${V==='dados'}">Meus dados</button></div>`;
+  const seg=`<div class="seg pseg"><button data-a="pnview" data-v="minhas" aria-pressed="${V==='minhas'}">Minhas designações</button><button data-a="pnview" data-v="prog" aria-pressed="${V==='prog'}">Programação</button><button data-a="pnview" data-v="cal" aria-pressed="${V==='cal'}">Calendário</button><button data-a="pnview" data-v="dados" aria-pressed="${V==='dados'}">Meus dados</button></div>`;
   let body='';
   if(V==='minhas'){const from=shiftDays(iso(new Date()),-1);const its=myItems(pid,from);let lastM='';
     body=its.length?its.map((it,i)=>{const m=it.date.slice(0,7);const head=m!==lastM?`<h3 class="pmes">${cap(monthLabel(m))}</h3>`:'';lastM=m;const dt=parse(it.date);
@@ -50,9 +50,10 @@ function rPainel(){const v=$('#v-painel');const pid=myPubId();
     body=`<div class="seg seg4" style="max-width:520px">${kinds.map(([k,l])=>`<button data-a="pnkind" data-k="${esc(k)}" aria-pressed="${K===k}">${l}</button>`).join('')}</div>
       <div class="monthnav" style="margin:14px 0 10px;justify-content:flex-start;gap:12px"><button class="btn small ghost" data-a="pnprev" aria-label="Mês anterior">‹</button><strong>${monthLabel(ui.pnMonth)}</strong><button class="btn small ghost" data-a="pnnext" aria-label="Próximo mês">›</button></div>
       <div id="pnStage" class="pnstage"></div>`}
+  else if(V==='cal'){body=calendarioHTML()}
   else{body=`<div class="panel" style="padding:20px;display:flex;flex-direction:column;gap:10px" id="pnDados"><p class="muted" style="margin:0">Carregando…</p></div>`}
   const fz=fonteGet();const letra=`<div class="pfonte" role="group" aria-label="Tamanho da letra"><span>Letra</span>${FONTES.map(([v,l])=>`<button data-a="fonte" data-v="${v}" aria-pressed="${v===fz}" aria-label="Letra ${v===1?'normal':v<1.2?'grande':'maior'}" style="font-size:${13*v}px">${l}</button>`).join('')}</div>`;
-  v.innerHTML=`<div class="pzoom"><div class="phead"><div><small>Meu painel</small><h2>Olá, ${esc(String(nome).split(' ')[0]||'irmão')}</h2></div>${letra}</div>${seg}<div class="pbodyp">${body}</div></div>`;
+  v.innerHTML=`<div class="pzoom"><div class="phead"><div><small>Meu painel</small><h2>Olá, ${esc(String(nome).split(' ')[0]||'irmão')}</h2></div>${letra}</div>${zoomCard()}${seg}<div class="pbodyp">${body}</div></div>`;
   if(V==='prog')requestAnimationFrame(pnStage);
   if(V==='dados')pnDados(pid)}
 function pnStage(){const st=$('#pnStage');if(!st)return;const ym=ui.pnMonth,K=ui.pnKind||'meio';let sel=[];
@@ -64,9 +65,8 @@ async function pnDados(pid){const box=$('#pnDados');if(!box)return;let p=pubs[pi
   if(painelOnly()){try{p=await window.FBX.myPubDoc()}catch(e){p=null}}
   const I=(window.FBX&&window.FBX.pub)||{};
   if(!p){box.innerHTML='<p class="muted" style="margin:0">Não foi possível carregar os seus dados.</p>';return}
-  const cats=(p.cats||[]).map(c=>CATNAME[c]).filter(Boolean);
   box.innerHTML=`<h3 style="margin:0;font-size:18px">Seus dados no sistema</h3>
-    <div class="pdl"><span>Nome</span><b>${esc(p.nome||'')}</b><span>WhatsApp</span><b>${esc(p.tel||'—')}</b><span>E-mail</span><b>${esc(p.email||window.FBX.email||'')}</b><span>Pode ser designado para</span><b>${cats.length?esc(cats.join(', ')):'—'}</b></div>
+    <div class="pdl"><span>Nome</span><b>${esc(p.nome||'')}</b><span>WhatsApp</span><b>${esc(p.tel||'—')}</b><span>E-mail</span><b>${esc(p.email||window.FBX.email||'')}</b></div>
     <p class="hint" style="margin:6px 0 0">Algo errado ou quer que seus dados sejam apagados? Fale com ${esc(I.responsavel||'os anciãos da congregação')}${I.contato?' ('+esc(I.contato)+')':''}. <a href="#" data-doc="privacidade">Aviso de privacidade</a></p>`}
 Object.assign(PACTS,{
   pnview:b=>{ui.pnView=b.dataset.v;rPainel()},

@@ -38,7 +38,7 @@ PV.noMeeting=(txt,x,y,W)=>{PV.rect(x,y,W,24,'#F3F3F3');PV.text(txt,x+W/2,y+15.5,
 
 /* Meio de semana — modelo colorido */
 PV.meioCores=(w,x,y,W)=>{const y0=y,tp=evTipo(w.data),ev=evOf(w.data)||{},vis=tp==='visita',RH=15.5;
-  PV.rect(x,y,W,21,'#2F5249');
+  PV.rect(x,y,W,21,'#4F3A82');
   if(SEM_REUNIAO(tp)){PV.text('Semana de '+br(w.data),x+8,y+14.5,'bold',12,'#FFFFFF');PV.text(EVENTOS[tp].toUpperCase(),x+W-8,y+14,'bold',7.5,'#FFFFFF',{align:'right'});
     y+=21;y+=PV.noMeeting('Não haverá reunião nesta semana: '+EVENTOS[tp],x,y,W);return y-y0}
   PV.text(br(meetDate(w)),x+8,y+14.5,'bold',12.5,'#FFFFFF');

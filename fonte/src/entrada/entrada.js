@@ -57,6 +57,9 @@
   document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('[data-doc]');if(!a)return;e.preventDefault();openDoc(a.dataset.doc)});
   document.addEventListener('keydown',e=>{const o=document.getElementById('fbdoc');if(e.key==='Escape'&&o&&!o.hidden)o.hidden=true});
 
+  /* nome mostrado na entrada (config.js › congregacao) */
+  const CONG=String(CFG.congregacao||'').trim()||'Jorrinho - Tucano BA';
+  const escH=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const LOCKUP=`<div class="fblock"><span class="fbmark"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="%%MARCA%%"/></svg></span></div>`;
   const LINKS=`<nav class="fblinks" aria-label="Documentos"><a href="#" data-doc="privacidade">Privacidade</a><a href="#" data-doc="termos">Termo de uso</a><a href="#" data-doc="sobre">Sobre</a><a href="#" class="fbhelp" target="_blank" rel="noopener noreferrer">Ajuda</a></nav>`;
   /* "Ajuda": e-mail ao desenvolvedor com assunto e roteiro preenchidos */
@@ -100,7 +103,7 @@
       falha:H('Não foi possível carregar','Verifique a internet e tente de novo.')+`<p class="fbnote">Se continuar, desative bloqueadores de anúncios ou extensões de privacidade para este site, ou abra em outro navegador.</p><button class="fbbtn" id="fbRetry">Tentar de novo</button>`
     }[kind]||'';
     g.innerHTML=`<div class="fbshell">
-      <aside class="fbside"><div class="fbsidein">${LOCKUP}<p class="fbtag">Gerencie o quadro de anúncios <br class="fbbr">da sua congregação em um só lugar.</p><p class="fbabout">O ${APP.toUpperCase()} é um apoio digital ao quadro de anúncios da congregação. Ele organiza as designações e faz com que cada publicador fique sabendo, a tempo, do que lhe cabe.</p></div>
+      <aside class="fbside"><div class="fbsidein">${LOCKUP}<p class="fbcong"><span class="fbeyebrow">Congregação</span><span class="fbcongname">${escH(CONG)}</span></p></div>
         <figure class="fbverse"><blockquote>Mas que todas as coisas ocorram com decência e ordem.</blockquote><figcaption>1 Cor. 14:40.</figcaption></figure></aside>
       <main class="fbmain"><div class="fbpanel">${body}</div>${LINKS}</main></div>`;
     g.hidden=false;
