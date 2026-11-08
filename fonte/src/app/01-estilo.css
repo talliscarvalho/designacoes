@@ -611,22 +611,25 @@ tr.agora .agoratag{display:block;margin:4px 0 0;width:max-content}
 .calform .calgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
 .calant{margin-top:8px}.calant summary{cursor:pointer;color:var(--muted);font-size:14px;padding:6px 0}.calant .calev{opacity:.75;margin-top:8px}
 /* reunião pelo Zoom: faixa inteira clicável, com o ícone de vídeo no azul do Zoom */
-#v-painel a.zoomlink,a.zoomlink{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:10px 12px 10px 10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;color:var(--fg);text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:border-color .15s,box-shadow .15s}
+#v-painel a.zoomlink,a.zoomlink{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:7px 10px 7px 7px;max-width:520px;background:var(--surface);border:1px solid var(--line);border-radius:12px;color:var(--fg);text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:border-color .15s,box-shadow .15s}
 a.zoomlink:hover{border-color:#2D8CFF;box-shadow:0 2px 10px rgba(45,140,255,.15)}
 a.zoomlink:focus-visible{outline:2px solid #2D8CFF;outline-offset:2px}
-.zico{width:42px;height:42px;flex:none;border-radius:11px;background:#2D8CFF;color:#fff;display:grid;place-items:center}
+.zico{width:36px;height:36px;flex:none;border-radius:9px;background:#2D8CFF;color:#fff;display:grid;place-items:center}
 .ztx{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
-.ztx b{font-size:15.5px;line-height:1.25}.ztx small{font-size:13px;color:var(--muted);line-height:1.35}
+.ztx b{font-size:15px;line-height:1.25}.ztx small{font-size:12.5px;color:var(--muted);line-height:1.35}
 .zgo{flex:none;display:inline-flex;align-items:center;gap:2px;font-weight:700;font-size:14px;color:#1F6FD6;padding:6px 4px 6px 10px}
 :root[data-theme="dark"] .zgo{color:#7DB6FF}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .zgo{color:#7DB6FF}}
-@media (max-width:420px){.zgo{font-size:0;padding:6px 2px}.zgo svg{width:20px;height:20px}.zpq{display:none}}
+
 /* folha de saídas de campo: mesmo padrão da limpeza, com as linhas alternadas por dia */
 .lw.cwk{margin-bottom:16px}
 .cwk .lt tr td{background:transparent!important;border-bottom:0}
-.cwk .lt tr.alt td{background:#F8F7FB!important}
-.cwk .lt tr.fim td{border-bottom:1px solid #E4E1EC}
+.cwk .lt tr.alt td{background:#EEE9F7!important}
+.cwk .lt tr.fim td{border-bottom:1px solid #C9C0DE}
 .cwk .lt td:first-child{font-weight:400}.cwk .lt td:first-child b{font-weight:700}
 .cwk .lt td:last-child{text-align:left;color:#1B1B1B;font-weight:700}
 .cwk .lt .red{color:#B42318;font-weight:700}
 .cwk .cnote{margin:6px 6px 0;font-style:italic;color:#444;font-size:11px}
+.drawbar.varbar{display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;margin:12px 0 4px;padding:10px 12px;background:var(--accent-soft);border-radius:8px}
+.drawbar.varbar .hint{flex:1 1 260px;margin:0}
+.drawbar.varbar .btn{flex:none}

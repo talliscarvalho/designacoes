@@ -29,4 +29,5 @@
 29-avisos-no-celular.js
 30-importar-sentinela.js
 31-calendario-e-zoom.js
+32-sorteio-de-varoes.js
 99-inicio.js

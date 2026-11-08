@@ -24,5 +24,5 @@ function drawMsg(r,label){
   if(r.short.length)t+=' Faltaram irmãs livres: '+r.short.map(id=>tc(pname(id))).join(', ')+(r.short.length>1?' foram escolhidas por estarem':' foi escolhida por estar')+' há mais tempo sem parte, mesmo dentro de '+meses()+' meses.';
   if(r.empty)t+=' '+r.empty+' vaga'+(r.empty>1?'s ficaram':' ficou')+' vazia'+(r.empty>1?'s':'')+': não há irmãs suficientes cadastradas.';
   return t}
-let lastDraw=null;
+let lastDraw=null,lastDrawV=null;
 

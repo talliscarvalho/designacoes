@@ -35,7 +35,7 @@
   const CFG=window.DESIGNAR_CONFIG||{};
   const FIREBASE_CONFIG=CFG.firebase;
   const OWNER=String(CFG.dono||'').trim().toLowerCase();
-  const APP="Designar", VERSAO="2026.11.07-2313", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
+  const APP="Designar", VERSAO="2026.11.07-2338", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
   const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,whatsapp:CFG.whatsapp||'',pub:{}};
   const t=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let resolveReady,rejectReady;const readyP=new Promise((r,j)=>{resolveReady=r;rejectReady=j});
@@ -943,25 +943,28 @@ tr.agora .agoratag{display:block;margin:4px 0 0;width:max-content}
 .calform .calgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
 .calant{margin-top:8px}.calant summary{cursor:pointer;color:var(--muted);font-size:14px;padding:6px 0}.calant .calev{opacity:.75;margin-top:8px}
 /* reunião pelo Zoom: faixa inteira clicável, com o ícone de vídeo no azul do Zoom */
-#v-painel a.zoomlink,a.zoomlink{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:10px 12px 10px 10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;color:var(--fg);text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:border-color .15s,box-shadow .15s}
+#v-painel a.zoomlink,a.zoomlink{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:7px 10px 7px 7px;max-width:520px;background:var(--surface);border:1px solid var(--line);border-radius:12px;color:var(--fg);text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:border-color .15s,box-shadow .15s}
 a.zoomlink:hover{border-color:#2D8CFF;box-shadow:0 2px 10px rgba(45,140,255,.15)}
 a.zoomlink:focus-visible{outline:2px solid #2D8CFF;outline-offset:2px}
-.zico{width:42px;height:42px;flex:none;border-radius:11px;background:#2D8CFF;color:#fff;display:grid;place-items:center}
+.zico{width:36px;height:36px;flex:none;border-radius:9px;background:#2D8CFF;color:#fff;display:grid;place-items:center}
 .ztx{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
-.ztx b{font-size:15.5px;line-height:1.25}.ztx small{font-size:13px;color:var(--muted);line-height:1.35}
+.ztx b{font-size:15px;line-height:1.25}.ztx small{font-size:12.5px;color:var(--muted);line-height:1.35}
 .zgo{flex:none;display:inline-flex;align-items:center;gap:2px;font-weight:700;font-size:14px;color:#1F6FD6;padding:6px 4px 6px 10px}
 :root[data-theme="dark"] .zgo{color:#7DB6FF}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .zgo{color:#7DB6FF}}
-@media (max-width:420px){.zgo{font-size:0;padding:6px 2px}.zgo svg{width:20px;height:20px}.zpq{display:none}}
+
 /* folha de saídas de campo: mesmo padrão da limpeza, com as linhas alternadas por dia */
 .lw.cwk{margin-bottom:16px}
 .cwk .lt tr td{background:transparent!important;border-bottom:0}
-.cwk .lt tr.alt td{background:#F8F7FB!important}
-.cwk .lt tr.fim td{border-bottom:1px solid #E4E1EC}
+.cwk .lt tr.alt td{background:#EEE9F7!important}
+.cwk .lt tr.fim td{border-bottom:1px solid #C9C0DE}
 .cwk .lt td:first-child{font-weight:400}.cwk .lt td:first-child b{font-weight:700}
 .cwk .lt td:last-child{text-align:left;color:#1B1B1B;font-weight:700}
 .cwk .lt .red{color:#B42318;font-weight:700}
 .cwk .cnote{margin:6px 6px 0;font-style:italic;color:#444;font-size:11px}
+.drawbar.varbar{display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;margin:12px 0 4px;padding:10px 12px;background:var(--accent-soft);border-radius:8px}
+.drawbar.varbar .hint{flex:1 1 260px;margin:0}
+.drawbar.varbar .btn{flex:none}
 
 </style>
 
@@ -1277,7 +1280,7 @@ function drawMsg(r,label){
   if(r.short.length)t+=' Faltaram irmãs livres: '+r.short.map(id=>tc(pname(id))).join(', ')+(r.short.length>1?' foram escolhidas por estarem':' foi escolhida por estar')+' há mais tempo sem parte, mesmo dentro de '+meses()+' meses.';
   if(r.empty)t+=' '+r.empty+' vaga'+(r.empty>1?'s ficaram':' ficou')+' vazia'+(r.empty>1?'s':'')+': não há irmãs suficientes cadastradas.';
   return t}
-let lastDraw=null;
+let lastDraw=null,lastDrawV=null;
 
 
 /* ================= Importar apostila ================= */
@@ -1461,7 +1464,7 @@ function rSemanas(){
   const list=`<div class="panel weeklist">
     <div class="monthnav"><button class="btn small ghost" data-a="mprev" aria-label="Mês anterior">‹</button><strong>${monthLabel(ui.month)}</strong><button class="btn small ghost" data-a="mnext" aria-label="Próximo mês">›</button></div>
     ${inMonth.length?'<div class="wklist">'+inMonth.map(w=>wkItem('pick',w.data,meetDate(w),filledCount(w),slotCount(w),w.data===ui.week)).join('')+'</div>':`<div class="empty">${loadingTxt}</div>`}
-    <div class="wkacts"><button class="btn" data-a="addweek">+ Nova semana</button><button class="btn" data-a="impopen">Importar apostila</button>${inMonth.length?`<button class="btn" data-a="drawmonth">Sortear irmãs do mês</button>`:''}</div>
+    <div class="wkacts"><button class="btn" data-a="addweek">+ Nova semana</button><button class="btn" data-a="impopen">Importar apostila</button>${inMonth.length?`<button class="btn" data-a="drawmonth">Sortear irmãs do mês</button><button class="btn" data-a="drawvmonth">Sortear varões do mês</button>`:''}</div>
   </div>`;
   let ed='';
   const w=ui.week&&weeks[ui.week];
@@ -1482,6 +1485,7 @@ function rSemanas(){
         <label class="f">Leitura semanal da Bíblia<input type="text" id="f-leit" data-f="leituraSemanal" value="${esc(w.leituraSemanal)}" placeholder="Ex.: EZEQUIEL 1-5"></label>
         <label class="f">Presidente${S('presidente','presidente',w.presidente)}</label>
       </div>
+      ${SEM_REUNIAO(tp)?'':`<div class="drawbar varbar"><span class="hint">Varões: preenche as partes vazias (menos Faça Seu Melhor no Ministério), em rodízio e com descanso após ${VAR_SEGUIDAS} semanas seguidas.</span><button class="btn small" data-a="drawv">Sortear varões</button></div>${lastDrawV&&lastDrawV.week===w.data?`<div class="drawres ${lastDrawV.short?'short':''}">${esc(lastDrawV.msg)}</div>`:''}`}
       ${confl.length?`<div class="warnline">Menos de ${meses()} meses desde (ou até) outra parte no ministério: ${confl.map(esc).join('; ')}.</div>`:''}
       ${dups.length?`<div class="warnline">Atenção: ${dups.map(esc).join(', ')} aparece${dups.length>1?'m':''} em mais de uma parte nesta semana.</div>`:''}
       ${evBox(d)}
@@ -1562,6 +1566,10 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
     impgo:()=>impApply(),
     draw:()=>{const r=drawSisters(w,false);saveWeek(w);lastDraw={week:w.data,msg:drawMsg(r),short:!!(r.short.length||r.empty)};rSemanas()},
     redraw:()=>{const r=drawSisters(w,true);saveWeek(w);lastDraw={week:w.data,msg:drawMsg(r),short:!!(r.short.length||r.empty)};rSemanas()},
+    drawv:()=>{const r=drawBrothers(w);if(r.n)saveWeek(w);lastDrawV={week:w.data,msg:drawBrothersMsg(r),short:!!r.empty.length};rSemanas()},
+    drawvmonth:()=>{const ws=sortedWeeks().filter(x=>x.data.startsWith(ui.month)&&!SEM_REUNIAO(evTipo(x.data)));let n=0,em=[],rs=new Set();
+      ws.forEach(x=>{const r=drawBrothers(x);if(r.n)saveWeek(x);n+=r.n;em=em.concat(r.empty);r.rest.forEach(i=>rs.add(i))});
+      if(!ui.week&&ws[0])ui.week=ws[0].data;lastDrawV={week:ui.week,msg:drawBrothersMsg({n,empty:em,rest:[...rs]},monthLabel(ui.month)),short:!!em.length};rSemanas();toast(n+' partes de varões preenchidas em '+monthLabel(ui.month))},
     drawmonth:()=>{const ws=sortedWeeks().filter(x=>x.data.startsWith(ui.month)&&!SEM_REUNIAO(evTipo(x.data)));let n=0,sh=[],em=0;
       ws.forEach(x=>{const r=drawSisters(x,false);if(r.n){saveWeek(x)}n+=r.n;sh=sh.concat(r.short);em+=r.empty});
       const msg=drawMsg({n,short:sh,empty:em},monthLabel(ui.month));if(!ui.week&&ws[0])ui.week=ws[0].data;
@@ -2182,7 +2190,7 @@ function alignDates(only){const {ws,fs}=misaligned();let n=0;
 Object.assign(PACTS,{alignone:b=>{const n=alignDates(b.dataset.k);renderAll();toast(n+' data'+(n===1?'':'s')+' ajustada'+(n===1?'':'s'))},alignask:()=>{ui.delAsk='align';rAjustes()},alignno:()=>{ui.delAsk=null;rAjustes()},alignok:()=>{const n=alignDates();ui.delAsk=null;rAjustes();toast(n+' data'+(n===1?'':'s')+' ajustada'+(n===1?'':'s'))}});
 
 /* ================= Limpeza do Salão do Reino ================= */
-const LCOR={A:'#4F3A82',B:'#4D6873',C:'#C27A0E',D:'#B0182C',E:'#6B4E9B',F:'#2E8C8E',G:'#7A5C2E',H:'#5B6B2E',I:'#8C3B6B',J:'#3B5B8C'};
+const LCOR={A:'#2E7D4F',B:'#4D6873',C:'#C27A0E',D:'#B0182C',E:'#6B4E9B',F:'#2E8C8E',G:'#7A5C2E',H:'#5B6B2E',I:'#8C3B6B',J:'#3B5B8C'};
 const lcor=L=>LCOR[L]||'#555555';
 const LTIPO={reuniao:'Limpeza a cada reunião',semanal:'Limpeza semanal'};
 const DIAS3=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
@@ -2735,14 +2743,14 @@ PV.campo=(mon,x,y,W)=>{const y0=y,d=PV.doc,c=cmp[mon];if(!c)return 0;
   PV.rect(x,y,W,20,'#4F3A82');PV.text(campoLabel(mon).toUpperCase(),x+8,y+14,'bold',11.5,'#FFFFFF',{charSpace:0.4});y+=20;
   PV.rect(x,y,W,15,'#ECE7F5');['DIA','HORÁRIO','MODALIDADE','TERRITÓRIO','DIRIGENTE'].forEach((t,i)=>PV.text(t,cx[i],y+10.5,'bold',7,'#4A4360'));y+=15;
   campoGroups(c).forEach((g,gi)=>{const n=g.rows.length,red=g.rows.some(isIso);
-    if(gi%2)PV.rect(x,y,W,n*RH,'#F8F7FB');
+    if(gi%2)PV.rect(x,y,W,n*RH,'#EEE9F7');
     g.rows.forEach((r,i)=>{const ty=y+i*RH+12.4,iso=isIso(r);
       if(i===0)PV.text(DIAS_C[g.dia],cx[0],ty,'bold',8.8,red?'#B42318':'#1B1B1B',{maxW:cx[1]-cx[0]-6});
       PV.text(r.hora,cx[1],ty,'normal',8.8,'#333333');
       PV.text(r.mod,cx[2],ty,iso?'bold':'normal',8.8,iso?'#B42318':'#1B1B1B',{maxW:cx[3]-cx[2]-8});
       PV.text(r.terr,cx[3],ty,iso?'bold':'normal',8.8,'#1B1B1B',{maxW:cx[4]-cx[3]-8});
       PV.text(r.dir?dirShort(r.dir):'a designar',cx[4],ty,r.dir?'bold':'normal',8.8,r.dir?'#1B1B1B':'#B5B5B5',{maxW:x+W-cx[4]-6})});
-    y+=n*RH;if(!PV.dry){d.setDrawColor(228,225,236);d.setLineWidth(0.5);d.line(x,y,x+W,y)}});
+    y+=n*RH;if(!PV.dry){d.setDrawColor(201,192,222);d.setLineWidth(0.7);d.line(x,y,x+W,y)}});
   if(c.nota){PV.text(c.nota,x+6,y+12,'italic',8.5,'#444444',{maxW:W-12});y+=14}
   return y+16-y0};
 /* WhatsApp */
@@ -3610,11 +3618,61 @@ document.addEventListener('change',e=>{if(e.target.id==='ce-tipo'){const t=$('#c
 function zoomUrl(){const u=String(cfg.zoom||'').trim();try{const x=new URL(u);if(x.protocol==='https:'&&/(^|\.)zoom\.us$/i.test(x.hostname))return x.href}catch(e){}return''}
 function zoomCard(){const u=zoomUrl();if(!u)return'';const d=cap(DIAS[+cfg.dia]||''),f=cap(DIAS[+cfg.diaFds]||'');
   const quando=`${esc(d)}${cfg.hora?' '+esc(cfg.hora):''} · ${esc(f)}${cfg.horaFds?' '+esc(cfg.horaFds):''}`;
-  return`<a class="zoomlink" href="${esc(u)}" target="_blank" rel="noopener noreferrer" aria-label="Assistir à reunião pelo Zoom (abre o Zoom)">
+  return`<a class="zoomlink" href="${esc(u)}" target="_blank" rel="noopener noreferrer" aria-label="Reunião pelo Zoom (abre o Zoom)">
     <span class="zico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="M15.5 10.5l5-3v9l-5-3z"/></svg></span>
-    <span class="ztx"><b>Assistir pelo Zoom</b><small>${quando}<span class="zpq"> · para quem não pode ir ao Salão do Reino</span></small></span>
+    <span class="ztx"><b>Reunião pelo Zoom</b><small>${quando}</small></span>
     <span class="zgo" aria-hidden="true">Entrar <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></a>`}
 function zoomMenu(){const i=$('#zoomItem');if(i)i.hidden=!zoomUrl()}
+
+/* ================= Sorteio de varões (meio de semana, menos "Faça Seu Melhor no Ministério") ================= */
+/* Regras:
+   - só entra quem é irmão, está ativo e tem a categoria da parte marcada em Publicadores;
+   - ninguém faz duas partes na mesma reunião;
+   - pode ter parte em semanas seguidas (rotatividade maior), mas no máximo VAR_SEGUIDAS semanas; depois descansa uma
+     (a oração, por ser curta, não conta para o descanso);
+   - em cada parte vai primeiro quem está há mais tempo sem fazer aquela parte; no empate, quem teve menos partes
+     nas últimas 8 semanas e quem está há mais tempo sem nenhuma parte. */
+const VAR_SEGUIDAS=3;
+const VAR_SLOTS=w=>{const tp=evTipo(w.data);if(SEM_REUNIAO(tp))return[];
+  const s=[['presidente','presidente'],['tesouros.pub','tesouros'],['joias.pub','joias']];
+  w.vida.forEach((p,i)=>s.push(['vida.'+i+'.pub','vida']));
+  if(tp!=='visita')s.push(['estudo.dirigente','dirigente'],['estudo.leitor','leitor']);
+  s.push(['leitura.pub','leitura'],['oracaoInicial','oracao'],['oracaoFinal','oracao']);return s};
+const getF=(w,f)=>f.split('.').reduce((o,k)=>o==null?o:o[k],w)||'';
+const setF=(w,f,v)=>{const ks=f.split('.');let o=w;ks.slice(0,-1).forEach(k=>o=o[k]);o[ks[ks.length-1]]=v};
+const roleKey=f=>f.replace(/\.\d+\./,'.').replace(/^oracao(Inicial|Final)$/,'oracao');
+function brotherPool(cat){return Object.entries(pubs).filter(([id,p])=>p&&p.ativo!==false&&p.sexo!=='F'&&(p.cats||[]).includes(cat)).map(([id])=>id)}
+/* histórico: em quais semanas cada um teve parte (qualquer parte, inclusive no ministério) e quando fez cada tipo de parte */
+function varHist(skip){const any={},por={};
+  sortedWeeks().forEach(w=>{if(w.data===skip)return;roles(w).forEach(r=>{if(!/^oracao/.test(r.field))(any[r.pub]=any[r.pub]||new Set()).add(w.data);
+    const k=roleKey(r.field);const m=por[r.pub]=por[r.pub]||{};if(!m[k]||m[k]<w.data)m[k]=w.data})});
+  return{any,por}}
+/* quantas semanas seguidas (com reunião) a pessoa teria parte, contando esta */
+function seguidas(pid,date,H){const ws=sortedWeeks().filter(w=>!SEM_REUNIAO(evTipo(w.data))).map(w=>w.data);const i=ws.indexOf(date);if(i<0)return 1;
+  const tem=d=>H.any[pid]&&H.any[pid].has(d);let n=1;for(let j=i-1;j>=0&&tem(ws[j]);j--)n++;for(let j=i+1;j<ws.length&&tem(ws[j]);j++)n++;return n}
+function drawBrothers(w){
+  const slots=VAR_SLOTS(w);if(!slots.length)return{n:0,empty:[],rest:[]};
+  const H=varHist(w.data);const lim8=shiftDays(w.data,-56);
+  const usados=new Set(roles(w).map(r=>r.pub));
+  let n=0;const empty=[],rest=new Set();
+  slots.forEach(([f,cat])=>{if(getF(w,f))return;
+    const k=roleKey(f);
+    const cand=brotherPool(cat).filter(id=>!usados.has(id));
+    /* a oração é curta: o descanso não se aplica a ela */
+    const livres=cat==='oracao'?cand:cand.filter(id=>{const ok=seguidas(id,w.data,H)<=VAR_SEGUIDAS;if(!ok)rest.add(id);return ok});
+    const L=livres;
+    if(!L.length){empty.push(CATNAME[cat]||cat);return}
+    const score=id=>{const ult=(H.por[id]||{})[k]||'0000-00-00';const rec=[...(H.any[id]||[])].filter(d=>d>=lim8&&d<w.data).length;const ultAny=[...(H.any[id]||[])].filter(d=>d<w.data).sort().pop()||'0000-00-00';return[ult,rec,ultAny,Math.random()]};
+    const cmp=(a,b)=>{const A=score(a),B=score(b);for(let i=0;i<4;i++){if(A[i]<B[i])return-1;if(A[i]>B[i])return 1}return 0};
+    const id=L.sort(cmp)[0];
+    setF(w,f,id);usados.add(id);if(cat!=='oracao')(H.any[id]=H.any[id]||new Set()).add(w.data);n++});
+  return{n,empty,rest:[...rest].filter(id=>!roles(w).some(r=>r.pub===id))}}
+function drawBrothersMsg(r,label){
+  if(!r.n&&!r.empty.length)return'As partes dos varões já estavam preenchidas'+(label?' em '+label:'')+'.';
+  let t=r.n+' parte'+(r.n===1?'':'s')+' preenchida'+(r.n===1?'':'s')+(label?' em '+label:'')+'.';
+  if(r.empty.length){const u=[...new Set(r.empty)];t+=' Ficou vaga em: '+u.join(', ')+' — ninguém livre com essa categoria (confira as categorias em Publicadores).'}
+  if(r.rest.length)t+=' Descansando por ter tido parte em '+VAR_SEGUIDAS+' semanas seguidas: '+r.rest.slice(0,6).map(id=>tc(shortName(pname(id)))).join(', ')+(r.rest.length>6?' e outros':'')+'.';
+  return t}
 
 /* ================= Início: roda depois que todas as partes foram carregadas ================= */
 route();init();

@@ -1,5 +1,5 @@
 /* ================= Limpeza do Salão do Reino ================= */
-const LCOR={A:'#4F3A82',B:'#4D6873',C:'#C27A0E',D:'#B0182C',E:'#6B4E9B',F:'#2E8C8E',G:'#7A5C2E',H:'#5B6B2E',I:'#8C3B6B',J:'#3B5B8C'};
+const LCOR={A:'#2E7D4F',B:'#4D6873',C:'#C27A0E',D:'#B0182C',E:'#6B4E9B',F:'#2E8C8E',G:'#7A5C2E',H:'#5B6B2E',I:'#8C3B6B',J:'#3B5B8C'};
 const lcor=L=>LCOR[L]||'#555555';
 const LTIPO={reuniao:'Limpeza a cada reunião',semanal:'Limpeza semanal'};
 const DIAS3=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];

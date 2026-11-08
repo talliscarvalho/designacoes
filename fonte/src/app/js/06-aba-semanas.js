@@ -15,7 +15,7 @@ function rSemanas(){
   const list=`<div class="panel weeklist">
     <div class="monthnav"><button class="btn small ghost" data-a="mprev" aria-label="Mês anterior">‹</button><strong>${monthLabel(ui.month)}</strong><button class="btn small ghost" data-a="mnext" aria-label="Próximo mês">›</button></div>
     ${inMonth.length?'<div class="wklist">'+inMonth.map(w=>wkItem('pick',w.data,meetDate(w),filledCount(w),slotCount(w),w.data===ui.week)).join('')+'</div>':`<div class="empty">${loadingTxt}</div>`}
-    <div class="wkacts"><button class="btn" data-a="addweek">+ Nova semana</button><button class="btn" data-a="impopen">Importar apostila</button>${inMonth.length?`<button class="btn" data-a="drawmonth">Sortear irmãs do mês</button>`:''}</div>
+    <div class="wkacts"><button class="btn" data-a="addweek">+ Nova semana</button><button class="btn" data-a="impopen">Importar apostila</button>${inMonth.length?`<button class="btn" data-a="drawmonth">Sortear irmãs do mês</button><button class="btn" data-a="drawvmonth">Sortear varões do mês</button>`:''}</div>
   </div>`;
   let ed='';
   const w=ui.week&&weeks[ui.week];
@@ -36,6 +36,7 @@ function rSemanas(){
         <label class="f">Leitura semanal da Bíblia<input type="text" id="f-leit" data-f="leituraSemanal" value="${esc(w.leituraSemanal)}" placeholder="Ex.: EZEQUIEL 1-5"></label>
         <label class="f">Presidente${S('presidente','presidente',w.presidente)}</label>
       </div>
+      ${SEM_REUNIAO(tp)?'':`<div class="drawbar varbar"><span class="hint">Varões: preenche as partes vazias (menos Faça Seu Melhor no Ministério), em rodízio e com descanso após ${VAR_SEGUIDAS} semanas seguidas.</span><button class="btn small" data-a="drawv">Sortear varões</button></div>${lastDrawV&&lastDrawV.week===w.data?`<div class="drawres ${lastDrawV.short?'short':''}">${esc(lastDrawV.msg)}</div>`:''}`}
       ${confl.length?`<div class="warnline">Menos de ${meses()} meses desde (ou até) outra parte no ministério: ${confl.map(esc).join('; ')}.</div>`:''}
       ${dups.length?`<div class="warnline">Atenção: ${dups.map(esc).join(', ')} aparece${dups.length>1?'m':''} em mais de uma parte nesta semana.</div>`:''}
       ${evBox(d)}
@@ -116,6 +117,10 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b
     impgo:()=>impApply(),
     draw:()=>{const r=drawSisters(w,false);saveWeek(w);lastDraw={week:w.data,msg:drawMsg(r),short:!!(r.short.length||r.empty)};rSemanas()},
     redraw:()=>{const r=drawSisters(w,true);saveWeek(w);lastDraw={week:w.data,msg:drawMsg(r),short:!!(r.short.length||r.empty)};rSemanas()},
+    drawv:()=>{const r=drawBrothers(w);if(r.n)saveWeek(w);lastDrawV={week:w.data,msg:drawBrothersMsg(r),short:!!r.empty.length};rSemanas()},
+    drawvmonth:()=>{const ws=sortedWeeks().filter(x=>x.data.startsWith(ui.month)&&!SEM_REUNIAO(evTipo(x.data)));let n=0,em=[],rs=new Set();
+      ws.forEach(x=>{const r=drawBrothers(x);if(r.n)saveWeek(x);n+=r.n;em=em.concat(r.empty);r.rest.forEach(i=>rs.add(i))});
+      if(!ui.week&&ws[0])ui.week=ws[0].data;lastDrawV={week:ui.week,msg:drawBrothersMsg({n,empty:em,rest:[...rs]},monthLabel(ui.month)),short:!!em.length};rSemanas();toast(n+' partes de varões preenchidas em '+monthLabel(ui.month))},
     drawmonth:()=>{const ws=sortedWeeks().filter(x=>x.data.startsWith(ui.month)&&!SEM_REUNIAO(evTipo(x.data)));let n=0,sh=[],em=0;
       ws.forEach(x=>{const r=drawSisters(x,false);if(r.n){saveWeek(x)}n+=r.n;sh=sh.concat(r.short);em+=r.empty});
       const msg=drawMsg({n,short:sh,empty:em},monthLabel(ui.month));if(!ui.week&&ws[0])ui.week=ws[0].data;

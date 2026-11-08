@@ -143,14 +143,14 @@ PV.campo=(mon,x,y,W)=>{const y0=y,d=PV.doc,c=cmp[mon];if(!c)return 0;
   PV.rect(x,y,W,20,'#4F3A82');PV.text(campoLabel(mon).toUpperCase(),x+8,y+14,'bold',11.5,'#FFFFFF',{charSpace:0.4});y+=20;
   PV.rect(x,y,W,15,'#ECE7F5');['DIA','HORÁRIO','MODALIDADE','TERRITÓRIO','DIRIGENTE'].forEach((t,i)=>PV.text(t,cx[i],y+10.5,'bold',7,'#4A4360'));y+=15;
   campoGroups(c).forEach((g,gi)=>{const n=g.rows.length,red=g.rows.some(isIso);
-    if(gi%2)PV.rect(x,y,W,n*RH,'#F8F7FB');
+    if(gi%2)PV.rect(x,y,W,n*RH,'#EEE9F7');
     g.rows.forEach((r,i)=>{const ty=y+i*RH+12.4,iso=isIso(r);
       if(i===0)PV.text(DIAS_C[g.dia],cx[0],ty,'bold',8.8,red?'#B42318':'#1B1B1B',{maxW:cx[1]-cx[0]-6});
       PV.text(r.hora,cx[1],ty,'normal',8.8,'#333333');
       PV.text(r.mod,cx[2],ty,iso?'bold':'normal',8.8,iso?'#B42318':'#1B1B1B',{maxW:cx[3]-cx[2]-8});
       PV.text(r.terr,cx[3],ty,iso?'bold':'normal',8.8,'#1B1B1B',{maxW:cx[4]-cx[3]-8});
       PV.text(r.dir?dirShort(r.dir):'a designar',cx[4],ty,r.dir?'bold':'normal',8.8,r.dir?'#1B1B1B':'#B5B5B5',{maxW:x+W-cx[4]-6})});
-    y+=n*RH;if(!PV.dry){d.setDrawColor(228,225,236);d.setLineWidth(0.5);d.line(x,y,x+W,y)}});
+    y+=n*RH;if(!PV.dry){d.setDrawColor(201,192,222);d.setLineWidth(0.7);d.line(x,y,x+W,y)}});
   if(c.nota){PV.text(c.nota,x+6,y+12,'italic',8.5,'#444444',{maxW:W-12});y+=14}
   return y+16-y0};
 /* WhatsApp */
