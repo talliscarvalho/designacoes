@@ -133,32 +133,26 @@ document.addEventListener('change',e=>{const t=e.target;
 /* folha (prévia e PDF) */
 function campoGroups(c){const g=[];sortSaidas(c.saidas||[]).forEach(r=>{const l=g[g.length-1];if(l&&l.dia===r.dia)l.rows.push(r);else g.push({dia:r.dia,rows:[r]})});return g}
 function campoHTML(mon){const c=cmp[mon];if(!c)return'<div></div>';
-  const body=campoGroups(c).map(g=>{const same=g.rows.length>1&&g.rows.every(r=>r.mod===g.rows[0].mod);const sun=g.dia===7;const red=g.rows.some(isIso);
-    return g.rows.map((r,i)=>`<tr class="${sun?'sun':''}">${i===0?`<td rowspan="${g.rows.length}" class="cd ${red?'red':''}">${DIAS_C[g.dia]}</td>`:''}<td>${esc(r.hora)}</td>${same?(i===0?`<td rowspan="${g.rows.length}" class="cm ${isIso(r)?'red':''}">${esc(r.mod)}</td>`:''):`<td class="${isIso(r)?'red':''}">${esc(r.mod)}</td>`}<td class="ct">${esc(r.terr)}</td><td>${r.dir?esc(dirShort(r.dir)):'<span class="empty">—</span>'}</td></tr>`).join('')}).join('');
-  return`<div class="cw"><div class="cwl">${esc(cap(campoLabel(mon)))}</div><table class="ctab"><thead><tr><th>Dia</th><th>Horário</th><th>Modalidade</th><th>Território</th><th>Dirigente</th></tr></thead><tbody>${body}</tbody></table>${c.nota?`<p class="cnote">${esc(c.nota)}</p>`:''}</div>`}
+  /* mesmo padrão das folhas de limpeza e A/V: faixa da semana, cabeçalho das colunas e linhas alternadas por dia */
+  const body=campoGroups(c).map((g,gi)=>g.rows.map((r,i)=>`<tr class="${gi%2?'alt':''} ${i===g.rows.length-1?'fim':''}"><td>${i===0?`<b class="${g.rows.some(isIso)?'red':''}">${DIAS_C[g.dia]}</b>`:''}</td><td>${esc(r.hora)}</td><td class="${isIso(r)?'red':''}">${esc(r.mod)}</td><td>${esc(r.terr)}</td><td>${r.dir?esc(dirShort(r.dir)):'<span class="empty">a designar</span>'}</td></tr>`).join('')).join('');
+  return`<div class="lw cwk"><div class="lbar">${esc(campoLabel(mon).toUpperCase())}</div><table class="lt"><thead><tr><th>Dia</th><th>Horário</th><th>Modalidade</th><th>Território</th><th>Dirigente</th></tr></thead><tbody>${body}</tbody></table>${c.nota?`<p class="cnote">${esc(c.nota)}</p>`:''}</div>`}
 PV.headCampo=(x,W)=>{PV.text(PV.congName(),x+W/2,50,'bold',19,'#111111',{align:'center'});PV.rect(x,59,W,1.6,'#A3A3A3');
   PV.text('SAÍDAS DE CAMPO',x+W/2,76,'normal',10,'#111111',{align:'center',charSpace:0.6});return 98};
 PV.campo=(mon,x,y,W)=>{const y0=y,d=PV.doc,c=cmp[mon];if(!c)return 0;
-  const cw=[78,62,128,124];cw.push(W-cw.reduce((a,b)=>a+b,0));const cx=[x];cw.forEach((w,i)=>cx.push(cx[i]+w));const RH=17;
-  PV.text(cap(campoLabel(mon)),x+W,y+10,'bold',11,'#1E8E45',{align:'right'});y+=16;
-  const LN=[];const line=(x1,y1,x2,y2)=>LN.push([x1,y1,x2,y2]);
-  PV.rect(x,y,W,18,'#E2EFDA');['DIA','HORÁRIO','MODALIDADE','TERRITÓRIO','DIRIGENTE'].forEach((t,i)=>PV.text(t,cx[i]+cw[i]/2,y+12.3,'bold',8.2,'#1B1B1B',{align:'center'}));
-  line(x,y,x+W,y);y+=18;line(x,y,x+W,y);
-  campoGroups(c).forEach(g=>{const n=g.rows.length,h=n*RH,sun=g.dia===7,red=g.rows.some(isIso);const same=n>1&&g.rows.every(r=>r.mod===g.rows[0].mod);
-    PV.rect(x,y,W,h,'#F1F7ED');
-    PV.text(DIAS_C[g.dia],cx[0]+cw[0]/2,y+h/2+3.2,sun||red?'bold':'normal',9,red?'#C00000':'#1B1B1B',{align:'center'});
-    if(same)PV.text(g.rows[0].mod,cx[2]+cw[2]/2,y+h/2+3.2,sun?'bolditalic':'normal',9,isIso(g.rows[0])?'#C00000':'#1B1B1B',{align:'center',maxW:cw[2]-8});
-    g.rows.forEach((r,i)=>{const ry=y+i*RH,ty=ry+RH/2+3.2;
-      PV.text(r.hora,cx[1]+cw[1]/2,ty,'normal',9,'#1B1B1B',{align:'center'});
-      if(!same)PV.text(r.mod,cx[2]+cw[2]/2,ty,isIso(r)?'bolditalic':'normal',9,isIso(r)?'#C00000':'#1B1B1B',{align:'center',maxW:cw[2]-8});
-      PV.text(r.terr,cx[3]+cw[3]/2,ty,sun||isIso(r)?'bold':'normal',9,'#1B1B1B',{align:'center',maxW:cw[3]-8});
-      PV.text(r.dir?dirShort(r.dir):'—',cx[4]+cw[4]/2,ty,'normal',9,r.dir?'#1B1B1B':'#B5B5B5',{align:'center',maxW:cw[4]-8});
-      if(i){if(same){line(cx[1],ry,cx[2],ry);line(cx[3],ry,x+W,ry)}else line(cx[1],ry,x+W,ry)}});
-    y+=h;line(x,y,x+W,y)});
-  [0,1,2,3,4,5].forEach(i=>line(cx[i],y0+16,cx[i],y));
-  if(!PV.dry){d.setDrawColor(150,170,145);d.setLineWidth(0.6);LN.forEach(a=>d.line(...a))}
-  if(c.nota){PV.text(c.nota,x,y+12,'italic',8.8,'#333333',{maxW:W});y+=14}
-  return y+22-y0};
+  const cx=[x+6,x+80,x+136,x+282,x+428],RH=18;
+  PV.rect(x,y,W,20,'#4F3A82');PV.text(campoLabel(mon).toUpperCase(),x+8,y+14,'bold',11.5,'#FFFFFF',{charSpace:0.4});y+=20;
+  PV.rect(x,y,W,15,'#ECE7F5');['DIA','HORÁRIO','MODALIDADE','TERRITÓRIO','DIRIGENTE'].forEach((t,i)=>PV.text(t,cx[i],y+10.5,'bold',7,'#4A4360'));y+=15;
+  campoGroups(c).forEach((g,gi)=>{const n=g.rows.length,red=g.rows.some(isIso);
+    if(gi%2)PV.rect(x,y,W,n*RH,'#F8F7FB');
+    g.rows.forEach((r,i)=>{const ty=y+i*RH+12.4,iso=isIso(r);
+      if(i===0)PV.text(DIAS_C[g.dia],cx[0],ty,'bold',8.8,red?'#B42318':'#1B1B1B',{maxW:cx[1]-cx[0]-6});
+      PV.text(r.hora,cx[1],ty,'normal',8.8,'#333333');
+      PV.text(r.mod,cx[2],ty,iso?'bold':'normal',8.8,iso?'#B42318':'#1B1B1B',{maxW:cx[3]-cx[2]-8});
+      PV.text(r.terr,cx[3],ty,iso?'bold':'normal',8.8,'#1B1B1B',{maxW:cx[4]-cx[3]-8});
+      PV.text(r.dir?dirShort(r.dir):'a designar',cx[4],ty,r.dir?'bold':'normal',8.8,r.dir?'#1B1B1B':'#B5B5B5',{maxW:x+W-cx[4]-6})});
+    y+=n*RH;if(!PV.dry){d.setDrawColor(228,225,236);d.setLineWidth(0.5);d.line(x,y,x+W,y)}});
+  if(c.nota){PV.text(c.nota,x+6,y+12,'italic',8.5,'#444444',{maxW:W-12});y+=14}
+  return y+16-y0};
 /* WhatsApp */
 function campoMsgs(mon){const c=cmp[mon];if(!c)return[];const by={};
   sortSaidas(c.saidas||[]).forEach(r=>{if(!r.dir)return;(by[r.dir]=by[r.dir]||[]).push('• '+DIAS_C[r.dia]+', '+br(cDate(mon,r.dia)).slice(0,5)+' às '+r.hora+' — '+r.mod+(r.terr?' ('+r.terr+')':''))});

@@ -66,6 +66,9 @@ document.addEventListener('change',e=>{if(e.target.id==='ce-tipo'){const t=$('#c
 /* ---- Zoom: só aceita um endereço https do zoom.us ---- */
 function zoomUrl(){const u=String(cfg.zoom||'').trim();try{const x=new URL(u);if(x.protocol==='https:'&&/(^|\.)zoom\.us$/i.test(x.hostname))return x.href}catch(e){}return''}
 function zoomCard(){const u=zoomUrl();if(!u)return'';const d=cap(DIAS[+cfg.dia]||''),f=cap(DIAS[+cfg.diaFds]||'');
-  return`<div class="zoomcard"><div><b>Assistir à reunião pelo Zoom</b><span>Para quem não pode estar presente no Salão do Reino. ${esc(d)}${cfg.hora?' às '+esc(cfg.hora):''} e ${esc(f)}${cfg.horaFds?' às '+esc(cfg.horaFds):''}.</span></div>
-    <a class="btn primary" href="${esc(u)}" target="_blank" rel="noopener noreferrer">Entrar no Zoom</a></div>`}
+  const quando=`${esc(d)}${cfg.hora?' '+esc(cfg.hora):''} · ${esc(f)}${cfg.horaFds?' '+esc(cfg.horaFds):''}`;
+  return`<a class="zoomlink" href="${esc(u)}" target="_blank" rel="noopener noreferrer" aria-label="Assistir à reunião pelo Zoom (abre o Zoom)">
+    <span class="zico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="M15.5 10.5l5-3v9l-5-3z"/></svg></span>
+    <span class="ztx"><b>Assistir pelo Zoom</b><small>${quando}<span class="zpq"> · para quem não pode ir ao Salão do Reino</span></small></span>
+    <span class="zgo" aria-hidden="true">Entrar <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></a>`}
 function zoomMenu(){const i=$('#zoomItem');if(i)i.hidden=!zoomUrl()}

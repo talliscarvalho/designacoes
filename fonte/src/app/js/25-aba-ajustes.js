@@ -77,7 +77,7 @@ const telE164=v=>{let d=String(v||'').replace(/\D/g,'').replace(/^0+/,'');if(d.l
 const idAcesso=v=>{v=String(v||'').trim();if(v.includes('@'))return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)?v.toLowerCase():null;return telE164(v)};
 const idDoPub=p=>p.email?String(p.email).trim().toLowerCase():(p.tel?telE164(p.tel):null);
 const idLbl=e=>String(e||'').startsWith('+')?fmtTel(e.replace(/^\+/,'')):String(e||'');
-const PAPEIS={admin:'Administrador',editor:'Pode editar',leitor:'Só visualizar',publicador:'Publicador (só o painel)'};
+const PAPEIS={admin:'Administrador',editor:'Pode editar',leitor:'Só visualizar',publicador:'Publicador'};
 function drawAcc(){const box=$('#accBox');if(!box)return;const F=window.FBX;const adm=F.papel==='admin';
   if(adm)acessoInit();
   const AC=ui.aceites||{};const accInfo=e=>{const a=AC[e];if(!a)return'<small class="muted">ainda não entrou</small>';return`<small class="muted">${a.ultimo?'último acesso '+tsLabel(a.ultimo):''}${a.em?' · aceitou o termo em '+tsLabel(a.em).slice(0,10):''}</small>`};

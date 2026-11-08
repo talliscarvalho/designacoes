@@ -30,7 +30,7 @@ function icsFor(it){const p2=n=>String(n).padStart(2,'0');const d=it.date.replac
     'DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z',st?'DTSTART:'+st:'DTSTART;VALUE=DATE:'+d,en?'DTEND:'+en:'',
     'SUMMARY:'+txt(it.txt.split('\n')[0]),'DESCRIPTION:'+txt(it.titulo+(cfg.congregacao?' · Congregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):'')),'END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n')}
 function rPainel(){const v=$('#v-painel');const pid=myPubId();
-  if(!pid){v.innerHTML=`<div class="panel" style="padding:20px"><h2 style="margin:0 0 6px">Meu painel</h2><p class="muted" style="margin:0">Sua conta ainda não está ligada a um cadastro de publicador. Peça a um administrador para conferir o seu e-mail na ficha de publicador.</p></div>`;return}
+  if(!pid){v.innerHTML=`${zoomCard()}<div class="panel" style="padding:20px"><h2 style="margin:0 0 6px">Meu painel</h2><p class="muted" style="margin:0">Sua conta ainda não está ligada a um cadastro de publicador. Peça a um administrador para conferir o seu e-mail na ficha de publicador.</p></div>`;return}
   const nome=pname(pid)||'';const V=ui.pnView||'minhas';
   const seg=`<div class="seg pseg"><button data-a="pnview" data-v="minhas" aria-pressed="${V==='minhas'}">Minhas designações</button><button data-a="pnview" data-v="prog" aria-pressed="${V==='prog'}">Programação</button><button data-a="pnview" data-v="cal" aria-pressed="${V==='cal'}">Calendário</button><button data-a="pnview" data-v="dados" aria-pressed="${V==='dados'}">Meus dados</button></div>`;
   let body='';

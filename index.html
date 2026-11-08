@@ -35,7 +35,7 @@
   const CFG=window.DESIGNAR_CONFIG||{};
   const FIREBASE_CONFIG=CFG.firebase;
   const OWNER=String(CFG.dono||'').trim().toLowerCase();
-  const APP="Designar", VERSAO="2026.11.07-2242", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
+  const APP="Designar", VERSAO="2026.11.07-2313", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
   const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,whatsapp:CFG.whatsapp||'',pub:{}};
   const t=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let resolveReady,rejectReady;const readyP=new Promise((r,j)=>{resolveReady=r;rejectReady=j});
@@ -852,8 +852,8 @@ select[data-cbx]{display:none!important}
 .chip button:hover{background:var(--line);color:var(--fg)}
 /* Folha de limpeza */
 .lw{font-size:11.5px;color:#222}.lw .lbar{background:#4F3A82;color:#fff;font-family:var(--f-cond);font-weight:700;font-size:15px;padding:5px 10px;letter-spacing:.03em}
-.lt{width:100%;border-collapse:collapse}.lt th{background:#E3EAE7;color:#4A5753;font-size:9.5px;text-align:left;padding:4px 6px;letter-spacing:.04em;text-transform:uppercase}
-.lt td{padding:5px 6px;border-bottom:1px solid #E1E6E4;vertical-align:top}.lt tr:nth-child(even) td{background:#F7F9F8}
+.lt{width:100%;border-collapse:collapse}.lt th{background:#ECE7F5;color:#4A4360;font-size:9.5px;text-align:left;padding:4px 6px;letter-spacing:.04em;text-transform:uppercase}
+.lt td{padding:5px 6px;border-bottom:1px solid #E4E1EC;vertical-align:top}.lt tr:nth-child(even) td{background:#F8F7FB}
 .lt td:first-child{font-weight:700;white-space:nowrap}.lt td:last-child{text-align:right;white-space:nowrap;color:#555}
 .lt .lp{display:inline-grid;place-items:center;width:20px;height:16px;border-radius:3px;color:#fff;font-weight:700;font-size:10.5px}
 .lt tr.sem td{background:#F3F3F3;color:#666;font-style:italic}.lw .empty{color:#B5B5B5}
@@ -942,12 +942,26 @@ tr.agora .agoratag{display:block;margin:4px 0 0;width:max-content}
 .calfalta{font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
 .calform .calgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
 .calant{margin-top:8px}.calant summary{cursor:pointer;color:var(--muted);font-size:14px;padding:6px 0}.calant .calev{opacity:.75;margin-top:8px}
-/* reunião pelo Zoom */
-.zoomcard{display:flex;align-items:center;justify-content:space-between;gap:12px 16px;flex-wrap:wrap;background:var(--accent-soft);border:1px solid var(--accent);border-radius:8px;padding:12px 14px;margin:0 0 14px}
-.zoomcard>div{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 240px}
-.zoomcard b{font-size:15.5px}.zoomcard span{font-size:13.5px;color:var(--muted);line-height:1.4}
-.zoomcard .btn{flex:none;text-decoration:none}
-#v-painel .zoomcard a.btn.primary,.zoomcard a.btn.primary,.zoomcard a.btn.primary:visited{color:var(--accent-fg);background:var(--accent);border-color:var(--accent)}
+/* reunião pelo Zoom: faixa inteira clicável, com o ícone de vídeo no azul do Zoom */
+#v-painel a.zoomlink,a.zoomlink{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:10px 12px 10px 10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;color:var(--fg);text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:border-color .15s,box-shadow .15s}
+a.zoomlink:hover{border-color:#2D8CFF;box-shadow:0 2px 10px rgba(45,140,255,.15)}
+a.zoomlink:focus-visible{outline:2px solid #2D8CFF;outline-offset:2px}
+.zico{width:42px;height:42px;flex:none;border-radius:11px;background:#2D8CFF;color:#fff;display:grid;place-items:center}
+.ztx{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.ztx b{font-size:15.5px;line-height:1.25}.ztx small{font-size:13px;color:var(--muted);line-height:1.35}
+.zgo{flex:none;display:inline-flex;align-items:center;gap:2px;font-weight:700;font-size:14px;color:#1F6FD6;padding:6px 4px 6px 10px}
+:root[data-theme="dark"] .zgo{color:#7DB6FF}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .zgo{color:#7DB6FF}}
+@media (max-width:420px){.zgo{font-size:0;padding:6px 2px}.zgo svg{width:20px;height:20px}.zpq{display:none}}
+/* folha de saídas de campo: mesmo padrão da limpeza, com as linhas alternadas por dia */
+.lw.cwk{margin-bottom:16px}
+.cwk .lt tr td{background:transparent!important;border-bottom:0}
+.cwk .lt tr.alt td{background:#F8F7FB!important}
+.cwk .lt tr.fim td{border-bottom:1px solid #E4E1EC}
+.cwk .lt td:first-child{font-weight:400}.cwk .lt td:first-child b{font-weight:700}
+.cwk .lt td:last-child{text-align:left;color:#1B1B1B;font-weight:700}
+.cwk .lt .red{color:#B42318;font-weight:700}
+.cwk .cnote{margin:6px 6px 0;font-style:italic;color:#444;font-size:11px}
 
 </style>
 
@@ -2289,19 +2303,19 @@ PV.headLimp=(x,W)=>{PV.text(PV.congName(),x+W/2,50,'bold',19,'#111111',{align:'c
 PV.limp=(ym,x,y,W)=>{const y0=y,d=PV.doc,slots=limpSlots(ym);
   const cD=x+6,cDia=x+64,cG=x+108,cT=x+W-6,cDes=x+146,desW=W-146-112;
   PV.rect(x,y,W,20,'#4F3A82');PV.text(monthLabel(ym).toUpperCase(),x+8,y+14,'bold',11.5,'#FFFFFF',{charSpace:0.4});y+=20;
-  PV.rect(x,y,W,15,'#E3EAE7');[['DATA',cD],['DIA',cDia],['GRUPO',cG-3],['DESIGNADOS',cDes]].forEach(([t,xx])=>PV.text(t,xx,y+10.5,'bold',7,'#4A5753'));PV.text('TAREFA',cT,y+10.5,'bold',7,'#4A5753',{align:'right'});y+=15;
+  PV.rect(x,y,W,15,'#ECE7F5');[['DATA',cD],['DIA',cDia],['GRUPO',cG-3],['DESIGNADOS',cDes]].forEach(([t,xx])=>PV.text(t,xx,y+10.5,'bold',7,'#4A4360'));PV.text('TAREFA',cT,y+10.5,'bold',7,'#4A4360',{align:'right'});y+=15;
   slots.forEach((s,i)=>{const a=lmp[s.id],g=a&&lgr[a.grupo];
     if(s.sem){PV.rect(x,y,W,18,'#F3F3F3');PV.text(br(s.data),cD,y+12,'normal',8.5,'#666666');PV.text(DIAS3[parse(s.data).getDay()],cDia,y+12,'normal',8.5,'#666666');
       PV.text('Semana de '+EVENTOS[s.ev]+': sem limpeza de reunião',cDes,y+12,'italic',8.5,'#666666',{maxW:W-146-6});y+=18;return}
     d.setFont('helvetica','normal');d.setFontSize(8.3);const lines=g?d.splitTextToSize(groupMembers(g).join(', '),desW):[];
     const h=Math.max(20,10+(g?11:0)+lines.length*10);
-    if(i%2)PV.rect(x,y,W,h,'#F7F9F8');
+    if(i%2)PV.rect(x,y,W,h,'#F8F7FB');
     PV.text(br(s.data),cD,y+13,'bold',8.8,'#1B1B1B');PV.text(DIAS3[parse(s.data).getDay()],cDia,y+13,'normal',8.8,'#333333');
     if(g){if(!PV.dry){d.setFillColor(...PV.hex(lcor(g.letra)));d.roundedRect(cG,y+4.5,17,12,2.5,2.5,'F')}PV.text(g.letra,cG+8.5,y+13,'bold',8.5,'#FFFFFF',{align:'center'});
       PV.text(g.nome,cDes,y+13,'bold',8.8,'#1B1B1B',{maxW:desW});lines.forEach((l,j)=>PV.text(l,cDes,y+24+j*10,'normal',8.3,'#444444'))}
     else PV.text('a designar',cDes,y+13,'normal',8.5,'#B5B5B5');
     PV.text(LTIPO[s.tipo],cT,y+13,s.tipo==='semanal'?'bold':'normal',8.3,s.tipo==='semanal'?'#4F3A82':'#555555',{align:'right'});
-    y+=h;if(!PV.dry){d.setDrawColor(225,230,228);d.setLineWidth(0.5);d.line(x,y,x+W,y)}});
+    y+=h;if(!PV.dry){d.setDrawColor(228,225,236);d.setLineWidth(0.5);d.line(x,y,x+W,y)}});
   return y+16-y0};
 function limpMsgs(ym){const by={};limpSlots(ym).forEach(s=>{const a=lmp[s.id];if(!s.sem&&a&&a.grupo&&lgr[a.grupo])(by[a.grupo]=by[a.grupo]||[]).push(s)});
   return Object.keys(by).sort().map(L=>{const g=lgr[L],ss=by[L],p=pubs[g.dirigente]||null;
@@ -2550,14 +2564,14 @@ PV.headAV=(x,W)=>{PV.text(PV.congName(),x+W/2,50,'bold',19,'#111111',{align:'cen
   PV.text('ÁUDIO/VÍDEO E INDICADORES',x+W/2,76,'normal',10,'#111111',{align:'center',charSpace:0.6});return 92};
 PV.av=(ym,x,y,W)=>{const y0=y,d0=PV.doc;const C=[['DATA',x+6],['DIA',x+64],['ÁUDIO/VÍDEO',x+112],['PALCO',x+212],['MICROFONES',x+312],['INDICADORES',x+420]];const cw=96;
   PV.rect(x,y,W,20,'#4F3A82');PV.text(monthLabel(ym).toUpperCase(),x+8,y+14,'bold',11.5,'#FFFFFF',{charSpace:0.4});y+=20;
-  PV.rect(x,y,W,15,'#E3EAE7');C.forEach(([t,xx])=>PV.text(t,xx,y+10.5,'bold',7,'#4A5753'));y+=15;
+  PV.rect(x,y,W,15,'#ECE7F5');C.forEach(([t,xx])=>PV.text(t,xx,y+10.5,'bold',7,'#4A4360'));y+=15;
   avSlots(ym).forEach((s,i)=>{if(s.sem){PV.rect(x,y,W,18,'#F3F3F3');PV.text(br(s.data),x+6,y+12,'normal',8.5,'#666666');PV.text(DIAS3[parse(s.data).getDay()],x+64,y+12,'normal',8.5,'#666666');
       PV.text(EVENTOS[s.ev]+': sem reunião',x+112,y+12,'italic',8.5,'#666666',{maxW:W-118});y+=18;return}
-    const d=avNorm(avd[s.id]||avBlank(s.data));const h=Math.max(20,8+3*11);if(i%2)PV.rect(x,y,W,h,'#F7F9F8');
+    const d=avNorm(avd[s.id]||avBlank(s.data));const h=Math.max(20,8+3*11);if(i%2)PV.rect(x,y,W,h,'#F8F7FB');
     const T=(id,xx,yy)=>id?PV.text(tc(pname(id)),xx,yy,'normal',8.6,'#1B1B1B',{maxW:cw}):PV.text('—',xx,yy,'normal',8.6,'#B5B5B5');
     PV.text(br(s.data),x+6,y+13,'bold',8.8,'#1B1B1B');PV.text(DIAS3[parse(s.data).getDay()],x+64,y+13,'normal',8.8,'#333333');
     T(d.av,x+112,y+13);T(d.palco,x+212,y+13);d.mic.forEach((m,j)=>T(m,x+312,y+13+j*11));d.ind.forEach((m,j)=>T(m,x+420,y+13+j*11));
-    y+=h;if(!PV.dry){d0.setDrawColor(225,230,228);d0.setLineWidth(0.5);d0.line(x,y,x+W,y)}});
+    y+=h;if(!PV.dry){d0.setDrawColor(228,225,236);d0.setLineWidth(0.5);d0.line(x,y,x+W,y)}});
   return y+16-y0};
 /* WhatsApp */
 function avMsgs(ym){const by={};avSlots(ym).filter(s=>!s.sem).forEach(s=>{const d=avNorm(avd[s.id]||avBlank(s.data));
@@ -2711,32 +2725,26 @@ document.addEventListener('change',e=>{const t=e.target;
 /* folha (prévia e PDF) */
 function campoGroups(c){const g=[];sortSaidas(c.saidas||[]).forEach(r=>{const l=g[g.length-1];if(l&&l.dia===r.dia)l.rows.push(r);else g.push({dia:r.dia,rows:[r]})});return g}
 function campoHTML(mon){const c=cmp[mon];if(!c)return'<div></div>';
-  const body=campoGroups(c).map(g=>{const same=g.rows.length>1&&g.rows.every(r=>r.mod===g.rows[0].mod);const sun=g.dia===7;const red=g.rows.some(isIso);
-    return g.rows.map((r,i)=>`<tr class="${sun?'sun':''}">${i===0?`<td rowspan="${g.rows.length}" class="cd ${red?'red':''}">${DIAS_C[g.dia]}</td>`:''}<td>${esc(r.hora)}</td>${same?(i===0?`<td rowspan="${g.rows.length}" class="cm ${isIso(r)?'red':''}">${esc(r.mod)}</td>`:''):`<td class="${isIso(r)?'red':''}">${esc(r.mod)}</td>`}<td class="ct">${esc(r.terr)}</td><td>${r.dir?esc(dirShort(r.dir)):'<span class="empty">—</span>'}</td></tr>`).join('')}).join('');
-  return`<div class="cw"><div class="cwl">${esc(cap(campoLabel(mon)))}</div><table class="ctab"><thead><tr><th>Dia</th><th>Horário</th><th>Modalidade</th><th>Território</th><th>Dirigente</th></tr></thead><tbody>${body}</tbody></table>${c.nota?`<p class="cnote">${esc(c.nota)}</p>`:''}</div>`}
+  /* mesmo padrão das folhas de limpeza e A/V: faixa da semana, cabeçalho das colunas e linhas alternadas por dia */
+  const body=campoGroups(c).map((g,gi)=>g.rows.map((r,i)=>`<tr class="${gi%2?'alt':''} ${i===g.rows.length-1?'fim':''}"><td>${i===0?`<b class="${g.rows.some(isIso)?'red':''}">${DIAS_C[g.dia]}</b>`:''}</td><td>${esc(r.hora)}</td><td class="${isIso(r)?'red':''}">${esc(r.mod)}</td><td>${esc(r.terr)}</td><td>${r.dir?esc(dirShort(r.dir)):'<span class="empty">a designar</span>'}</td></tr>`).join('')).join('');
+  return`<div class="lw cwk"><div class="lbar">${esc(campoLabel(mon).toUpperCase())}</div><table class="lt"><thead><tr><th>Dia</th><th>Horário</th><th>Modalidade</th><th>Território</th><th>Dirigente</th></tr></thead><tbody>${body}</tbody></table>${c.nota?`<p class="cnote">${esc(c.nota)}</p>`:''}</div>`}
 PV.headCampo=(x,W)=>{PV.text(PV.congName(),x+W/2,50,'bold',19,'#111111',{align:'center'});PV.rect(x,59,W,1.6,'#A3A3A3');
   PV.text('SAÍDAS DE CAMPO',x+W/2,76,'normal',10,'#111111',{align:'center',charSpace:0.6});return 98};
 PV.campo=(mon,x,y,W)=>{const y0=y,d=PV.doc,c=cmp[mon];if(!c)return 0;
-  const cw=[78,62,128,124];cw.push(W-cw.reduce((a,b)=>a+b,0));const cx=[x];cw.forEach((w,i)=>cx.push(cx[i]+w));const RH=17;
-  PV.text(cap(campoLabel(mon)),x+W,y+10,'bold',11,'#1E8E45',{align:'right'});y+=16;
-  const LN=[];const line=(x1,y1,x2,y2)=>LN.push([x1,y1,x2,y2]);
-  PV.rect(x,y,W,18,'#E2EFDA');['DIA','HORÁRIO','MODALIDADE','TERRITÓRIO','DIRIGENTE'].forEach((t,i)=>PV.text(t,cx[i]+cw[i]/2,y+12.3,'bold',8.2,'#1B1B1B',{align:'center'}));
-  line(x,y,x+W,y);y+=18;line(x,y,x+W,y);
-  campoGroups(c).forEach(g=>{const n=g.rows.length,h=n*RH,sun=g.dia===7,red=g.rows.some(isIso);const same=n>1&&g.rows.every(r=>r.mod===g.rows[0].mod);
-    PV.rect(x,y,W,h,'#F1F7ED');
-    PV.text(DIAS_C[g.dia],cx[0]+cw[0]/2,y+h/2+3.2,sun||red?'bold':'normal',9,red?'#C00000':'#1B1B1B',{align:'center'});
-    if(same)PV.text(g.rows[0].mod,cx[2]+cw[2]/2,y+h/2+3.2,sun?'bolditalic':'normal',9,isIso(g.rows[0])?'#C00000':'#1B1B1B',{align:'center',maxW:cw[2]-8});
-    g.rows.forEach((r,i)=>{const ry=y+i*RH,ty=ry+RH/2+3.2;
-      PV.text(r.hora,cx[1]+cw[1]/2,ty,'normal',9,'#1B1B1B',{align:'center'});
-      if(!same)PV.text(r.mod,cx[2]+cw[2]/2,ty,isIso(r)?'bolditalic':'normal',9,isIso(r)?'#C00000':'#1B1B1B',{align:'center',maxW:cw[2]-8});
-      PV.text(r.terr,cx[3]+cw[3]/2,ty,sun||isIso(r)?'bold':'normal',9,'#1B1B1B',{align:'center',maxW:cw[3]-8});
-      PV.text(r.dir?dirShort(r.dir):'—',cx[4]+cw[4]/2,ty,'normal',9,r.dir?'#1B1B1B':'#B5B5B5',{align:'center',maxW:cw[4]-8});
-      if(i){if(same){line(cx[1],ry,cx[2],ry);line(cx[3],ry,x+W,ry)}else line(cx[1],ry,x+W,ry)}});
-    y+=h;line(x,y,x+W,y)});
-  [0,1,2,3,4,5].forEach(i=>line(cx[i],y0+16,cx[i],y));
-  if(!PV.dry){d.setDrawColor(150,170,145);d.setLineWidth(0.6);LN.forEach(a=>d.line(...a))}
-  if(c.nota){PV.text(c.nota,x,y+12,'italic',8.8,'#333333',{maxW:W});y+=14}
-  return y+22-y0};
+  const cx=[x+6,x+80,x+136,x+282,x+428],RH=18;
+  PV.rect(x,y,W,20,'#4F3A82');PV.text(campoLabel(mon).toUpperCase(),x+8,y+14,'bold',11.5,'#FFFFFF',{charSpace:0.4});y+=20;
+  PV.rect(x,y,W,15,'#ECE7F5');['DIA','HORÁRIO','MODALIDADE','TERRITÓRIO','DIRIGENTE'].forEach((t,i)=>PV.text(t,cx[i],y+10.5,'bold',7,'#4A4360'));y+=15;
+  campoGroups(c).forEach((g,gi)=>{const n=g.rows.length,red=g.rows.some(isIso);
+    if(gi%2)PV.rect(x,y,W,n*RH,'#F8F7FB');
+    g.rows.forEach((r,i)=>{const ty=y+i*RH+12.4,iso=isIso(r);
+      if(i===0)PV.text(DIAS_C[g.dia],cx[0],ty,'bold',8.8,red?'#B42318':'#1B1B1B',{maxW:cx[1]-cx[0]-6});
+      PV.text(r.hora,cx[1],ty,'normal',8.8,'#333333');
+      PV.text(r.mod,cx[2],ty,iso?'bold':'normal',8.8,iso?'#B42318':'#1B1B1B',{maxW:cx[3]-cx[2]-8});
+      PV.text(r.terr,cx[3],ty,iso?'bold':'normal',8.8,'#1B1B1B',{maxW:cx[4]-cx[3]-8});
+      PV.text(r.dir?dirShort(r.dir):'a designar',cx[4],ty,r.dir?'bold':'normal',8.8,r.dir?'#1B1B1B':'#B5B5B5',{maxW:x+W-cx[4]-6})});
+    y+=n*RH;if(!PV.dry){d.setDrawColor(228,225,236);d.setLineWidth(0.5);d.line(x,y,x+W,y)}});
+  if(c.nota){PV.text(c.nota,x+6,y+12,'italic',8.5,'#444444',{maxW:W-12});y+=14}
+  return y+16-y0};
 /* WhatsApp */
 function campoMsgs(mon){const c=cmp[mon];if(!c)return[];const by={};
   sortSaidas(c.saidas||[]).forEach(r=>{if(!r.dir)return;(by[r.dir]=by[r.dir]||[]).push('• '+DIAS_C[r.dia]+', '+br(cDate(mon,r.dia)).slice(0,5)+' às '+r.hora+' — '+r.mod+(r.terr?' ('+r.terr+')':''))});
@@ -2831,7 +2839,7 @@ function icsFor(it){const p2=n=>String(n).padStart(2,'0');const d=it.date.replac
     'DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z',st?'DTSTART:'+st:'DTSTART;VALUE=DATE:'+d,en?'DTEND:'+en:'',
     'SUMMARY:'+txt(it.txt.split('\n')[0]),'DESCRIPTION:'+txt(it.titulo+(cfg.congregacao?' · Congregação '+cfg.congregacao.replace(/^Congrega[cç][aã]o\s+/i,''):'')),'END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n')}
 function rPainel(){const v=$('#v-painel');const pid=myPubId();
-  if(!pid){v.innerHTML=`<div class="panel" style="padding:20px"><h2 style="margin:0 0 6px">Meu painel</h2><p class="muted" style="margin:0">Sua conta ainda não está ligada a um cadastro de publicador. Peça a um administrador para conferir o seu e-mail na ficha de publicador.</p></div>`;return}
+  if(!pid){v.innerHTML=`${zoomCard()}<div class="panel" style="padding:20px"><h2 style="margin:0 0 6px">Meu painel</h2><p class="muted" style="margin:0">Sua conta ainda não está ligada a um cadastro de publicador. Peça a um administrador para conferir o seu e-mail na ficha de publicador.</p></div>`;return}
   const nome=pname(pid)||'';const V=ui.pnView||'minhas';
   const seg=`<div class="seg pseg"><button data-a="pnview" data-v="minhas" aria-pressed="${V==='minhas'}">Minhas designações</button><button data-a="pnview" data-v="prog" aria-pressed="${V==='prog'}">Programação</button><button data-a="pnview" data-v="cal" aria-pressed="${V==='cal'}">Calendário</button><button data-a="pnview" data-v="dados" aria-pressed="${V==='dados'}">Meus dados</button></div>`;
   let body='';
@@ -3167,7 +3175,7 @@ const telE164=v=>{let d=String(v||'').replace(/\D/g,'').replace(/^0+/,'');if(d.l
 const idAcesso=v=>{v=String(v||'').trim();if(v.includes('@'))return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)?v.toLowerCase():null;return telE164(v)};
 const idDoPub=p=>p.email?String(p.email).trim().toLowerCase():(p.tel?telE164(p.tel):null);
 const idLbl=e=>String(e||'').startsWith('+')?fmtTel(e.replace(/^\+/,'')):String(e||'');
-const PAPEIS={admin:'Administrador',editor:'Pode editar',leitor:'Só visualizar',publicador:'Publicador (só o painel)'};
+const PAPEIS={admin:'Administrador',editor:'Pode editar',leitor:'Só visualizar',publicador:'Publicador'};
 function drawAcc(){const box=$('#accBox');if(!box)return;const F=window.FBX;const adm=F.papel==='admin';
   if(adm)acessoInit();
   const AC=ui.aceites||{};const accInfo=e=>{const a=AC[e];if(!a)return'<small class="muted">ainda não entrou</small>';return`<small class="muted">${a.ultimo?'último acesso '+tsLabel(a.ultimo):''}${a.em?' · aceitou o termo em '+tsLabel(a.em).slice(0,10):''}</small>`};
@@ -3601,8 +3609,11 @@ document.addEventListener('change',e=>{if(e.target.id==='ce-tipo'){const t=$('#c
 /* ---- Zoom: só aceita um endereço https do zoom.us ---- */
 function zoomUrl(){const u=String(cfg.zoom||'').trim();try{const x=new URL(u);if(x.protocol==='https:'&&/(^|\.)zoom\.us$/i.test(x.hostname))return x.href}catch(e){}return''}
 function zoomCard(){const u=zoomUrl();if(!u)return'';const d=cap(DIAS[+cfg.dia]||''),f=cap(DIAS[+cfg.diaFds]||'');
-  return`<div class="zoomcard"><div><b>Assistir à reunião pelo Zoom</b><span>Para quem não pode estar presente no Salão do Reino. ${esc(d)}${cfg.hora?' às '+esc(cfg.hora):''} e ${esc(f)}${cfg.horaFds?' às '+esc(cfg.horaFds):''}.</span></div>
-    <a class="btn primary" href="${esc(u)}" target="_blank" rel="noopener noreferrer">Entrar no Zoom</a></div>`}
+  const quando=`${esc(d)}${cfg.hora?' '+esc(cfg.hora):''} · ${esc(f)}${cfg.horaFds?' '+esc(cfg.horaFds):''}`;
+  return`<a class="zoomlink" href="${esc(u)}" target="_blank" rel="noopener noreferrer" aria-label="Assistir à reunião pelo Zoom (abre o Zoom)">
+    <span class="zico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="M15.5 10.5l5-3v9l-5-3z"/></svg></span>
+    <span class="ztx"><b>Assistir pelo Zoom</b><small>${quando}<span class="zpq"> · para quem não pode ir ao Salão do Reino</span></small></span>
+    <span class="zgo" aria-hidden="true">Entrar <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></a>`}
 function zoomMenu(){const i=$('#zoomItem');if(i)i.hidden=!zoomUrl()}
 
 /* ================= Início: roda depois que todas as partes foram carregadas ================= */
