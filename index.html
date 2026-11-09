@@ -35,7 +35,7 @@
   const CFG=window.DESIGNAR_CONFIG||{};
   const FIREBASE_CONFIG=CFG.firebase;
   const OWNER=String(CFG.dono||'').trim().toLowerCase();
-  const APP="Designar", VERSAO="2026.11.07-2338", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
+  const APP="Designar", VERSAO="2026.11.09-2027", TERMOS_V=1, DOCS_DATA="5 de novembro de 2026";
   const FBX=window.FBX={papel:null,email:null,owner:OWNER,app:APP,versao:VERSAO,whatsapp:CFG.whatsapp||'',pub:{}};
   const t=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let resolveReady,rejectReady;const readyP=new Promise((r,j)=>{resolveReady=r;rejectReady=j});
@@ -168,7 +168,8 @@
     try{if(rv){try{rv.clear()}catch(e){}rv=null}rv=new firebase.auth.RecaptchaVerifier('fbTelSend',{size:'invisible'});
       confirmacao=await auth.signInWithPhoneNumber(n,rv);telAtual=n;gate('codigo',n)}
     catch(e){if(rv){try{rv.clear()}catch(x){}rv=null}
-      const m={'auth/billing-not-enabled':'A entrada por SMS ainda não está liberada no Firebase: ela precisa do plano Blaze (pago por uso). Entre com Google ou pelo e-mail.','auth/operation-not-allowed':'A entrada pelo celular ainda não foi ativada no Firebase (Authentication › Método de login › Telefone).','auth/invalid-phone-number':'Esse número não parece válido. Confira o DDD.','auth/too-many-requests':'Muitas tentativas seguidas. Espere alguns minutos e tente de novo.','auth/quota-exceeded':'O limite de SMS foi atingido. Tente mais tarde ou entre com Google.','auth/captcha-check-failed':'A verificação de segurança falhou. Recarregue a página e tente de novo.','auth/network-request-failed':'Sem conexão com a internet. Verifique a rede e tente de novo.'};
+      const m={'auth/billing-not-enabled':'A entrada por SMS ainda não está liberada no Firebase: ela precisa do plano Blaze (pago por uso). Entre com Google ou pelo e-mail.','auth/operation-not-allowed':/region/i.test(e.message||'')?'A entrada pelo celular está bloqueada para números do Brasil. Avise o administrador (Firebase › Authentication › Configurações › Política de região do SMS: permitir o Brasil). Enquanto isso, entre com Google ou pelo e-mail.':'A entrada pelo celular ainda não está liberada. Avise o administrador (Firebase › Authentication › Método de login › Telefone ativado e, em Configurações, a Política de região do SMS permitindo o Brasil). Enquanto isso, entre com Google ou pelo e-mail.','auth/invalid-phone-number':'Esse número não parece válido. Confira o DDD.','auth/too-many-requests':'Muitas tentativas seguidas. Espere alguns minutos e tente de novo.','auth/quota-exceeded':'O limite de SMS foi atingido. Tente mais tarde ou entre com Google.','auth/captcha-check-failed':'A verificação de segurança falhou. Recarregue a página e tente de novo.','auth/network-request-failed':'Sem conexão com a internet. Verifique a rede e tente de novo.'};
+      try{console.warn('SMS:',e.code,e.message)}catch(x){}
       gate('tel');alertBox(m[e.code]||'Não foi possível enviar o código ('+(e.code||'erro')+').')}}
   async function confirmSms(c){if(!confirmacao){gate('tel');return}gate('espera','Entrando…');
     try{await confirmacao.confirm(c)}
