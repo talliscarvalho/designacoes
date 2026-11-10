@@ -2,40 +2,19 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; base-uri 'none'; form-action 'none'">
-<title>Página não encontrada</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234F3A82'/%3E%3Cpath fill='white' transform='translate(4 4) scale(1)' d='M3 6.4c2.6-1.1 5.6-1 8 .7v11.2c-2.4-1.6-5.4-1.7-8-.6zM21 6.4c-2.6-1.1-5.6-1-8 .7v11.2c2.4-1.6 5.4-1.7 8-.6z'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@1,300&display=swap">
-<style>
-:root{--bg:#F2F1EE;--surface:#FFFFFF;--fg:#1B1B1B;--muted:#5F6368;--line:#DAD8D3;--accent:#4F3A82;--accent-fg:#FFFFFF}
-@media (prefers-color-scheme:dark){:root{--bg:#141318;--surface:#1C1B21;--fg:#E8E9E7;--muted:#A3A8A6;--line:#35333C;--accent:#B7A3E3;--accent-fg:#16121F}}
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:32px 24px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.08)}
-.logo{width:52px;height:52px;border-radius:14px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;background:var(--accent);color:var(--accent-fg)}
-.wm{font-family:"Open Sans",system-ui,sans-serif;font-style:italic;font-weight:300;font-size:30px;margin:-6px 0 14px;color:var(--fg)}
-.code{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--muted);margin:0 0 6px}
-h1{font-size:23px;margin:0 0 10px;line-height:1.25}
-p{margin:0 0 22px;font-size:15px;line-height:1.55;color:var(--muted)}
-a.btn{display:inline-flex;justify-content:center;width:100%;padding:12px 16px;border-radius:10px;background:var(--accent);color:var(--accent-fg);font-weight:600;font-size:15.5px;text-decoration:none}
-a.btn:focus-visible{outline:3px solid var(--line);outline-offset:2px}
-.foot{margin-top:16px;font-size:12.5px;color:var(--muted)}
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Designar mudou de endereço</title>
+<script>
+  /* leva para o endereço novo, mantendo o que vier depois (link de entrada por e-mail, aba aberta etc.) */
+  location.replace('https://jorrinhotucano.github.io/'+location.search+location.hash);
+</script>
+<meta http-equiv="refresh" content="0;url=https://jorrinhotucano.github.io/">
+<style>body{font-family:system-ui,sans-serif;background:#F2F1EE;color:#1B1B1B;display:grid;place-items:center;min-height:100vh;margin:0;padding:16px;text-align:center}a{color:#4F3A82;font-weight:700}</style>
 </head>
 <body>
-<main class="card">
-  <div class="logo" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24"><path fill="currentColor" d="M3 6.4c2.6-1.1 5.6-1 8 .7v11.2c-2.4-1.6-5.4-1.7-8-.6zM21 6.4c-2.6-1.1-5.6-1-8 .7v11.2c2.4-1.6 5.4-1.7 8-.6z"/></svg></div>
-  <p class="code">ERRO 404</p>
-  <h1>Esta página não existe</h1>
-  <p>O endereço pode ter sido digitado errado ou o link mudou. As designações continuam no lugar de sempre.</p>
-  <a class="btn" id="home" href="./">Ir para o início</a>
-  <div class="foot">Cada um com seu dom, tudo em seu lugar.</div>
-</main>
-<script>
-/* volta para a página inicial do site, qualquer que seja o nome do repositório */
-(function(){var seg=location.pathname.split('/').filter(Boolean)[0];var h=location.hostname.endsWith('github.io')&&seg?'/'+seg+'/':'/';document.getElementById('home').href=h})();
-</script>
+<main><h1 style="font-size:22px">O sistema da Congregação Jorrinho mudou de endereço</h1>
+<p>Se não abrir sozinho, toque em <a href="https://jorrinhotucano.github.io/">jorrinhotucano.github.io</a>.</p>
+<p style="color:#5F6368;font-size:14px">Quem instalou como aplicativo: apague o ícone antigo e instale de novo pelo endereço novo.</p></main>
 </body>
 </html>
